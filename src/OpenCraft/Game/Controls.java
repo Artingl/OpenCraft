@@ -62,4 +62,14 @@ public class Controls
         return PressedMouseKeys.get(id);
     }
 
+    public static int getMouseX()
+    {
+        return Mouse.getX();
+    }
+
+    public static int getMouseY()
+    {
+        return Mouse.getY();
+    }
+
 }

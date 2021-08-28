@@ -7,14 +7,20 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
+import java.util.HashMap;
+
 public class Screen
 {
+
+    private HashMap<Integer, GuiElement> elements;
 
     protected int width;
     protected int height;
 
     public Screen(int width, int height)
     {
+        elements = new HashMap<>();
+
         this.width = width;
         this.height = height;
     }
@@ -65,37 +71,37 @@ public class Screen
         GL11.glDisable(3042);
     }
 
-    protected void fillTexture(int x0, int y0, int x1, int y1, int texture) {
-        //GL11.glEnable(3553);
-
+    protected void fillTexture(float x0, float y0, float x1, float y1, int texture) {
+        GL11.glEnable(3553);
         GL11.glPushMatrix();
         GL11.glBindTexture(3553, texture);
         GL11.glEnable(3042);
         GL11.glBlendFunc(770, 771);
         GL11.glBegin(7);
-        GL11.glTexCoord2f(0, 0);
-        GL11.glVertex2f((float)x1, (float)y0);
         GL11.glTexCoord2f(1, 0);
+        GL11.glVertex2f((float)x1, (float)y0);
+        GL11.glTexCoord2f(0, 0);
         GL11.glVertex2f((float)x0, (float)y0);
-        GL11.glTexCoord2f(1, 1);
-        GL11.glVertex2f((float)x0, (float)y1);
         GL11.glTexCoord2f(0, 1);
+        GL11.glVertex2f((float)x0, (float)y1);
+        GL11.glTexCoord2f(1, 1);
         GL11.glVertex2f((float)x1, (float)y1);
         GL11.glEnd();
-        GL11.glDisable(3042);GL11.glDisable(3553);
+        GL11.glDisable(3042);
+        GL11.glDisable(3553);
     }
 
-    public void drawCenteredString(String str, int x, int y, int color) {
+    protected void drawCenteredString(String str, int x, int y, int color) {
         Font font = OpenCraft.getFont();
         font.drawShadow(str, x - font.width(str) / 2, y, color);
     }
 
-    public void drawString(String str, int x, int y, int color) {
+    protected void drawString(String str, int x, int y, int color) {
         Font font = OpenCraft.getFont();
         font.drawShadow(str, x, y, color);
     }
 
-    public void updateEvents() {
+    protected void updateEvents() {
         while(Mouse.next()) {
             if (Mouse.getEventButtonState()) {
                 int xm = Mouse.getEventX() * this.width / OpenCraft.getWidth();
@@ -118,6 +124,24 @@ public class Screen
     protected void mouseClicked(int x, int y, int button) {
     }
 
-    public void render(int screenWidth, int screenHeight)
-    { }
+    protected int addElement(GuiElement e)
+    {
+        int id = elements.size();
+        elements.put(id, e);
+        return id;
+    }
+
+    protected HashMap<Integer, GuiElement> getElements()
+    {
+        return elements;
+    }
+
+    public void render(int screenWidth, int screenHeight, int scale)
+    {
+        elements.forEach((id, element) -> {
+            if (element != null) element.render(screenWidth, screenHeight, scale);
+        });
+
+    }
+
 }

@@ -1,5 +1,6 @@
 package OpenCraft.Game.Gui.screens;
 
+import OpenCraft.Game.Gui.Button;
 import OpenCraft.Game.Gui.Screen;
 import OpenCraft.Game.Rendering.BlockRenderer;
 import OpenCraft.Game.Rendering.TextureManager;
@@ -39,12 +40,23 @@ public class MainMenu extends Screen
         panoramaId3 = TextureManager.load(ImageIO.read(new File("resources/title/bg/panorama3.png")));
         panoramaId4 = TextureManager.load(ImageIO.read(new File("resources/title/bg/panorama4.png")));
         panoramaId5 = TextureManager.load(ImageIO.read(new File("resources/title/bg/panorama5.png")));
-        logo = TextureManager.load(ImageIO.read(new File("resources/title/logo.png")));
+        logo = TextureManager.load(ImageIO.read(new File("resources/title/logo.png")), GL11.GL_LINEAR);
+
+        this.addElement(new Button(0, 0, "Singleplayer", OpenCraft::startNewGame));
+
     }
 
-    @Override
-    public void render(int screenWidth, int screenHeight)
+    public void render(int screenWidth, int screenHeight, int scale)
     {
+        getElements().forEach((id, element) -> {
+            if (element instanceof Button)
+            {
+                Button btn = (Button)element;
+                btn.setX(screenWidth / 2f - btn.getWidth() / 2f);
+                btn.setY(screenHeight / 2f);
+            }
+        });
+
         GL11.glMatrixMode(5889);
         GL11.glLoadIdentity();
         GLU.gluPerspective(90, (float)width / (float)height, 0.05F, 1000.0F);
@@ -116,10 +128,20 @@ public class MainMenu extends Screen
         GL11.glLoadIdentity();
         GL11.glTranslatef(0.0F, 0.0F, -200.0F);
 
-        fillTexture(0, 0, screenWidth, screenHeight, logo);
+        float l_width = ((858f / 2) * Math.min(scale / 100, 1));
+        float l_height = ((106f / 2) * Math.min(scale / 100, 1));
+
+        GL11.glPushMatrix();
+        GL11.glTranslatef(screenWidth / 2f - (l_width / 2), 20, -50);
+        fillTexture(0, 0, l_width, l_height, logo);
+        GL11.glPopMatrix();
+
+        super.render(screenWidth, screenHeight, scale);
 
         //fill(0, 0, screenWidth, screenHeight, 0xFFFFFFFF);
-        //drawCenteredString("Test", 10, 10, 0xFFFFFF);
+        //GL11.glScalef(4, 4, 4);
+        //drawCenteredString("OpenCraft", screenWidth / 8, 10, 0xFFFFFF);
+        //GL11.glLoadIdentity();
     }
 
 }

@@ -27,3 +27,4 @@ If you found some bug, create an issue. Describe the bug (it will be good if you
 - [ ] Simple Mods API
 - [ ] Multiplayer
 - [ ] Debug system
+- [ ] Languages

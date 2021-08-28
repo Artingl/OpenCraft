@@ -33,7 +33,7 @@ public class OpenCraft
 {
 
     // Game version
-    private static final String version = "0.1.23g";
+    private static final String version = "0.1.30g";
 
     // Window width and height
     private static int width = 868;
@@ -63,7 +63,7 @@ public class OpenCraft
     // Gui
     private static MainMenu mainMenu;
     private static Font font;
-    private static int guiScale = 3;
+    private static int guiScale = 2;
 
     public OpenCraft() throws Exception {
         /* Window initializing */
@@ -101,11 +101,6 @@ public class OpenCraft
         mainMenu = new MainMenu();
 
         setCurrentScreen(mainMenu);
-
-        //player = new Player(128, 70, 128);
-        //level = new Level();
-        //levelRenderer = new LevelRenderer();
-        //particleEngine = new ParticleEngine();
 
         long lastTime = System.currentTimeMillis();
         int frames = 0;
@@ -162,6 +157,19 @@ public class OpenCraft
         Controls.destroy();
         Display.destroy();
         System.exit(0);
+    }
+
+    public static void startNewGame()
+    {
+        guiTicks = new HashMap<>();
+        setCurrentScreen(null);
+        inMenu = false;
+
+        player = new Player(128, 70, 128);
+        level = new Level();
+        levelRenderer = new LevelRenderer();
+        particleEngine = new ParticleEngine();
+
     }
 
     private void render()
@@ -228,7 +236,7 @@ public class OpenCraft
         VerticesBuffer t = VerticesBuffer.instance;
         if (currentScreen != null)
         {
-            currentScreen.render(screenWidth, screenHeight);
+            currentScreen.render(screenWidth, screenHeight, scale);
         }
 
         if (!inMenu)
@@ -237,8 +245,9 @@ public class OpenCraft
         }
 
         for(int i = 0; i < timer.ticks; ++i) {
+            int finalScale = scale;
             new HashMap<>(guiTicks).forEach(((id, tick) -> {
-                if (tick != null) tick.tick(screenWidth, screenHeight);
+                if (tick != null) tick.tick(screenWidth, screenHeight, finalScale);
                 GL11.glTranslatef(0.0F, 0.0F, -200.0F);
             }));
         }
@@ -377,6 +386,10 @@ public class OpenCraft
     public static Font getFont()
     {
         return font;
+    }
+
+    public static int getGuiScale() {
+        return guiScale;
     }
 
     public static void registerTickEvent(ITick tick)
