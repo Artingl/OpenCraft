@@ -19,9 +19,8 @@ If you found some bug, create an issue. Describe the bug (it will be good if you
 
 ## . TODO
 
-- [ ] Mobs
 - [ ] Singleplayer
-- [ ] Multiplayer
+- [ ] Mobs
 - [ ] Gamemodes
 - [ ] Infinity world generation
 - [ ] Mods Engine
