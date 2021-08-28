@@ -6,9 +6,9 @@ import OpenCraft.Game.Rendering.TextureManager;
 public class BlockLeavesOak extends Block
 {
 
-    public BlockLeavesOak()
+    public BlockLeavesOak(int idi)
     {
-        super("leaves_oak");
+        super("leaves_oak", idi);
 
         float tx, ty, bx, by, sx, sy;
         tx = 0; ty = 0; bx = 0; by = 0; sx = 0; sy = 0;

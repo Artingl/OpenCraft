@@ -8,9 +8,9 @@ import OpenCraft.World.Level;
 public class BlockWater extends Block
 {
 
-    public BlockWater()
+    public BlockWater(int idi)
     {
-        super("water");
+        super("water", idi);
 
         float tx, ty, bx, by, sx, sy;
         tx = 0; ty = 0; bx = 0; by = 0; sx = 0; sy = 0;

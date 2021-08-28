@@ -6,9 +6,9 @@ import OpenCraft.Game.Rendering.TextureManager;
 public class BlockGlass extends Block
 {
 
-    public BlockGlass()
+    public BlockGlass(int idi)
     {
-        super("glass");
+        super("glass", idi);
 
         float tx, ty, bx, by, sx, sy;
         tx = 0; ty = 0; bx = 0; by = 0; sx = 0; sy = 0;

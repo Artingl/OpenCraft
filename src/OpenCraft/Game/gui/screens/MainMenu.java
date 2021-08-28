@@ -127,10 +127,10 @@ public class MainMenu extends Screen
         float l_width = ((858f / 2) * Math.min(scale / 100, 1));
         float l_height = ((106f / 2) * Math.min(scale / 100, 1));
 
-        GL11.glPushMatrix();
-        GL11.glTranslatef(screenWidth / 2f - (l_width / 2), 20, -50);
-        fillTexture(0, 0, l_width, l_height, logo);
-        GL11.glPopMatrix();
+        //GL11.glPushMatrix();
+        //GL11.glTranslatef(screenWidth / 2f - (l_width / 2), 20, -50);
+        //fillTexture(0, 0, l_width, l_height, logo);
+        //GL11.glPopMatrix();
 
         super.render(screenWidth, screenHeight, scale);
 

@@ -6,9 +6,9 @@ import OpenCraft.Game.Rendering.TextureManager;
 public class BlockGrassBlock extends Block
 {
 
-    public BlockGrassBlock()
+    public BlockGrassBlock(int idi)
     {
-        super("grass_block");
+        super("grass_block", idi);
 
         float tx, ty, bx, by, sx, sy;
         tx = 0; ty = 0; bx = 0; by = 0; sx = 0; sy = 0;

@@ -6,9 +6,9 @@ import OpenCraft.Game.Rendering.TextureManager;
 public class BlockLogOak extends Block
 {
 
-    public BlockLogOak()
+    public BlockLogOak(int idi)
     {
-        super("log_oak");
+        super("log_oak", idi);
 
         float tx, ty, bx, by, sx, sy;
         tx = 0; ty = 0; bx = 0; by = 0; sx = 0; sy = 0;

@@ -9,26 +9,31 @@ import OpenCraft.World.Level;
 public class Block
 {
 
-    public static Block air = new BlockAir();
-    public static Block stone = new BlockStone();
-    public static Block dirt = new BlockDirt();
-    public static Block grass_block = new BlockGrassBlock();
-    public static Block bedrock = new BlockBedrock();
-    public static Block water = new BlockWater();
-    public static Block sand = new BlockSand();
-    public static Block gravel = new BlockGravel();
-    public static Block log_oak = new BlockLogOak();
-    public static Block leaves_oak = new BlockLeavesOak();
-    public static Block glass = new BlockGlass();
-    public static Block block_void = new BlockVoid();
+    public static Block air = new BlockAir(0);
+    public static Block stone = new BlockStone(1);
+    public static Block dirt = new BlockDirt(2);
+    public static Block grass_block = new BlockGrassBlock(3);
+    public static Block bedrock = new BlockBedrock(4);
+    public static Block water = new BlockWater(5);
+    public static Block sand = new BlockSand(6);
+    public static Block gravel = new BlockGravel(7);
+    public static Block log_oak = new BlockLogOak(8);
+    public static Block leaves_oak = new BlockLeavesOak(9);
+    public static Block glass = new BlockGlass(10);
+    public static Block block_void = new BlockVoid(11);
 
-    private String id;
+    public static Block[] blocks = {
+      air, stone, dirt, grass_block, bedrock, water, sand, gravel, log_oak, leaves_oak, glass, block_void
+    };
+
+    private final int idi;
+    private final String id;
     protected Texture texture;
 
-    public Block(String id) {
+    public Block(String id, int idi) {
         this.id = id;
+        this.idi = idi;
     }
-
 
     public void setTexture(Texture texture)
     {
@@ -45,7 +50,12 @@ public class Block
         return this.id;
     }
 
-    public AABB getAABB(int x, int y, int z) {
+    public int getIdInt()
+    {
+        return this.idi;
+    }
+
+    public static AABB getAABB(int x, int y, int z) {
         return new AABB((float)x, (float)y, (float)z, (float)(x + 1), (float)(y + 1), (float)(z + 1));
     }
 
@@ -62,6 +72,16 @@ public class Block
     public boolean blocksLight()
     {
         return true;
+    }
+
+    public static Block getBlockByIntId(int id)
+    {
+        for (Block block: blocks)
+        {
+            if (block.idi == id) return block;
+        }
+
+        return Block.air;
     }
 
     public void destroy(int x, int y, int z) {

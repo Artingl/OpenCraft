@@ -105,8 +105,7 @@ public class Player extends Entity
                 clickedMouse0 = false;
             }
 
-            if (Controls.getMouseKey(1) && !clickedMouse1 && ((int)(x) != (int)ray[2][0] || (int)(y) != (int)ray[2][1] || (int)(z) != (int)ray[2][2])
-                    && ((int)(x) != (int)ray[2][0] || (int)(y - 1) != (int)ray[2][1] || (int)(z) != (int)ray[2][2]))
+            if (Controls.getMouseKey(1) && !clickedMouse1 && !aabb.intersects(Block.getAABB((int)ray[2][0], (int)ray[2][1], (int)ray[2][2])))
             {
                 OpenCraft.getLevel().setBlock((int)ray[2][0], (int)ray[2][1], (int)ray[2][2], currentBlock);
                 clickedMouse1 = true;

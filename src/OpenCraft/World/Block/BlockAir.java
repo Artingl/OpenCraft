@@ -3,9 +3,9 @@ package OpenCraft.World.Block;
 public class BlockAir extends Block
 {
 
-    public BlockAir()
+    public BlockAir(int idi)
     {
-        super("air");
+        super("air", idi);
     }
 
 }

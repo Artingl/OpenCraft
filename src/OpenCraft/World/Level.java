@@ -18,6 +18,7 @@ public class Level
     public static final int WATER_LEVEL = 64;
 
     private static Block[] blocks;
+    private static byte[] saveBlocks;
     private int[] lightDepths;
     private PerlinNoise noise;
     private boolean isPlayerStartPosSet = false;
@@ -25,9 +26,14 @@ public class Level
 
     public Level()
     {
-        noise = new PerlinNoise(3);
+        saveBlocks = new byte[WIDTH * HEIGHT * DEPTH];
         blocks = new Block[WIDTH * HEIGHT * DEPTH];
         lightDepths = new int[WIDTH * HEIGHT];
+    }
+
+    public void generateWorld(int seed)
+    {
+        noise = new PerlinNoise(3, seed);
 
         for (int x = 0; x < WIDTH; x++)
         {
@@ -40,7 +46,7 @@ public class Level
 
                 for (int i = y + 1; i < DEPTH; i++)
                     if (blocks[(i * HEIGHT + z) * WIDTH + x] == null)
-                        blocks[(i * HEIGHT + z) * WIDTH + x] = Block.air;
+                        setBlockWithoutRendering(x, i, z, Block.air);
 
                 boolean wasSand = false;
 
@@ -95,27 +101,17 @@ public class Level
                 {
                     for (int i = y; i < WATER_LEVEL - 3; i++)
                     {
-                        blocks[(i * HEIGHT + z) * WIDTH + x] = Block.water;
+                        setBlockWithoutRendering(x, i, z, Block.water);
+                        //blocks[(i * HEIGHT + z) * WIDTH + x] = Block.water;
                     }
                 }
-
-                //if (y < 0) y = 0;
-                //if (y > DEPTH - 1) y = DEPTH - 1;
-
-                //blocks[z * WIDTH + x] = Block.bedrock;
-                //blocks[(y * HEIGHT + z) * WIDTH + x] = Block.grass_block;
-
-                //for (int i = 1; i < y; i++)
-                //{
-                //    blocks[(i * HEIGHT + z) * WIDTH + x] = Block.dirt;
-                //}
             }
         }
 
         this.calcLightDepths(0, 0, WIDTH, HEIGHT);
     }
 
-    private void generateTree(int x, int y, int z)
+    public void generateTree(int x, int y, int z)
     {
         int treeHeight = getRandomNumber(5, 7);
         for (int i = x + -2; i < x + 3; i++)
@@ -160,10 +156,22 @@ public class Level
         setBlockWithoutRendering(x, y + treeHeight + 1, z, Block.leaves_oak);
     }
 
-    private void setBlockWithoutRendering(int x, int y, int z, Block block)
+    public void setBlockWithoutRendering(int x, int y, int z, Block block)
     {
         if (x >= 0 && y >= 0 && z >= 0 && x < WIDTH && y < DEPTH && z < HEIGHT)
+        {
+            saveBlocks[(y * HEIGHT + z) * WIDTH + x] = (byte) block.getIdInt();
             blocks[(y * HEIGHT + z) * WIDTH + x] = block;
+        }
+    }
+
+    public void setBlockWithoutRendering(int i, Block block)
+    {
+        if (i >= 0 && i < blocks.length)
+        {
+            saveBlocks[i] = (byte) block.getIdInt();
+            blocks[i] = block;
+        }
     }
 
     public int getRandomNumber(int min, int max)
@@ -225,6 +233,7 @@ public class Level
     public void setBlock(int x, int y, int z, Block block)
     {
         if (x >= 0 && y >= 0 && z >= 0 && x < WIDTH && y < DEPTH && z < HEIGHT) {
+            saveBlocks[(y * HEIGHT + z) * WIDTH + x] = (byte) block.getIdInt();
             blocks[(y * HEIGHT + z) * WIDTH + x] = block;
             this.neighborChanged(x - 1, y, z);
             this.neighborChanged(x + 1, y, z);
@@ -360,4 +369,7 @@ public class Level
         return false;
     }
 
+    public byte[] getByteBlocks() {
+        return saveBlocks;
+    }
 }

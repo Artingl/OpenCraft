@@ -18,6 +18,7 @@ import OpenCraft.Game.Controls;
 import OpenCraft.Game.Rendering.TextureManager;
 import OpenCraft.World.*;
 import org.lwjgl.BufferUtils;
+import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
@@ -45,6 +46,7 @@ public class OpenCraft
     // World
     private static ParticleEngine particleEngine; // Particle engine
     private static LevelRenderer levelRenderer; // World
+    private static LevelSaver levelSaver; // World
     private static Level level; // World
 
     // Rendering and other game stuff
@@ -108,6 +110,7 @@ public class OpenCraft
         int frames = 0;
 
         while (!Display.isCloseRequested()) {
+
             if (Display.wasResized()) // Was window resized?
             {
                 GL11.glViewport(0, 0, Display.getWidth(), Display.getHeight());
@@ -134,6 +137,8 @@ public class OpenCraft
                 Mouse.setGrabbed(false);
             }
             else {
+                if (Keyboard.isKeyDown(Keyboard.KEY_ESCAPE)) break;
+
                 for(int i = 0; i < timer.ticks; ++i) {
                     new HashMap<>(ticks).forEach(((id, tick) -> {
                         if (tick != null) tick.tick();
@@ -156,6 +161,7 @@ public class OpenCraft
             Display.update();
         }
 
+        levelSaver.destroy();
         Controls.destroy();
         Display.destroy();
         System.exit(0);
@@ -169,6 +175,7 @@ public class OpenCraft
 
         player = new Player(128, 70, 128);
         level = new Level();
+        levelSaver = new LevelSaver("level", 3232343);
         levelRenderer = new LevelRenderer();
         particleEngine = new ParticleEngine();
 
@@ -383,6 +390,10 @@ public class OpenCraft
     public static ParticleEngine getParticleEngine()
     {
         return particleEngine;
+    }
+
+    public static LevelSaver getLevelSaver() {
+        return levelSaver;
     }
 
     public static Font getFont()
