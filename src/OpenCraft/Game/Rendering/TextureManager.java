@@ -74,7 +74,7 @@ public class TextureManager
         return load(image, GL11.GL_NEAREST);
     }
 
-    public static int load(BufferedImage image, int type)
+    public static int load(BufferedImage image, int mode)
     {
         int BYTES_PER_PIXEL = 4;
 
@@ -95,10 +95,8 @@ public class TextureManager
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureID);
         GL11.glEnable(GL11.GL_BLEND);
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL12.GL_CLAMP_TO_EDGE);
-        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL12.GL_CLAMP_TO_EDGE);
-        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, type);
-        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, type);
+        GL11.glTexParameteri(3553, 10241, mode);
+        GL11.glTexParameteri(3553, 10240, mode);
         GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA8, image.getWidth(), image.getHeight(), 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, buffer);
         return textureID;
     }

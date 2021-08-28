@@ -11,6 +11,8 @@ import org.lwjgl.input.Mouse;
 public class Player extends Entity
 {
 
+    private Block currentBlock = Block.stone;
+
     private boolean clickedMouse0 = false;
     private boolean clickedMouse1 = false;
 
@@ -106,7 +108,7 @@ public class Player extends Entity
             if (Controls.getMouseKey(1) && !clickedMouse1 && ((int)(x) != (int)ray[2][0] || (int)(y) != (int)ray[2][1] || (int)(z) != (int)ray[2][2])
                     && ((int)(x) != (int)ray[2][0] || (int)(y - 1) != (int)ray[2][1] || (int)(z) != (int)ray[2][2]))
             {
-                OpenCraft.getLevel().setBlock((int)ray[2][0], (int)ray[2][1], (int)ray[2][2], Block.glass);
+                OpenCraft.getLevel().setBlock((int)ray[2][0], (int)ray[2][1], (int)ray[2][2], currentBlock);
                 clickedMouse1 = true;
             }
             else if(!Controls.getMouseKey(1))
@@ -114,6 +116,11 @@ public class Player extends Entity
                 clickedMouse1 = false;
             }
         }
+    }
+
+    public Block getCurrentBlock()
+    {
+        return currentBlock;
     }
 
 }

@@ -1,20 +1,16 @@
-package OpenCraft.Game.Gui.screens;
+package OpenCraft.Game.gui.screens;
 
-import OpenCraft.Game.Gui.Button;
-import OpenCraft.Game.Gui.Screen;
+import OpenCraft.Game.gui.Button;
+import OpenCraft.Game.gui.Screen;
 import OpenCraft.Game.Rendering.BlockRenderer;
 import OpenCraft.Game.Rendering.TextureManager;
 import OpenCraft.OpenCraft;
-import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.glu.GLU;
 
 import javax.imageio.ImageIO;
 import java.io.File;
 import java.io.IOException;
-
-import static org.lwjgl.opengl.GL11.glTexCoord2f;
-import static org.lwjgl.opengl.GL11.glVertex3f;
 
 public class MainMenu extends Screen
 {
@@ -42,7 +38,7 @@ public class MainMenu extends Screen
         panoramaId5 = TextureManager.load(ImageIO.read(new File("resources/title/bg/panorama5.png")));
         logo = TextureManager.load(ImageIO.read(new File("resources/title/logo.png")), GL11.GL_LINEAR);
 
-        this.addElement(new Button(0, 0, "Singleplayer", OpenCraft::startNewGame));
+        this.addElement(new Button(0, 0, 0, "Singleplayer", () -> OpenCraft.setCurrentScreen(OpenCraft.getWorldListScreen())));
 
     }
 

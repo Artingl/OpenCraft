@@ -1,7 +1,8 @@
-package OpenCraft.Game.Gui;
+package OpenCraft.Game.gui;
 
 import OpenCraft.Game.Controls;
 import OpenCraft.Game.Rendering.TextureManager;
+import OpenCraft.Game.sound.Sound;
 import OpenCraft.OpenCraft;
 import org.lwjgl.opengl.GL11;
 
@@ -23,15 +24,17 @@ public class Button extends GuiElement
         } catch (IOException e) {}
     }
 
+    private final int id;
     private String text;
     private Runnable onClick;
     private boolean mouseClicked;
 
-    public Button(float x, float y, String text, Runnable onClick)
+    public Button(int id, float x, float y, String text, Runnable onClick)
     {
         super(x, y, 0, 0);
         this.text = text;
         this.onClick = onClick;
+        this.id = id;
     }
 
     @Override
@@ -49,26 +52,27 @@ public class Button extends GuiElement
 
         int id = BUTTON_TEXTURES[0];
 
-        if (mouseHover(mx, my, x, y - height, width, height))
+        if (mouseHover(mx, my, x, screenHeight - (y + height), width, height))
         {
             id = BUTTON_TEXTURES[1];
+
+            if (Controls.getMouseKey(0) && !mouseClicked)
+            {
+                if (onClick != null) onClick.run();
+                Sound.loadAndPlay("resources/sounds/gui/click1.wav");
+                mouseClicked = true;
+            }
+            else if(!Controls.getMouseKey(0))
+            {
+                mouseClicked = false;
+            }
         }
 
         GL11.glPushMatrix();
-        GL11.glTranslatef(this.x, this.y, -50);
+        GL11.glTranslatef(this.x, this.y, 50);
         fillTexture(0, 0, width, height, id);
         OpenCraft.getFont().drawShadow(text, (int)((this.width / 2f) - OpenCraft.getFont().width(text) / 2f), (int)(this.height / 2f) - 5, 16777215);
         GL11.glPopMatrix();
-
-        if (Controls.getMouseKey(0) && !mouseClicked)
-        {
-            if (onClick != null) onClick.run();
-            mouseClicked = true;
-        }
-        else if(!Controls.getMouseKey(0))
-        {
-            mouseClicked = false;
-        }
 
     }
 
@@ -78,5 +82,9 @@ public class Button extends GuiElement
 
     public void setText(String text) {
         this.text = text;
+    }
+
+    public int getId() {
+        return id;
     }
 }

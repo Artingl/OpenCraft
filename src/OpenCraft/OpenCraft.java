@@ -1,8 +1,9 @@
 package OpenCraft;
 
-import OpenCraft.Game.Gui.Font;
-import OpenCraft.Game.Gui.Screen;
-import OpenCraft.Game.Gui.screens.MainMenu;
+import OpenCraft.Game.gui.Font;
+import OpenCraft.Game.gui.Screen;
+import OpenCraft.Game.gui.screens.MainMenu;
+import OpenCraft.Game.gui.screens.WorldList;
 import OpenCraft.Game.Rendering.Frustum;
 import OpenCraft.Game.Rendering.VerticesBuffer;
 import OpenCraft.Game.Rendering.ParticleEngine;
@@ -12,7 +13,6 @@ import OpenCraft.Game.Rendering.LevelRenderer;
 import OpenCraft.Game.Timer;
 import OpenCraft.Interfaces.IGuiTick;
 import OpenCraft.Interfaces.ITick;
-import OpenCraft.World.Block.Block;
 import OpenCraft.World.Entity.Player;
 import OpenCraft.Game.Controls;
 import OpenCraft.Game.Rendering.TextureManager;
@@ -33,7 +33,7 @@ public class OpenCraft
 {
 
     // Game version
-    private static final String version = "0.1.30g";
+    private static final String version = "0.1.31g";
 
     // Window width and height
     private static int width = 868;
@@ -61,6 +61,7 @@ public class OpenCraft
 
 
     // Gui
+    private static WorldList worldList;
     private static MainMenu mainMenu;
     private static Font font;
     private static int guiScale = 2;
@@ -99,6 +100,7 @@ public class OpenCraft
         font = new Font("resources/textures/gui/font.gif");
         timer = new Timer(20.0F);
         mainMenu = new MainMenu();
+        worldList = new WorldList();
 
         setCurrentScreen(mainMenu);
 
@@ -241,7 +243,7 @@ public class OpenCraft
 
         if (!inMenu)
         {
-            BlockRenderer.renderBlockIcon(t, 16, 16, (float)(screenWidth - 16), 16, Block.glass);
+            BlockRenderer.renderBlockIcon(t, 16, 16, (float)(screenWidth - 16), 16, player.getCurrentBlock());
         }
 
         for(int i = 0; i < timer.ticks; ++i) {
@@ -390,6 +392,16 @@ public class OpenCraft
 
     public static int getGuiScale() {
         return guiScale;
+    }
+
+    public static WorldList getWorldListScreen()
+    {
+        return worldList;
+    }
+
+    public static MainMenu getMainMenuScreen()
+    {
+        return mainMenu;
     }
 
     public static void registerTickEvent(ITick tick)

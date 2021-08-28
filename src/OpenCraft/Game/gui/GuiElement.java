@@ -1,4 +1,4 @@
-package OpenCraft.Game.Gui;
+package OpenCraft.Game.gui;
 
 import OpenCraft.Interfaces.IGuiElement;
 import OpenCraft.OpenCraft;
@@ -24,7 +24,6 @@ public class GuiElement implements IGuiElement
 
     protected void fillTexture(float x0, float y0, float x1, float y1, int texture) {
         GL11.glEnable(3553);
-        GL11.glPushMatrix();
         GL11.glBindTexture(3553, texture);
         GL11.glEnable(3042);
         GL11.glBlendFunc(770, 771);

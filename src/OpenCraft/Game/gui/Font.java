@@ -1,10 +1,9 @@
-package OpenCraft.Game.Gui;
+package OpenCraft.Game.gui;
 
 import OpenCraft.Game.Rendering.TextureManager;
 import OpenCraft.Game.Rendering.VerticesBuffer;
 import org.lwjgl.opengl.GL11;
 import javax.imageio.ImageIO;
-import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
