@@ -16,8 +16,7 @@ We are developing OpenCraft now. You can download and test last beta version [he
 
 If you found some bug, create an issue. Describe the bug (it will be good if you can provide screenshot)
 
-
-## . TODO
+# TODO
 
 - [ ] Singleplayer
 - [ ] Mobs
@@ -28,3 +27,6 @@ If you found some bug, create an issue. Describe the bug (it will be good if you
 - [ ] Multiplayer
 - [ ] Debug system
 - [ ] Languages
+
+# Screenshots
+![](images/screenshot.png)
