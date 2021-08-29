@@ -6,29 +6,79 @@ import OpenCraft.Game.Rendering.TextureManager;
 import OpenCraft.Game.Rendering.VerticesBuffer;
 import OpenCraft.OpenCraft;
 import org.lwjgl.input.Keyboard;
+import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 
 import javax.imageio.ImageIO;
+import java.io.DataInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.zip.GZIPInputStream;
 
 public class WorldList extends Screen
 {
 
-    private final int background_id;
+    public String levelName;
 
-    public WorldList() throws IOException {
+    private int worldBtnPosition;
+    private int loadWorldBtnId;
+
+    public WorldList() {
         super(OpenCraft.getWidth(), OpenCraft.getHeight());
-        background_id = TextureManager.load(ImageIO.read(new File("resources/gui/dirt.png")));
+    }
 
-        this.addElement(new Button(0, 0, 0, "Create a new world", OpenCraft::startNewGame));
-        this.addElement(new Button(1, 0, 0, "Load world", () -> {
+    public void selectWorld(String path)
+    {
+        ((Button)getElements().get(loadWorldBtnId)).enabled = true;
+        levelName = path;
+    }
 
+    public void init() {
+        super.init();
+
+        this.addElement(new Button(0, 0, 0, "Create a new world", () -> OpenCraft.setCurrentScreen(OpenCraft.getNewWorldConfigurator())));
+        loadWorldBtnId = this.addElement(new Button(1, 0, 0, "Load world", () -> {
+            setLoadingScreen("Loading world...");
+            OpenCraft.startNewGame(true);
         }));
+
+        levelName = "";
+        ((Button)getElements().get(loadWorldBtnId)).enabled = false;
+
+        File folder = new File("saves");
+        File[] listOfFiles = folder.listFiles();
+
+        for (File file : listOfFiles) {
+            if (file.isDirectory()) {
+                File level = new File("saves" + File.separator + file.getName() + File.separator + "level.data");
+                if (level.exists())
+                {
+                    try {
+                        DataInputStream dis = new DataInputStream(new GZIPInputStream(new FileInputStream("saves" + File.separator + file.getName() + File.separator + "level.data")));
+                        int header = dis.readInt();
+                        if (header <= 78924536)
+                        {
+                            String worldName = dis.readUTF();
+                            String author = dis.readUTF();
+                            String creationDate = dis.readUTF();
+                            String version = dis.readUTF();
+                            int seed = dis.readInt();
+
+                            this.addElement(new Button(3, 0, 0, worldName, () -> selectWorld(file.getName())));
+                        }
+
+                        dis.close();
+                    } catch (IOException e) { }
+                }
+            }
+        }
+
     }
 
     public void render(int screenWidth, int screenHeight, int scale)
     {
+        worldBtnPosition = 120;
         getElements().forEach((id, element) -> {
             if (element instanceof Button)
             {
@@ -40,8 +90,13 @@ public class WorldList extends Screen
                 {
                     btn.setX(screenWidth / 2f - btn.getWidth() - 10);
                 }
-                else {
+                else if (btn.getId() == 0) {
                     btn.setX(screenWidth / 2f + 10);
+                }
+                else if (btn.getId() == 3) {
+                    btn.setY(worldBtnPosition);
+                    btn.setX(screenWidth / 2f - btn.getWidth() / 2);
+                    worldBtnPosition += btn.getHeight() + 20;
                 }
 
             }
@@ -66,21 +121,6 @@ public class WorldList extends Screen
 
         OpenCraft.getFont().drawShadow("Select world", (screenWidth - OpenCraft.getFont().width("Select world")) / 2, 20, 0xAAAAAA);
         super.render(screenWidth, screenHeight, scale);
-    }
-
-    private void drawBackground(VerticesBuffer t, int screenWidth, int screenHeight, int clr)
-    {
-        GL11.glEnable(3553);
-        GL11.glBindTexture(3553, background_id);
-        t.begin();
-        t.color(clr);
-        float s = 32.0F;
-        t.vertexUV(0.0F, (float)screenHeight, 0.0F, 0.0F, (float)screenHeight / s);
-        t.vertexUV((float)screenWidth, (float)screenHeight, 0.0F, (float)screenWidth / s, (float)screenHeight / s);
-        t.vertexUV((float)screenWidth, 0.0F, 0.0F, (float)screenWidth / s, 0.0F);
-        t.vertexUV(0.0F, 0.0F, 0.0F, 0.0F, 0.0F);
-        t.end();
-        GL11.glEnable(3553);
     }
 
 }

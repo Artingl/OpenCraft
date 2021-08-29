@@ -184,4 +184,7 @@ public class LevelRenderer implements LevelRendererListener
 
     }
 
+    public Chunk[] getChunks() {
+        return sortedChunks;
+    }
 }

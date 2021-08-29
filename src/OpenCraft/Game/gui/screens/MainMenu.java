@@ -42,6 +42,11 @@ public class MainMenu extends Screen
 
     }
 
+    public void init()
+    {
+
+    }
+
     public void render(int screenWidth, int screenHeight, int scale)
     {
         getElements().forEach((id, element) -> {

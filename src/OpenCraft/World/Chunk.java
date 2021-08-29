@@ -32,6 +32,7 @@ public class Chunk
     private int chunksList; // GL list
 
     private Level level; // Level where is located current chunk
+    private byte[] blocks;
 
     public Chunk(Level level, int x, int y, int z, int w, int h, int d)
     {
@@ -44,6 +45,7 @@ public class Chunk
         this.depth = d;
         this.level = level;
         this.aabb = new AABB((float)x, (float)y, (float)z, (float)w, (float)h, (float)d);
+        this.blocks = new byte[16 * 16 * 16];
 
         this.chunksList = GL11.glGenLists(3);
     }
@@ -56,6 +58,7 @@ public class Chunk
         GL11.glNewList(this.chunksList + i, GL_COMPILE);
         verticesBuffer.begin();
 
+        int ii = 0;
         for(int x = this.x; x < this.width; ++x) {
             for(int y = this.y; y < this.height; ++y) {
                 for(int z = this.z; z < this.depth; ++z) {
@@ -65,6 +68,8 @@ public class Chunk
                         BlockRenderer.render(i, x, y, z, block);
                     }
 
+                    if (i == 0) blocks[ii] = (byte) block.getIdInt();
+                    ii++;
                 }
             }
         }
@@ -109,6 +114,7 @@ public class Chunk
     }
 
     public void reset() {
+        this.blocks = new byte[16 * 16 * 16];
         this.dirty = true;
 
         for(int i = 0; i < 3; ++i) {
@@ -118,4 +124,37 @@ public class Chunk
 
     }
 
+    public int getX()
+    {
+        return x;
+    }
+
+    public int getY()
+    {
+        return y;
+    }
+
+    public int getZ()
+    {
+        return z;
+    }
+
+    public int getWidth()
+    {
+        return width;
+    }
+
+    public int getHeight()
+    {
+        return height;
+    }
+
+    public int getDepth()
+    {
+        return depth;
+    }
+
+    public byte[] getBlocks() {
+        return blocks;
+    }
 }

@@ -3,6 +3,7 @@ package OpenCraft;
 import OpenCraft.Game.gui.Font;
 import OpenCraft.Game.gui.Screen;
 import OpenCraft.Game.gui.screens.MainMenu;
+import OpenCraft.Game.gui.screens.NewWorldConfigurator;
 import OpenCraft.Game.gui.screens.WorldList;
 import OpenCraft.Game.Rendering.Frustum;
 import OpenCraft.Game.Rendering.VerticesBuffer;
@@ -34,7 +35,7 @@ public class OpenCraft
 {
 
     // Game version
-    private static final String version = "0.1.31g";
+    private static final String version = "0.2.1g";
 
     // Window width and height
     private static int width = 868;
@@ -63,6 +64,7 @@ public class OpenCraft
 
 
     // Gui
+    private static NewWorldConfigurator newWorldConfigurator;
     private static WorldList worldList;
     private static MainMenu mainMenu;
     private static Font font;
@@ -103,6 +105,7 @@ public class OpenCraft
         timer = new Timer(20.0F);
         mainMenu = new MainMenu();
         worldList = new WorldList();
+        newWorldConfigurator = new NewWorldConfigurator();
 
         setCurrentScreen(mainMenu);
 
@@ -161,13 +164,13 @@ public class OpenCraft
             Display.update();
         }
 
-        levelSaver.destroy();
+        if (levelSaver != null) levelSaver.destroy();
         Controls.destroy();
         Display.destroy();
         System.exit(0);
     }
 
-    public static void startNewGame()
+    public static void startNewGame(boolean load)
     {
         guiTicks = new HashMap<>();
         setCurrentScreen(null);
@@ -175,10 +178,27 @@ public class OpenCraft
 
         player = new Player(128, 70, 128);
         level = new Level();
-        levelSaver = new LevelSaver("level", 3232343);
+        levelSaver = new LevelSaver(worldList.levelName, 3232343, load);
         levelRenderer = new LevelRenderer();
         particleEngine = new ParticleEngine();
 
+    }
+
+    public static int getScreenScaledWidth() {
+        int scale = 240;
+        if (guiScale == 1) scale = 540;
+        if (guiScale == 2) scale = 440;
+        if (guiScale == 3) scale = 340;
+        return width * scale / height;
+    }
+
+    public static int getScreenScaledHeight() {
+        int scale = 240;
+        if (guiScale == 1) scale = 540;
+        if (guiScale == 2) scale = 440;
+        if (guiScale == 3) scale = 340;
+
+        return height * scale / height;
     }
 
     private void render()
@@ -405,6 +425,10 @@ public class OpenCraft
         return guiScale;
     }
 
+    public static LevelRenderer getLevelRenderer() {
+        return levelRenderer;
+    }
+
     public static WorldList getWorldListScreen()
     {
         return worldList;
@@ -413,6 +437,11 @@ public class OpenCraft
     public static MainMenu getMainMenuScreen()
     {
         return mainMenu;
+    }
+
+    public static NewWorldConfigurator getNewWorldConfigurator()
+    {
+        return newWorldConfigurator;
     }
 
     public static void registerTickEvent(ITick tick)
@@ -427,6 +456,7 @@ public class OpenCraft
 
     public static void setCurrentScreen(Screen scr)
     {
+        if (scr != null) scr.init();
         currentScreen = scr;
     }
 

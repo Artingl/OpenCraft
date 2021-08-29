@@ -19,11 +19,13 @@ public class Button extends GuiElement
         try {
             BUTTON_TEXTURES = new int[]{
                     TextureManager.load(ImageIO.read(new File("resources/gui/button.png"))),
-                    TextureManager.load(ImageIO.read(new File("resources/gui/button_hover.png")))
+                    TextureManager.load(ImageIO.read(new File("resources/gui/button_hover.png"))),
+                    TextureManager.load(ImageIO.read(new File("resources/gui/button_disabled.png")))
             };
         } catch (IOException e) {}
     }
 
+    public boolean enabled = true;
     private final int id;
     private String text;
     private Runnable onClick;
@@ -52,14 +54,14 @@ public class Button extends GuiElement
 
         int id = BUTTON_TEXTURES[0];
 
-        if (mouseHover(mx, my, x, screenHeight - (y + height), width, height))
+        if (mouseHover(mx, my, x, screenHeight - (y + height), width, height) && enabled)
         {
             id = BUTTON_TEXTURES[1];
 
             if (Controls.getMouseKey(0) && !mouseClicked)
             {
-                if (onClick != null) onClick.run();
                 Sound.loadAndPlay("resources/sounds/gui/click1.wav");
+                if (onClick != null) onClick.run();
                 mouseClicked = true;
             }
             else if(!Controls.getMouseKey(0))
@@ -67,12 +69,15 @@ public class Button extends GuiElement
                 mouseClicked = false;
             }
         }
+        else if (!enabled) id = BUTTON_TEXTURES[2];
 
         GL11.glPushMatrix();
         GL11.glTranslatef(this.x, this.y, 50);
         fillTexture(0, 0, width, height, id);
         OpenCraft.getFont().drawShadow(text, (int)((this.width / 2f) - OpenCraft.getFont().width(text) / 2f), (int)(this.height / 2f) - 5, 16777215);
         GL11.glPopMatrix();
+        GL11.glLoadIdentity();
+        GL11.glTranslatef(0, 0,-200);
 
     }
 
