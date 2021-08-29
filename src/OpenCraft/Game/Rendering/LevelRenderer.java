@@ -93,7 +93,7 @@ public class LevelRenderer implements LevelRendererListener
     public void render(Player player, int layer) {
         //GL11.glEnable(GL11.GL_ALPHA_TEST);
         GL11.glEnable(GL11.GL_TEXTURE_2D);
-        GL11.glBindTexture(GL11.GL_TEXTURE_2D, TextureManager.getTerrain());
+        GL11.glBindTexture(GL11.GL_TEXTURE_2D, TextureEngine.getTerrain());
 
         float xd = player.getX() - this.lX;
         float yd = player.getY() - this.lY;

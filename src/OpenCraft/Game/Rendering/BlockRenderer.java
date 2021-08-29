@@ -20,7 +20,7 @@ public class BlockRenderer
         GL11.glRotatef(45.0F, 0.0F, 1.0F, 0.0F);
         GL11.glTranslatef(-1.5F, 0.5F, 0.5F);
         GL11.glScalef(-1.0F, -1.0F, -1.0F);
-        GL11.glBindTexture(3553, TextureManager.getTerrain());
+        GL11.glBindTexture(3553, TextureEngine.getTerrain());
         GL11.glEnable(3553);
         t.begin();
         render(t, -2, 0, 0, block);
@@ -105,13 +105,13 @@ public class BlockRenderer
         float down = 0;
 
         t.setColori(block_r, block_g, block_b);
-        t.setTexCoord(block.getTexture().getTopTextureX() + 0.0f, block.getTexture().getTopTextureY() + TextureManager.addTextCoord);
+        t.setTexCoord(block.getTexture().getTopTextureX() + 0.0f, block.getTexture().getTopTextureY() + TextureEngine.addTextCoord);
         t.setVertexCoord(x, 1.f +y - down, z);
         t.setTexCoord(block.getTexture().getTopTextureX() + 0.0f, block.getTexture().getTopTextureY() + 0.0f);
         t.setVertexCoord(1.f +x, 1.f +y - down, z);
-        t.setTexCoord(block.getTexture().getTopTextureX() + TextureManager.addTextCoord, block.getTexture().getTopTextureY() + 0.0f);
+        t.setTexCoord(block.getTexture().getTopTextureX() + TextureEngine.addTextCoord, block.getTexture().getTopTextureY() + 0.0f);
         t.setVertexCoord(1.f +x, 1.f +y - down, 1.f +z);
-        t.setTexCoord(block.getTexture().getTopTextureX() + TextureManager.addTextCoord, block.getTexture().getTopTextureY() + TextureManager.addTextCoord);
+        t.setTexCoord(block.getTexture().getTopTextureX() + TextureEngine.addTextCoord, block.getTexture().getTopTextureY() + TextureEngine.addTextCoord);
         t.setVertexCoord(x, 1.f +y - down, 1.f +z);
     }
 
@@ -123,13 +123,13 @@ public class BlockRenderer
         float down = 0;
 
         t.setColori(block_r, block_g, block_b);
-        t.setTexCoord(block.getTexture().getBottomTextureX() + 0.0f, block.getTexture().getBottomTextureY() + TextureManager.addTextCoord);
+        t.setTexCoord(block.getTexture().getBottomTextureX() + 0.0f, block.getTexture().getBottomTextureY() + TextureEngine.addTextCoord);
         t.setVertexCoord(x, y, 1.f +z);
         t.setTexCoord(block.getTexture().getBottomTextureX() + 0.0f, block.getTexture().getBottomTextureY() + 0.0f);
         t.setVertexCoord(1.f +x, y, 1.f +z);
-        t.setTexCoord(block.getTexture().getBottomTextureX() + TextureManager.addTextCoord, block.getTexture().getBottomTextureY() + 0.0f);
+        t.setTexCoord(block.getTexture().getBottomTextureX() + TextureEngine.addTextCoord, block.getTexture().getBottomTextureY() + 0.0f);
         t.setVertexCoord(1.f +x, y, z);
-        t.setTexCoord(block.getTexture().getBottomTextureX() + TextureManager.addTextCoord, block.getTexture().getBottomTextureY() + TextureManager.addTextCoord);
+        t.setTexCoord(block.getTexture().getBottomTextureX() + TextureEngine.addTextCoord, block.getTexture().getBottomTextureY() + TextureEngine.addTextCoord);
         t.setVertexCoord(x, y, z);
     }
 
@@ -141,13 +141,13 @@ public class BlockRenderer
         float down = 0;
 
         t.setColori(block_r - 40, block_g - 40, block_b - 40);
-        t.setTexCoord(block.getTexture().getSideTextureX() + TextureManager.addTextCoord, block.getTexture().getSideTextureY() + TextureManager.addTextCoord);
+        t.setTexCoord(block.getTexture().getSideTextureX() + TextureEngine.addTextCoord, block.getTexture().getSideTextureY() + TextureEngine.addTextCoord);
         t.setVertexCoord(x, y - down, z);
-        t.setTexCoord(block.getTexture().getSideTextureX() + 0.0f, block.getTexture().getSideTextureY() + TextureManager.addTextCoord);
+        t.setTexCoord(block.getTexture().getSideTextureX() + 0.0f, block.getTexture().getSideTextureY() + TextureEngine.addTextCoord);
         t.setVertexCoord(1.f +x, y - down, z);
         t.setTexCoord(block.getTexture().getSideTextureX() + 0.0f, block.getTexture().getSideTextureY() + 0.0f);
         t.setVertexCoord(1.f +x, 1.f +y - down, z);
-        t.setTexCoord(block.getTexture().getSideTextureX() + TextureManager.addTextCoord, block.getTexture().getSideTextureY() + 0.0f);
+        t.setTexCoord(block.getTexture().getSideTextureX() + TextureEngine.addTextCoord, block.getTexture().getSideTextureY() + 0.0f);
         t.setVertexCoord(x, 1.f +y - down, z);
     }
 
@@ -159,13 +159,13 @@ public class BlockRenderer
         float down = 0;
 
         t.setColori(block_r - 80, block_g - 80, block_b - 80);
-        t.setTexCoord(block.getTexture().getSideTextureX() + TextureManager.addTextCoord, block.getTexture().getSideTextureY() + TextureManager.addTextCoord);
+        t.setTexCoord(block.getTexture().getSideTextureX() + TextureEngine.addTextCoord, block.getTexture().getSideTextureY() + TextureEngine.addTextCoord);
         t.setVertexCoord(1.f +x, y - down, z);
-        t.setTexCoord(block.getTexture().getSideTextureX() + 0.0f, block.getTexture().getSideTextureY() + TextureManager.addTextCoord);
+        t.setTexCoord(block.getTexture().getSideTextureX() + 0.0f, block.getTexture().getSideTextureY() + TextureEngine.addTextCoord);
         t.setVertexCoord(1.f +x, y - down, 1.f +z);
         t.setTexCoord(block.getTexture().getSideTextureX() + 0.0f, block.getTexture().getSideTextureY() + 0.0f);
         t.setVertexCoord(1.f +x, 1.f +y - down, 1.f +z);
-        t.setTexCoord(block.getTexture().getSideTextureX() + TextureManager.addTextCoord, block.getTexture().getSideTextureY() + 0.0f);
+        t.setTexCoord(block.getTexture().getSideTextureX() + TextureEngine.addTextCoord, block.getTexture().getSideTextureY() + 0.0f);
         t.setVertexCoord(1.f +x, 1.f +y - down, z);
     }
 
@@ -177,13 +177,13 @@ public class BlockRenderer
         float down = 0;
 
         t.setColori(block_r - 40, block_g - 40, block_b - 40);
-        t.setTexCoord(block.getTexture().getSideTextureX() + TextureManager.addTextCoord, block.getTexture().getSideTextureY() + TextureManager.addTextCoord);
+        t.setTexCoord(block.getTexture().getSideTextureX() + TextureEngine.addTextCoord, block.getTexture().getSideTextureY() + TextureEngine.addTextCoord);
         t.setVertexCoord(1.f +x, y - down, 1.f +z);
-        t.setTexCoord(block.getTexture().getSideTextureX() + 0.0f, block.getTexture().getSideTextureY() + TextureManager.addTextCoord);
+        t.setTexCoord(block.getTexture().getSideTextureX() + 0.0f, block.getTexture().getSideTextureY() + TextureEngine.addTextCoord);
         t.setVertexCoord(x, y - down, 1.f +z);
         t.setTexCoord(block.getTexture().getSideTextureX() + 0.0f, block.getTexture().getSideTextureY() + 0.0f);
         t.setVertexCoord(x, 1.f +y - down, 1.f +z);
-        t.setTexCoord(block.getTexture().getSideTextureX() + TextureManager.addTextCoord, block.getTexture().getSideTextureY() + 0.0f);
+        t.setTexCoord(block.getTexture().getSideTextureX() + TextureEngine.addTextCoord, block.getTexture().getSideTextureY() + 0.0f);
         t.setVertexCoord(1.f +x, 1.f +y - down, 1.f +z);
     }
 
@@ -195,13 +195,13 @@ public class BlockRenderer
         float down = 0;
 
         t.setColori(block_r - 80, block_g - 80, block_b - 80);
-        t.setTexCoord(block.getTexture().getSideTextureX() + TextureManager.addTextCoord, block.getTexture().getSideTextureY() + TextureManager.addTextCoord);
+        t.setTexCoord(block.getTexture().getSideTextureX() + TextureEngine.addTextCoord, block.getTexture().getSideTextureY() + TextureEngine.addTextCoord);
         t.setVertexCoord(x, y - down, 1.f +z);
-        t.setTexCoord(block.getTexture().getSideTextureX() + 0.0f, block.getTexture().getSideTextureY() + TextureManager.addTextCoord);
+        t.setTexCoord(block.getTexture().getSideTextureX() + 0.0f, block.getTexture().getSideTextureY() + TextureEngine.addTextCoord);
         t.setVertexCoord(x, y - down, z);
         t.setTexCoord(block.getTexture().getSideTextureX() + 0.0f, block.getTexture().getSideTextureY() + 0.0f);
         t.setVertexCoord(x, 1.f +y - down, z);
-        t.setTexCoord(block.getTexture().getSideTextureX() + TextureManager.addTextCoord, block.getTexture().getSideTextureY() + 0.0f);
+        t.setTexCoord(block.getTexture().getSideTextureX() + TextureEngine.addTextCoord, block.getTexture().getSideTextureY() + 0.0f);
         t.setVertexCoord(x, 1.f +y - down, 1.f +z);
     }
 

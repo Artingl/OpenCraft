@@ -1,7 +1,7 @@
 package OpenCraft.Game.gui;
 
 import OpenCraft.Game.Controls;
-import OpenCraft.Game.Rendering.TextureManager;
+import OpenCraft.Game.Rendering.TextureEngine;
 import OpenCraft.Game.sound.Sound;
 import OpenCraft.OpenCraft;
 import org.lwjgl.opengl.GL11;
@@ -12,7 +12,7 @@ import java.io.IOException;
 
 import static org.lwjgl.opengl.GL11.*;
 
-public class Button extends GuiElement
+public class Button extends Element
 {
 
     public static int[] BUTTON_TEXTURES;
@@ -20,9 +20,9 @@ public class Button extends GuiElement
     static {
         try {
             BUTTON_TEXTURES = new int[]{
-                    TextureManager.load(ImageIO.read(new File("resources/gui/button.png"))),
-                    TextureManager.load(ImageIO.read(new File("resources/gui/button_hover.png"))),
-                    TextureManager.load(ImageIO.read(new File("resources/gui/button_disabled.png")))
+                    TextureEngine.load(ImageIO.read(new File("resources/gui/button.png"))),
+                    TextureEngine.load(ImageIO.read(new File("resources/gui/button_hover.png"))),
+                    TextureEngine.load(ImageIO.read(new File("resources/gui/button_disabled.png")))
             };
         } catch (IOException e) {}
     }

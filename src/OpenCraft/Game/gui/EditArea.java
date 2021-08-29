@@ -1,7 +1,7 @@
 package OpenCraft.Game.gui;
 
 import OpenCraft.Game.Controls;
-import OpenCraft.Game.Rendering.TextureManager;
+import OpenCraft.Game.Rendering.TextureEngine;
 import OpenCraft.OpenCraft;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
@@ -13,7 +13,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 
-public class EditArea extends GuiElement
+public class EditArea extends Element
 {
 
     public static int[] EDITAREA_TEXTURES;
@@ -21,7 +21,7 @@ public class EditArea extends GuiElement
     static {
         try {
             EDITAREA_TEXTURES = new int[]{
-                    TextureManager.load(ImageIO.read(new File("resources/gui/edit.png")))
+                    TextureEngine.load(ImageIO.read(new File("resources/gui/edit.png")))
             };
         } catch (IOException e) {}
     }

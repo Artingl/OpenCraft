@@ -3,7 +3,7 @@ package OpenCraft.Game.gui.screens;
 import OpenCraft.Game.gui.Button;
 import OpenCraft.Game.gui.Screen;
 import OpenCraft.Game.Rendering.BlockRenderer;
-import OpenCraft.Game.Rendering.TextureManager;
+import OpenCraft.Game.Rendering.TextureEngine;
 import OpenCraft.OpenCraft;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.glu.GLU;
@@ -30,13 +30,13 @@ public class MainMenu extends Screen
     public MainMenu() throws IOException {
         super(OpenCraft.getWidth(), OpenCraft.getHeight(), "");
 
-        panoramaId0 = TextureManager.load(ImageIO.read(new File("resources/title/bg/panorama0.png")));
-        panoramaId1 = TextureManager.load(ImageIO.read(new File("resources/title/bg/panorama1.png")));
-        panoramaId2 = TextureManager.load(ImageIO.read(new File("resources/title/bg/panorama2.png")));
-        panoramaId3 = TextureManager.load(ImageIO.read(new File("resources/title/bg/panorama3.png")));
-        panoramaId4 = TextureManager.load(ImageIO.read(new File("resources/title/bg/panorama4.png")));
-        panoramaId5 = TextureManager.load(ImageIO.read(new File("resources/title/bg/panorama5.png")));
-        logo = TextureManager.load(ImageIO.read(new File("resources/title/logo.png")), GL11.GL_LINEAR);
+        panoramaId0 = TextureEngine.load(ImageIO.read(new File("resources/title/bg/panorama0.png")));
+        panoramaId1 = TextureEngine.load(ImageIO.read(new File("resources/title/bg/panorama1.png")));
+        panoramaId2 = TextureEngine.load(ImageIO.read(new File("resources/title/bg/panorama2.png")));
+        panoramaId3 = TextureEngine.load(ImageIO.read(new File("resources/title/bg/panorama3.png")));
+        panoramaId4 = TextureEngine.load(ImageIO.read(new File("resources/title/bg/panorama4.png")));
+        panoramaId5 = TextureEngine.load(ImageIO.read(new File("resources/title/bg/panorama5.png")));
+        logo = TextureEngine.load(ImageIO.read(new File("resources/title/logo.png")), GL11.GL_LINEAR);
 
         this.addElement(new Button(0, 0, 0, "Singleplayer", () -> OpenCraft.setCurrentScreen(OpenCraft.getWorldListScreen())));
 

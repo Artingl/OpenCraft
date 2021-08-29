@@ -39,7 +39,7 @@ public class ParticleEngine implements ITick {
    public void render(Player player, float a, int layer) {
       if (this.particles.size() != 0) {
          GL11.glEnable(3553);
-         GL11.glBindTexture(3553, TextureManager.getTerrain());
+         GL11.glBindTexture(3553, TextureEngine.getTerrain());
 
          float xa = -((float)Math.cos((double)player.getRy() * 3.141592653589793D / 180.0D));
          float za = -((float)Math.sin((double)player.getRy() * 3.141592653589793D / 180.0D));

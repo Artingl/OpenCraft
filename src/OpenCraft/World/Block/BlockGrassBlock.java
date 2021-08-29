@@ -1,7 +1,7 @@
 package OpenCraft.World.Block;
 
 import OpenCraft.Game.Rendering.Texture;
-import OpenCraft.Game.Rendering.TextureManager;
+import OpenCraft.Game.Rendering.TextureEngine;
 
 public class BlockGrassBlock extends Block
 {
@@ -13,13 +13,13 @@ public class BlockGrassBlock extends Block
         float tx, ty, bx, by, sx, sy;
         tx = 0; ty = 0; bx = 0; by = 0; sx = 0; sy = 0;
 
-        tx = TextureManager.getBlockTextureX("grass t");
-        ty = TextureManager.getBlockTextureY("grass t");
-        bx = TextureManager.getBlockTextureX("grass b");
-        by = TextureManager.getBlockTextureY("grass b");
-        sx = TextureManager.getBlockTextureX("grass s");
-        sy = TextureManager.getBlockTextureY("grass s");
-        int id = TextureManager.getBlockTextureId("grass s");
+        tx = TextureEngine.getBlockTextureX("grass t");
+        ty = TextureEngine.getBlockTextureY("grass t");
+        bx = TextureEngine.getBlockTextureX("grass b");
+        by = TextureEngine.getBlockTextureY("grass b");
+        sx = TextureEngine.getBlockTextureX("grass s");
+        sy = TextureEngine.getBlockTextureY("grass s");
+        int id = TextureEngine.getBlockTextureId("grass s");
 
         this.texture = new Texture(id, tx, ty, bx, by, sx, sy);
 

@@ -13,11 +13,12 @@ import OpenCraft.Game.RayCast;
 import OpenCraft.Game.Rendering.BlockRenderer;
 import OpenCraft.Game.Rendering.LevelRenderer;
 import OpenCraft.Game.Timer;
+import OpenCraft.Interfaces.IGuiInterface;
 import OpenCraft.Interfaces.IGuiTick;
 import OpenCraft.Interfaces.ITick;
 import OpenCraft.World.Entity.Player;
 import OpenCraft.Game.Controls;
-import OpenCraft.Game.Rendering.TextureManager;
+import OpenCraft.Game.Rendering.TextureEngine;
 import OpenCraft.World.*;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.input.Keyboard;
@@ -27,6 +28,7 @@ import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.glu.GLU;
 
+import java.io.IOException;
 import java.nio.FloatBuffer;
 import java.util.HashMap;
 
@@ -55,6 +57,7 @@ public class OpenCraft
     private static Level level; // World
 
     // Rendering and other game stuff
+    private static HashMap<Integer, IGuiInterface> guiInterface = new HashMap<>();
     private static HashMap<Integer, IGuiTick> guiTicks = new HashMap<>();
     private static HashMap<Integer, ITick> ticks = new HashMap<>();
     private static int renderDistance = 8; // Render distance
@@ -74,7 +77,7 @@ public class OpenCraft
     private static WorldList worldList;
     private static MainMenu mainMenu;
     private static Font font;
-    private static int guiScale = 3;
+    private static int guiScale = 2;
 
     public OpenCraft() throws Exception {
         /* Window initializing */
@@ -105,15 +108,12 @@ public class OpenCraft
         /**/
 
         Controls.init();
-        TextureManager.init();
+        TextureEngine.init();
 
         font = new Font("resources/textures/gui/font.gif");
         timer = new Timer(20.0F);
-        mainMenu = new MainMenu();
-        worldList = new WorldList();
-        pauseMenu = new PauseMenu();
-        newWorldConfigurator = new NewWorldConfigurator();
 
+        initScreens();
         setCurrentScreen(mainMenu);
 
         long lastTime = System.currentTimeMillis();
@@ -190,10 +190,29 @@ public class OpenCraft
         System.exit(0);
     }
 
+    public static void initScreens()
+    {
+        try {
+            mainMenu = new MainMenu();
+        } catch (IOException e) { }
+        worldList = new WorldList();
+        pauseMenu = new PauseMenu();
+        newWorldConfigurator = new NewWorldConfigurator();
+    }
+
     public static void quitToMainMenu()
     {
+        //guiInterface = new HashMap<>();
+        //ticks = new HashMap<>();
+        //guiTicks = new HashMap<>();
+        //initScreens();
+
         closeCurrentScreen();
         setCurrentScreen(mainMenu);
+        mainMenu.setLoadingScreen("Quitting the world...");
+        for (int i = 0; i < 4; i++)
+            Display.update();
+
         inMenu = true;
         renderWhenInMenu = false;
         levelSaver.save();
@@ -290,17 +309,15 @@ public class OpenCraft
             currentScreen.render(screenWidth, screenHeight, scale);
         }
 
-        if (!inMenu)
+        if (inMenu)
         {
-            BlockRenderer.renderBlockIcon(t, 16, 16, (float)(screenWidth - 16), 16, player.getCurrentBlock());
-        }
-
-        for(int i = 0; i < timer.ticks; ++i) {
-            int finalScale = scale;
-            new HashMap<>(guiTicks).forEach(((id, tick) -> {
-                if (tick != null) tick.tick(screenWidth, screenHeight, finalScale);
-                GL11.glTranslatef(0.0F, 0.0F, -200.0F);
-            }));
+            for(int i = 0; i < timer.ticks; ++i) {
+                int finalScale = scale;
+                new HashMap<>(guiTicks).forEach(((id, tick) -> {
+                    if (tick != null) tick.tick(screenWidth, screenHeight, finalScale);
+                    GL11.glTranslatef(0.0F, 0.0F, -200.0F);
+                }));
+            }
         }
 
         if (!inMenu)
@@ -331,7 +348,17 @@ public class OpenCraft
             t.vertex((float)(wc - 4), (float)(hc + 1), 0.0F);
             t.vertex((float)(wc + 5), (float)(hc + 1), 0.0F);
             t.end();
+
+            int finalScale = scale;
+            new HashMap<>(guiInterface).forEach(((id, iGuiInterface) -> {
+                //GL11.glColor4f(1, 1, 1, 1);
+                if (iGuiInterface != null) iGuiInterface.render(screenWidth, screenHeight, finalScale);
+                GL11.glTranslatef(0.0F, 0.0F, 0.0F);
+            }));
+
+            BlockRenderer.renderBlockIcon(t, 16, 16, (float)(screenWidth - 16), 16, player.getInventoryBlock(0));
         }
+
         GL11.glDisable(3042);
         GL11.glDisable(2896);
         GL11.glDisable(3553);
@@ -484,6 +511,11 @@ public class OpenCraft
     public static void registerGuiTickEvent(IGuiTick tick)
     {
         guiTicks.put(guiTicks.size(), tick);
+    }
+
+    public static void registerGuiInterfaceEvent(IGuiInterface iGuiInterface)
+    {
+        guiInterface.put(guiInterface.size(), iGuiInterface);
     }
 
     public static int getScreenScaledWidth() {

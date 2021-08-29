@@ -2,7 +2,7 @@ package OpenCraft.Game;
 
 import OpenCraft.World.Entity.Entity;
 import OpenCraft.Game.Rendering.Texture;
-import OpenCraft.Game.Rendering.TextureManager;
+import OpenCraft.Game.Rendering.TextureEngine;
 import OpenCraft.Game.Rendering.VerticesBuffer;
 import OpenCraft.World.Level;
 
@@ -65,9 +65,9 @@ public class Particle extends Entity {
 
     public void render(VerticesBuffer t, float a, float xa, float ya, float za, float xa2, float za2) {
         float u0 = tex.getSideTextureX();//((float)(this.tex.getId() % 16) + this.uo / 4.0F) / 16.0F;
-        float u1 = u0 + TextureManager.addTextCoord;
+        float u1 = u0 + TextureEngine.addTextCoord;
         float v0 = tex.getSideTextureY();//((float)(this.tex.getId() / 16) + this.vo / 4.0F) / 16.0F;
-        float v1 = v0 + TextureManager.addTextCoord;
+        float v1 = v0 + TextureEngine.addTextCoord;
         float r = 0.1F * this.size;
         float x = this.xo + (this.x - this.xo) * a;
         float y = this.yo + (this.y - this.yo) * a;

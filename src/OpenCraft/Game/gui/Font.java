@@ -1,6 +1,6 @@
 package OpenCraft.Game.gui;
 
-import OpenCraft.Game.Rendering.TextureManager;
+import OpenCraft.Game.Rendering.TextureEngine;
 import OpenCraft.Game.Rendering.VerticesBuffer;
 import org.lwjgl.opengl.GL11;
 import javax.imageio.ImageIO;
@@ -51,7 +51,7 @@ public class Font {
       }
 
       try {
-         this.fontTexture = TextureManager.load(ImageIO.read(new File(name)));
+         this.fontTexture = TextureEngine.load(ImageIO.read(new File(name)));
       } catch (IOException var16) {
          throw new RuntimeException(var16);
       }

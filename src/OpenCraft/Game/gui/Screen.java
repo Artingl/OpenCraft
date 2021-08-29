@@ -1,6 +1,6 @@
 package OpenCraft.Game.gui;
 
-import OpenCraft.Game.Rendering.TextureManager;
+import OpenCraft.Game.Rendering.TextureEngine;
 import OpenCraft.Game.Rendering.VerticesBuffer;
 import OpenCraft.OpenCraft;
 import org.lwjgl.input.Keyboard;
@@ -21,14 +21,14 @@ public class Screen
     static
     {
         try {
-            background_id = TextureManager.load(ImageIO.read(new File("resources/gui/dirt.png")));
+            background_id = TextureEngine.load(ImageIO.read(new File("resources/gui/dirt.png")));
         } catch (IOException e) {}
     }
 
-    private HashMap<Integer, GuiElement> elements;
+    private HashMap<Integer, Element> elements;
 
-    protected int width;
-    protected int height;
+    protected float width;
+    protected float height;
     protected String title;
 
     public Screen(int width, int height, String title)
@@ -69,7 +69,7 @@ public class Screen
         GL11.glDisable(3042);
     }
 
-    protected void setLoadingScreen(String s) {
+    public void setLoadingScreen(String s) {
         GL11.glTranslatef(0, 0, 50);
         drawBackground(VerticesBuffer.instance, OpenCraft.getScreenScaledWidth(), OpenCraft.getScreenScaledHeight(), 0x808080);
         OpenCraft.getFont().drawShadow(s, (OpenCraft.getScreenScaledWidth() - OpenCraft.getFont().getTextWidth(s)) / 2, (int) (OpenCraft.getScreenScaledHeight() / 2f) - 5, 0xFFFFFF);
@@ -89,6 +89,25 @@ public class Screen
         t.vertexUV(0.0F, 0.0F, 0.0F, 0.0F, 0.0F);
         t.end();
         GL11.glEnable(3553);
+    }
+
+    protected void fillTexture(float x0, float y0, float x1, float y1, int texture) {
+        GL11.glEnable(3553);
+        GL11.glBindTexture(3553, texture);
+        GL11.glEnable(3042);
+        GL11.glBlendFunc(770, 771);
+        GL11.glBegin(7);
+        GL11.glTexCoord2f(1, 0);
+        GL11.glVertex2f((float)x1, (float)y0);
+        GL11.glTexCoord2f(0, 0);
+        GL11.glVertex2f((float)x0, (float)y0);
+        GL11.glTexCoord2f(0, 1);
+        GL11.glVertex2f((float)x0, (float)y1);
+        GL11.glTexCoord2f(1, 1);
+        GL11.glVertex2f((float)x1, (float)y1);
+        GL11.glEnd();
+        GL11.glDisable(3042);
+        GL11.glDisable(3553);
     }
 
     protected void fillGradient(int x0, int y0, int x1, int y1, int col1, int col2, int a) {
@@ -114,25 +133,6 @@ public class Screen
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
     }
 
-    protected void fillTexture(float x0, float y0, float x1, float y1, int texture) {
-        GL11.glEnable(3553);
-        GL11.glBindTexture(3553, texture);
-        GL11.glEnable(3042);
-        GL11.glBlendFunc(770, 771);
-        GL11.glBegin(7);
-        GL11.glTexCoord2f(1, 0);
-        GL11.glVertex2f((float)x1, (float)y0);
-        GL11.glTexCoord2f(0, 0);
-        GL11.glVertex2f((float)x0, (float)y0);
-        GL11.glTexCoord2f(0, 1);
-        GL11.glVertex2f((float)x0, (float)y1);
-        GL11.glTexCoord2f(1, 1);
-        GL11.glVertex2f((float)x1, (float)y1);
-        GL11.glEnd();
-        GL11.glDisable(3042);
-        GL11.glDisable(3553);
-    }
-
     protected void drawCenteredString(String str, int x, int y, int color) {
         Font font = OpenCraft.getFont();
         font.drawShadow(str, x - font.getTextWidth(str) / 2, y, color);
@@ -146,8 +146,8 @@ public class Screen
     protected void updateEvents() {
         while(Mouse.next()) {
             if (Mouse.getEventButtonState()) {
-                int xm = Mouse.getEventX() * this.width / OpenCraft.getWidth();
-                int ym = this.height - Mouse.getEventY() * this.height / OpenCraft.getHeight() - 1;
+                int xm = (int) (Mouse.getEventX() * this.width / OpenCraft.getWidth());
+                int ym = (int) (this.height - Mouse.getEventY() * this.height / OpenCraft.getHeight() - 1);
                 this.mouseClicked(xm, ym, Mouse.getEventButton());
             }
         }
@@ -166,14 +166,14 @@ public class Screen
     protected void mouseClicked(int x, int y, int button) {
     }
 
-    protected int addElement(GuiElement e)
+    protected int addElement(Element e)
     {
         int id = elements.size();
         elements.put(id, e);
         return id;
     }
 
-    protected HashMap<Integer, GuiElement> getElements()
+    protected HashMap<Integer, Element> getElements()
     {
         return elements;
     }
@@ -181,7 +181,6 @@ public class Screen
     public void render(int screenWidth, int screenHeight, int scale)
     {
         OpenCraft.getFont().drawShadow(title, (screenWidth - OpenCraft.getFont().getTextWidth(title)) / 2, 20, 0xFFFFFF);
-
         elements.forEach((id, element) -> {
             if (element != null) element.render(screenWidth, screenHeight, scale);
         });
