@@ -372,4 +372,11 @@ public class Level
     public byte[] getByteBlocks() {
         return saveBlocks;
     }
+
+    public void destroy()
+    {
+        saveBlocks = new byte[WIDTH * HEIGHT * DEPTH];
+        blocks = new Block[WIDTH * HEIGHT * DEPTH];
+        lightDepths = new int[WIDTH * HEIGHT];
+    }
 }

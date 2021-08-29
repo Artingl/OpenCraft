@@ -28,7 +28,7 @@ public class MainMenu extends Screen
     private boolean b_rotation;
 
     public MainMenu() throws IOException {
-        super(OpenCraft.getWidth(), OpenCraft.getHeight());
+        super(OpenCraft.getWidth(), OpenCraft.getHeight(), "");
 
         panoramaId0 = TextureManager.load(ImageIO.read(new File("resources/title/bg/panorama0.png")));
         panoramaId1 = TextureManager.load(ImageIO.read(new File("resources/title/bg/panorama1.png")));

@@ -21,7 +21,7 @@ public class TextureManager
     private static BufferedImage terrainImage; // Terrain image
     private static int terrainId; // Terrain texture id
 
-    public static final int maxCountOfBlocks = 48; // Max count of blocks
+    public static final int maxCountOfBlocks = 64; // Max count of blocks
     public static float addTextCoord = 1.0f / maxCountOfBlocks; // Normalized texcoord of 1 texture
 
     public static void init() throws IOException {

@@ -10,6 +10,8 @@ import javax.imageio.ImageIO;
 import java.io.File;
 import java.io.IOException;
 
+import static org.lwjgl.opengl.GL11.*;
+
 public class Button extends GuiElement
 {
 
@@ -71,13 +73,18 @@ public class Button extends GuiElement
         }
         else if (!enabled) id = BUTTON_TEXTURES[2];
 
+        GL11.glEnable(GL_BLEND);
+        GL11.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
         GL11.glPushMatrix();
         GL11.glTranslatef(this.x, this.y, 50);
         fillTexture(0, 0, width, height, id);
-        OpenCraft.getFont().drawShadow(text, (int)((this.width / 2f) - OpenCraft.getFont().width(text) / 2f), (int)(this.height / 2f) - 5, 16777215);
+        OpenCraft.getFont().drawShadow(text, (int)((this.width / 2f) - OpenCraft.getFont().getTextWidth(text) / 2f), (int)(this.height / 2f) - 5, 16777215);
         GL11.glPopMatrix();
         GL11.glLoadIdentity();
         GL11.glTranslatef(0, 0,-200);
+
+        GL11.glDisable(GL_BLEND);
 
     }
 

@@ -4,6 +4,7 @@ import OpenCraft.Game.gui.Font;
 import OpenCraft.Game.gui.Screen;
 import OpenCraft.Game.gui.screens.MainMenu;
 import OpenCraft.Game.gui.screens.NewWorldConfigurator;
+import OpenCraft.Game.gui.screens.PauseMenu;
 import OpenCraft.Game.gui.screens.WorldList;
 import OpenCraft.Game.Rendering.Frustum;
 import OpenCraft.Game.Rendering.VerticesBuffer;
@@ -35,16 +36,19 @@ public class OpenCraft
 {
 
     // Game version
-    private static final String version = "0.2.1g";
+    private static final String version = "0.2.10g";
 
-    // Window width and height
+    // Window
     private static int width = 868;
     private static int height = 468;
+    private static boolean escapeClick;
 
     // Player
     private static Player player;
 
     // World
+    private static boolean worldIsSaving = false;
+    private static long worldSavingElapsed;
     private static ParticleEngine particleEngine; // Particle engine
     private static LevelRenderer levelRenderer; // World
     private static LevelSaver levelSaver; // World
@@ -56,6 +60,7 @@ public class OpenCraft
     private static int renderDistance = 8; // Render distance
     private static int blockCastList = -1;
     private static boolean inMenu = true;
+    private static boolean renderWhenInMenu = false;
     private static int chunksUpdate = 0;
     private static int FOV = 90; // Camera FOV
     private static int FPS = 0;
@@ -65,10 +70,11 @@ public class OpenCraft
 
     // Gui
     private static NewWorldConfigurator newWorldConfigurator;
+    private static PauseMenu pauseMenu;
     private static WorldList worldList;
     private static MainMenu mainMenu;
     private static Font font;
-    private static int guiScale = 2;
+    private static int guiScale = 3;
 
     public OpenCraft() throws Exception {
         /* Window initializing */
@@ -105,6 +111,7 @@ public class OpenCraft
         timer = new Timer(20.0F);
         mainMenu = new MainMenu();
         worldList = new WorldList();
+        pauseMenu = new PauseMenu();
         newWorldConfigurator = new NewWorldConfigurator();
 
         setCurrentScreen(mainMenu);
@@ -126,8 +133,6 @@ public class OpenCraft
             timer.advanceTime();
 
             GL11.glClearColor(0.5f, 0.7f, 1, 1);
-            if (inMenu) GL11.glClearColor(0, 0, 0, 0);
-
             GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
             GL11.glLoadIdentity();
 
@@ -135,12 +140,27 @@ public class OpenCraft
 
             if (inMenu)
             {
+                if (renderWhenInMenu && level != null) {
+                    render();
+                }
+                GL11.glColor4f(1F, 1F, 1F, 1.0F);
+
                 drawGui();
                 Controls.update();
                 Mouse.setGrabbed(false);
             }
             else {
-                if (Keyboard.isKeyDown(Keyboard.KEY_ESCAPE)) break;
+                if (Keyboard.isKeyDown(Keyboard.KEY_ESCAPE))
+                {
+                    escapeClick = true;
+                }
+                else if (escapeClick)
+                {
+                    //renderWhenInMenu = true;
+                    escapeClick = false;
+                    inMenu = true;
+                    setCurrentScreen(pauseMenu);
+                }
 
                 for(int i = 0; i < timer.ticks; ++i) {
                     new HashMap<>(ticks).forEach(((id, tick) -> {
@@ -170,11 +190,28 @@ public class OpenCraft
         System.exit(0);
     }
 
+    public static void quitToMainMenu()
+    {
+        closeCurrentScreen();
+        setCurrentScreen(mainMenu);
+        inMenu = true;
+        renderWhenInMenu = false;
+        levelSaver.save();
+
+        level.destroy();
+        levelRenderer.destroy();
+        player = null;
+        level = null;
+        levelSaver = null;
+        levelRenderer = null;
+        particleEngine = null;
+
+        System.gc();
+    }
+
     public static void startNewGame(boolean load)
     {
-        guiTicks = new HashMap<>();
-        setCurrentScreen(null);
-        inMenu = false;
+        closeCurrentScreen();
 
         player = new Player(128, 70, 128);
         level = new Level();
@@ -184,29 +221,14 @@ public class OpenCraft
 
     }
 
-    public static int getScreenScaledWidth() {
-        int scale = 240;
-        if (guiScale == 1) scale = 540;
-        if (guiScale == 2) scale = 440;
-        if (guiScale == 3) scale = 340;
-        return width * scale / height;
-    }
-
-    public static int getScreenScaledHeight() {
-        int scale = 240;
-        if (guiScale == 1) scale = 540;
-        if (guiScale == 2) scale = 440;
-        if (guiScale == 3) scale = 340;
-
-        return height * scale / height;
-    }
-
     private void render()
     {
-        player.rotate();
-
-        Controls.update();
-        Mouse.setGrabbed(true);
+        if (!inMenu)
+        {
+            player.rotate();
+            Controls.update();
+            Mouse.setGrabbed(true);
+        }
 
         GL11.glClear(16640);
         this.setPerspective();
@@ -243,9 +265,6 @@ public class OpenCraft
 
     private void drawGui()
     {
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glEnable(GL_BLEND);
-
         int scale = 240;
         if (guiScale == 1) scale = 540;
         if (guiScale == 2) scale = 440;
@@ -261,6 +280,9 @@ public class OpenCraft
         GL11.glMatrixMode(5888);
         GL11.glLoadIdentity();
         GL11.glTranslatef(0.0F, 0.0F, -200.0F);
+
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glEnable(GL_BLEND);
 
         VerticesBuffer t = VerticesBuffer.instance;
         if (currentScreen != null)
@@ -283,8 +305,18 @@ public class OpenCraft
 
         if (!inMenu)
         {
-            font.drawShadow("OpenCraft " + version, 2, 2, 16777215);
-            font.drawShadow("FPS: " + FPS + ", Chunks updated: " + chunksUpdate + ", X Y Z: " + player.getX() + " " +  + player.getY() + " " +  + player.getZ(), 2, 12, 16777215);
+            font.drawShadow("OpenCraft " + version, 2, 2, 0xFFFFFF);
+            font.drawShadow("FPS: " + FPS + ", Chunks updated: " + chunksUpdate + ", X Y Z: " + player.getX() + " " +  + player.getY() + " " +  + player.getZ(), 2, 12, 0xFFFFFF);
+
+            if (worldIsSaving)
+            {
+                if (worldSavingElapsed + 2000 < System.currentTimeMillis())
+                {
+                    worldIsSaving = false;
+                }
+
+                font.drawShadow("Saving world...", screenWidth - font.getTextWidth("Saving world...") - 20, screenHeight - 20, 0xFDFDFD);
+            }
 
             int wc = screenWidth / 2;
             int hc = screenHeight / 2;
@@ -454,9 +486,47 @@ public class OpenCraft
         guiTicks.put(guiTicks.size(), tick);
     }
 
+    public static int getScreenScaledWidth() {
+        int scale = 240;
+        if (guiScale == 1) scale = 540;
+        if (guiScale == 2) scale = 440;
+        if (guiScale == 3) scale = 340;
+        return width * scale / height;
+    }
+
+    public static int getScreenScaledHeight() {
+        int scale = 240;
+        if (guiScale == 1) scale = 540;
+        if (guiScale == 2) scale = 440;
+        if (guiScale == 3) scale = 340;
+
+        return height * scale / height;
+    }
+
+    public static void closeCurrentScreen()
+    {
+        guiTicks = new HashMap<>();
+        setCurrentScreen(null);
+        inMenu = false;
+        renderWhenInMenu = false;
+    }
+
+    public static void setWorldSavingState(boolean b) {
+        worldIsSaving = b;
+        worldSavingElapsed = System.currentTimeMillis();
+    }
+
     public static void setCurrentScreen(Screen scr)
     {
-        if (scr != null) scr.init();
+        if (scr != null)
+        {
+            int scale = 240;
+            if (guiScale == 1) scale = 540;
+            if (guiScale == 2) scale = 440;
+            if (guiScale == 3) scale = 340;
+
+            scr.init();
+        }
         currentScreen = scr;
     }
 

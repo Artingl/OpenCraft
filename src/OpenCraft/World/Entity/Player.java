@@ -11,7 +11,7 @@ import org.lwjgl.input.Mouse;
 public class Player extends Entity
 {
 
-    private Block currentBlock = Block.stone;
+    private Block currentBlock = Block.glass;
 
     private boolean clickedMouse0 = false;
     private boolean clickedMouse1 = false;

@@ -29,13 +29,15 @@ public class Screen
 
     protected int width;
     protected int height;
+    protected String title;
 
-    public Screen(int width, int height)
+    public Screen(int width, int height, String title)
     {
         elements = new HashMap<>();
 
         this.width = width;
         this.height = height;
+        this.title = title;
     }
 
     public void resize(int width, int height)
@@ -70,7 +72,7 @@ public class Screen
     protected void setLoadingScreen(String s) {
         GL11.glTranslatef(0, 0, 50);
         drawBackground(VerticesBuffer.instance, OpenCraft.getScreenScaledWidth(), OpenCraft.getScreenScaledHeight(), 0x808080);
-        OpenCraft.getFont().drawShadow(s, (OpenCraft.getScreenScaledWidth() - OpenCraft.getFont().width(s)) / 2, (int) (OpenCraft.getScreenScaledHeight() / 2f) - 5, 0xFFFFFF);
+        OpenCraft.getFont().drawShadow(s, (OpenCraft.getScreenScaledWidth() - OpenCraft.getFont().getTextWidth(s)) / 2, (int) (OpenCraft.getScreenScaledHeight() / 2f) - 5, 0xFFFFFF);
         Display.update();
     }
 
@@ -89,7 +91,7 @@ public class Screen
         GL11.glEnable(3553);
     }
 
-    protected void fillGradient(int x0, int y0, int x1, int y1, int col1, int col2) {
+    protected void fillGradient(int x0, int y0, int x1, int y1, int col1, int col2, int a) {
         float a1 = (float)(col1 >> 24 & 255) / 255.0F;
         float r1 = (float)(col1 >> 16 & 255) / 255.0F;
         float g1 = (float)(col1 >> 8 & 255) / 255.0F;
@@ -101,14 +103,15 @@ public class Screen
         GL11.glEnable(3042);
         GL11.glBlendFunc(770, 771);
         GL11.glBegin(7);
-        GL11.glColor4f(r1, g1, b1, a1);
-        GL11.glVertex2f((float)x1, (float)y0);
-        GL11.glVertex2f((float)x0, (float)y0);
-        GL11.glColor4f(r2, g2, b2, a2);
-        GL11.glVertex2f((float)x0, (float)y1);
-        GL11.glVertex2f((float)x1, (float)y1);
+        GL11.glColor4f(r1, g1, b1, a / 255f);
+        GL11.glVertex3f((float)x1, (float)y0, 0f);
+        GL11.glVertex3f((float)x0, (float)y0, 0f);
+        GL11.glColor4f(r2, g2, b2, a / 255f);
+        GL11.glVertex3f((float)x0, (float)y1, 0f);
+        GL11.glVertex3f((float)x1, (float)y1, 0f);
         GL11.glEnd();
         GL11.glDisable(3042);
+        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
     }
 
     protected void fillTexture(float x0, float y0, float x1, float y1, int texture) {
@@ -132,7 +135,7 @@ public class Screen
 
     protected void drawCenteredString(String str, int x, int y, int color) {
         Font font = OpenCraft.getFont();
-        font.drawShadow(str, x - font.width(str) / 2, y, color);
+        font.drawShadow(str, x - font.getTextWidth(str) / 2, y, color);
     }
 
     protected void drawString(String str, int x, int y, int color) {
@@ -177,6 +180,8 @@ public class Screen
 
     public void render(int screenWidth, int screenHeight, int scale)
     {
+        OpenCraft.getFont().drawShadow(title, (screenWidth - OpenCraft.getFont().getTextWidth(title)) / 2, 20, 0xFFFFFF);
+
         elements.forEach((id, element) -> {
             if (element != null) element.render(screenWidth, screenHeight, scale);
         });

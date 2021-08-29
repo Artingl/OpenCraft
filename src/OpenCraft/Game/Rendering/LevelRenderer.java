@@ -65,6 +65,14 @@ public class LevelRenderer implements LevelRendererListener
 
     }
 
+    public void destroy()
+    {
+        for(int i = 0; i < this.chunks.length; ++i) {
+            this.chunks[i].reset();
+            this.chunks[i] = null;
+        }
+    }
+
     public List<Chunk> getAllDirtyChunks() {
         ArrayList<Chunk> dirty = null;
 
@@ -83,7 +91,7 @@ public class LevelRenderer implements LevelRendererListener
     }
 
     public void render(Player player, int layer) {
-        GL11.glEnable(GL11.GL_ALPHA_TEST);
+        //GL11.glEnable(GL11.GL_ALPHA_TEST);
         GL11.glEnable(GL11.GL_TEXTURE_2D);
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, TextureManager.getTerrain());
 
@@ -108,7 +116,7 @@ public class LevelRenderer implements LevelRendererListener
         }
 
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
-        GL11.glDisable(GL11.GL_ALPHA_TEST);
+        //GL11.glDisable(GL11.GL_ALPHA_TEST);
     }
 
     public void updateDirtyChunks(Player player) {

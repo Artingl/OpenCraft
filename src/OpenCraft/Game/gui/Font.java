@@ -110,7 +110,7 @@ public class Font {
       GL11.glDisable(3553);
    }
 
-   public int width(String str) {
+   public int getTextWidth(String str) {
       char[] chars = str.toCharArray();
       int len = 0;
 

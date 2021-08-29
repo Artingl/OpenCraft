@@ -2,14 +2,11 @@ package OpenCraft.Game.gui.screens;
 
 import OpenCraft.Game.gui.Button;
 import OpenCraft.Game.gui.Screen;
-import OpenCraft.Game.Rendering.TextureManager;
 import OpenCraft.Game.Rendering.VerticesBuffer;
 import OpenCraft.OpenCraft;
 import org.lwjgl.input.Keyboard;
-import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 
-import javax.imageio.ImageIO;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -20,12 +17,12 @@ public class WorldList extends Screen
 {
 
     public String levelName;
-
+    private boolean escapeClick;
     private int worldBtnPosition;
     private int loadWorldBtnId;
 
     public WorldList() {
-        super(OpenCraft.getWidth(), OpenCraft.getHeight());
+        super(OpenCraft.getWidth(), OpenCraft.getHeight(), "Select world");
     }
 
     public void selectWorld(String path)
@@ -47,6 +44,7 @@ public class WorldList extends Screen
         ((Button)getElements().get(loadWorldBtnId)).enabled = false;
 
         File folder = new File("saves");
+        folder.mkdir();
         File[] listOfFiles = folder.listFiles();
 
         for (File file : listOfFiles) {
@@ -104,7 +102,12 @@ public class WorldList extends Screen
 
         if (Keyboard.isKeyDown(Keyboard.KEY_ESCAPE))
         {
+            escapeClick = true;
+        }
+        else if (escapeClick)
+        {
             OpenCraft.setCurrentScreen(OpenCraft.getMainMenuScreen());
+            escapeClick = false;
             return;
         }
 
@@ -119,7 +122,6 @@ public class WorldList extends Screen
 
         GL11.glTranslatef(0, 0,-200);
 
-        OpenCraft.getFont().drawShadow("Select world", (screenWidth - OpenCraft.getFont().width("Select world")) / 2, 20, 0xAAAAAA);
         super.render(screenWidth, screenHeight, scale);
     }
 

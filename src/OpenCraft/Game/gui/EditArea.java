@@ -12,7 +12,6 @@ import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Locale;
 
 public class EditArea extends GuiElement
 {
@@ -88,7 +87,7 @@ public class EditArea extends GuiElement
                 else if (!Keyboard.isKeyDown(Keyboard.getKeyIndex(s)))
                     keyDown.put(String.valueOf((char)i), false);
             }
-            if (OpenCraft.getFont().width(text) > width - 20)
+            if (OpenCraft.getFont().getTextWidth(text) > width - 20)
             {
                 text = old;
             }
@@ -118,7 +117,7 @@ public class EditArea extends GuiElement
         OpenCraft.getFont().drawShadow(text, (int)5, (int)(this.height / 2f) - 5, 16777215);
         if (selected)
         {
-            OpenCraft.getFont().drawShadow("_", (int)7 + OpenCraft.getFont().width(text), (int)(this.height / 2f) - 5, 16777215);
+            OpenCraft.getFont().drawShadow("_", (int)7 + OpenCraft.getFont().getTextWidth(text), (int)(this.height / 2f) - 5, 16777215);
         }
         GL11.glPopMatrix();
         GL11.glLoadIdentity();

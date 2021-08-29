@@ -1,33 +1,24 @@
 package OpenCraft.Game.gui.screens;
 
-import OpenCraft.Game.Rendering.TextureManager;
 import OpenCraft.Game.Rendering.VerticesBuffer;
 import OpenCraft.Game.gui.Button;
 import OpenCraft.Game.gui.EditArea;
 import OpenCraft.Game.gui.Screen;
 import OpenCraft.OpenCraft;
 import org.lwjgl.input.Keyboard;
-import org.lwjgl.opengl.Display;
-import org.lwjgl.opengl.GL11;
 
-import javax.imageio.ImageIO;
-import java.io.DataInputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.zip.GZIPInputStream;
 
 public class NewWorldConfigurator extends Screen
 {
 
     public String levelName;
-
+    private boolean escapeClick;
     private int levelEditArea;
     private int createNewWorldBtn;
 
     public NewWorldConfigurator() {
-        super(OpenCraft.getWidth(), OpenCraft.getHeight());
+        super(OpenCraft.getWidth(), OpenCraft.getHeight(), "Create a new world");
     }
 
     public void init() {
@@ -78,7 +69,12 @@ public class NewWorldConfigurator extends Screen
 
         if (Keyboard.isKeyDown(Keyboard.KEY_ESCAPE))
         {
+            escapeClick = true;
+        }
+        else if (escapeClick)
+        {
             OpenCraft.setCurrentScreen(OpenCraft.getWorldListScreen());
+            escapeClick = false;
             return;
         }
 
@@ -87,7 +83,6 @@ public class NewWorldConfigurator extends Screen
         //GL11.glClear(16640);
         drawBackground(t, screenWidth, screenHeight, 0x808080);
 
-        OpenCraft.getFont().drawShadow("Create a new world", (screenWidth - OpenCraft.getFont().width("Create a new world")) / 2, 20, 0xAAAAAA);
         super.render(screenWidth, screenHeight, scale);
     }
 
