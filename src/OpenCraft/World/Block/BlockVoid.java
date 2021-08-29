@@ -1,6 +1,6 @@
 package OpenCraft.World.Block;
 
-import OpenCraft.Game.Rendering.Texture;
+import OpenCraft.Rendering.Texture;
 
 public class BlockVoid extends Block
 {

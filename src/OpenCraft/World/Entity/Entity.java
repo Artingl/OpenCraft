@@ -1,6 +1,6 @@
 package OpenCraft.World.Entity;
 
-import OpenCraft.Game.phys.AABB;
+import OpenCraft.phys.AABB;
 import OpenCraft.Interfaces.ITick;
 import OpenCraft.OpenCraft;
 import OpenCraft.World.Level;
@@ -31,6 +31,9 @@ public class Entity implements ITick
     protected float xo; // X coordinate
     protected float yo; // Y coordinate
     protected float zo; // Z coordinate
+
+    /* Model */
+    protected Model model;
 
     protected float spawnPointX = 0;
     protected float spawnPointY = 0;
@@ -69,6 +72,16 @@ public class Entity implements ITick
         float h = 0.9F;
         this.aabb = new AABB(x - w, y - h, z - w, x + w, y + h, z + w);
         OpenCraft.registerTickEvent(this);
+    }
+
+    public void setModel(Model model)
+    {
+        this.model = model;
+    }
+
+    public Model getModel(Model model)
+    {
+        return model;
     }
 
     protected void remove()

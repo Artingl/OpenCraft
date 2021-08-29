@@ -1,18 +1,15 @@
 package OpenCraft.World.Entity;
 
-import OpenCraft.Game.Controls;
-import OpenCraft.Game.RayCast;
-import OpenCraft.Game.gui.windows.PlayerInventory;
-import OpenCraft.Game.phys.AABB;
+import OpenCraft.Controls;
+import OpenCraft.RayCast;
+import OpenCraft.gui.windows.PlayerInventory;
+import OpenCraft.phys.AABB;
 import OpenCraft.OpenCraft;
 import OpenCraft.World.Block.Block;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 
-import java.awt.*;
-import java.awt.event.KeyEvent;
 import java.util.HashMap;
-import java.util.Locale;
 
 public class Player extends Entity
 {

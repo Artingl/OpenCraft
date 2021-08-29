@@ -2,9 +2,9 @@ package OpenCraft.World;
 
 import OpenCraft.World.Block.Block;
 import OpenCraft.World.Entity.Player;
-import OpenCraft.Game.Rendering.VerticesBuffer;
-import OpenCraft.Game.Rendering.BlockRenderer;
-import OpenCraft.Game.phys.AABB;
+import OpenCraft.Rendering.VerticesBuffer;
+import OpenCraft.Rendering.BlockRenderer;
+import OpenCraft.phys.AABB;
 import OpenCraft.OpenCraft;
 import org.lwjgl.opengl.GL11;
 

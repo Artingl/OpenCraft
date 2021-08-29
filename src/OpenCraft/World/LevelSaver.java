@@ -1,16 +1,11 @@
 package OpenCraft.World;
 
-import OpenCraft.Game.Rendering.LevelRenderer;
+import OpenCraft.Rendering.LevelRenderer;
 import OpenCraft.Interfaces.ITick;
 import OpenCraft.OpenCraft;
 import OpenCraft.World.Block.Block;
 
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.List;
-import java.util.stream.Stream;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 

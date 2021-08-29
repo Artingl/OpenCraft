@@ -1,7 +1,7 @@
 package OpenCraft.World;
 
-import OpenCraft.Game.generation.PerlinNoise;
-import OpenCraft.Game.phys.AABB;
+import OpenCraft.generation.PerlinNoise;
+import OpenCraft.phys.AABB;
 import OpenCraft.Interfaces.LevelRendererListener;
 import OpenCraft.OpenCraft;
 import OpenCraft.World.Block.Block;

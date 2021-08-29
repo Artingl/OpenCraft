@@ -1,24 +1,21 @@
 package OpenCraft;
 
-import OpenCraft.Game.gui.Font;
-import OpenCraft.Game.gui.Screen;
-import OpenCraft.Game.gui.screens.MainMenu;
-import OpenCraft.Game.gui.screens.NewWorldConfigurator;
-import OpenCraft.Game.gui.screens.PauseMenu;
-import OpenCraft.Game.gui.screens.WorldList;
-import OpenCraft.Game.Rendering.Frustum;
-import OpenCraft.Game.Rendering.VerticesBuffer;
-import OpenCraft.Game.Rendering.ParticleEngine;
-import OpenCraft.Game.RayCast;
-import OpenCraft.Game.Rendering.BlockRenderer;
-import OpenCraft.Game.Rendering.LevelRenderer;
-import OpenCraft.Game.Timer;
+import OpenCraft.gui.Font;
+import OpenCraft.gui.Screen;
+import OpenCraft.gui.screens.MainMenu;
+import OpenCraft.gui.screens.NewWorldConfigurator;
+import OpenCraft.gui.screens.PauseMenu;
+import OpenCraft.gui.screens.WorldList;
+import OpenCraft.Rendering.Frustum;
+import OpenCraft.Rendering.VerticesBuffer;
+import OpenCraft.Rendering.ParticleEngine;
+import OpenCraft.Rendering.BlockRenderer;
+import OpenCraft.Rendering.LevelRenderer;
 import OpenCraft.Interfaces.IGuiInterface;
 import OpenCraft.Interfaces.IGuiTick;
 import OpenCraft.Interfaces.ITick;
 import OpenCraft.World.Entity.Player;
-import OpenCraft.Game.Controls;
-import OpenCraft.Game.Rendering.TextureEngine;
+import OpenCraft.Rendering.TextureEngine;
 import OpenCraft.World.*;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.input.Keyboard;
@@ -38,12 +35,13 @@ public class OpenCraft
 {
 
     // Game version
-    private static final String version = "0.2.10g";
+    private static final String version = "0.2.15g";
 
     // Window
     private static int width = 868;
     private static int height = 468;
     private static boolean escapeClick;
+    private static boolean close = false;
 
     // Player
     private static Player player;
@@ -119,7 +117,7 @@ public class OpenCraft
         long lastTime = System.currentTimeMillis();
         int frames = 0;
 
-        while (!Display.isCloseRequested()) {
+        while (!Display.isCloseRequested() && !close) {
 
             if (Display.wasResized()) // Was window resized?
             {
@@ -355,8 +353,6 @@ public class OpenCraft
                 if (iGuiInterface != null) iGuiInterface.render(screenWidth, screenHeight, finalScale);
                 GL11.glTranslatef(0.0F, 0.0F, 0.0F);
             }));
-
-            BlockRenderer.renderBlockIcon(t, 16, 16, (float)(screenWidth - 16), 16, player.getInventoryBlock(0));
         }
 
         GL11.glDisable(3042);
@@ -565,6 +561,10 @@ public class OpenCraft
     public static Screen getCurrentScreen()
     {
         return currentScreen;
+    }
+
+    public static void close() {
+        close = true;
     }
 
 }

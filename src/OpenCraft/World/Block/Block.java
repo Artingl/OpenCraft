@@ -1,8 +1,8 @@
 package OpenCraft.World.Block;
 
-import OpenCraft.Game.Rendering.Texture;
-import OpenCraft.Game.Particle;
-import OpenCraft.Game.phys.AABB;
+import OpenCraft.Rendering.Texture;
+import OpenCraft.Particle;
+import OpenCraft.phys.AABB;
 import OpenCraft.OpenCraft;
 import OpenCraft.World.Level;
 
