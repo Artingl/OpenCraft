@@ -1,5 +1,7 @@
 package OpenCraft;
 
+import OpenCraft.World.Entity.Entity;
+import OpenCraft.World.Entity.Zombie;
 import OpenCraft.gui.Font;
 import OpenCraft.gui.Screen;
 import OpenCraft.gui.screens.MainMenu;
@@ -27,6 +29,7 @@ import org.lwjgl.util.glu.GLU;
 
 import java.io.IOException;
 import java.nio.FloatBuffer;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import static org.lwjgl.opengl.GL11.*;
@@ -35,7 +38,7 @@ public class OpenCraft
 {
 
     // Game version
-    private static final String version = "0.2.15g";
+    private static final String version = "0.2.31g";
 
     // Window
     private static int width = 868;
@@ -65,7 +68,7 @@ public class OpenCraft
     private static int chunksUpdate = 0;
     private static int FOV = 90; // Camera FOV
     private static int FPS = 0;
-    private static Timer timer;
+    private static TickTimer timer;
     private static Screen currentScreen;
 
 
@@ -108,8 +111,8 @@ public class OpenCraft
         Controls.init();
         TextureEngine.init();
 
-        font = new Font("resources/textures/gui/font.gif");
-        timer = new Timer(20.0F);
+        font = new Font("resources/gui/font.gif");
+        timer = new TickTimer(20.0F);
 
         initScreens();
         setCurrentScreen(mainMenu);
@@ -236,6 +239,7 @@ public class OpenCraft
         levelRenderer = new LevelRenderer();
         particleEngine = new ParticleEngine();
 
+        //level.addEntity(new Zombie(70, 80, 70));
     }
 
     private void render()
@@ -247,6 +251,8 @@ public class OpenCraft
             Mouse.setGrabbed(true);
         }
 
+        ArrayList<Entity> entities = level.getEntities();
+
         GL11.glClear(16640);
         this.setPerspective();
         Frustum frustum = Frustum.getFrustum();
@@ -255,11 +261,33 @@ public class OpenCraft
         //fog();
         //GL11.glEnable(2912);
         levelRenderer.render(player, 0);
+
+        for (int i = 0; i < entities.size(); i++)
+        {
+            //player.render();
+            Entity entity = entities.get(i);
+            if (frustum.isVisible(entity.aabb))
+            {
+                entity.render();
+            }
+        }
+
         glEnable(GL_BLEND);
         particleEngine.render(player, timer.a, 0);
         glDisable(GL_BLEND);
         //fog();
         levelRenderer.render(player, 1);
+
+        for (int i = 0; i < entities.size(); i++)
+        {
+            //player.render();
+            Entity entity = entities.get(i);
+            if (frustum.isVisible(entity.aabb))
+            {
+                entity.render();
+            }
+        }
+
         //fog();
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glEnable(GL_BLEND);
@@ -353,6 +381,11 @@ public class OpenCraft
                 if (iGuiInterface != null) iGuiInterface.render(screenWidth, screenHeight, finalScale);
                 GL11.glTranslatef(0.0F, 0.0F, 0.0F);
             }));
+
+            if (player.getCurrentBlock() != null)
+            {
+                //BlockRenderer.renderBlockIcon(t, 20, 0, 128, 128, screenWidth - 10, screenHeight + 78, player.getCurrentBlock());
+            }
         }
 
         GL11.glDisable(3042);
@@ -417,9 +450,21 @@ public class OpenCraft
         GL11.glTranslatef(0.0F, 0.0F, -0.3F);
         GL11.glRotatef(player.getRx(), 1.0F, 0.0F, 0.0F);
         GL11.glRotatef(player.getRy(), 0.0F, 1.0F, 0.0F);
+        //GL11.glRotatef(-(player.getRx()), 1.0f, 0.0f, 0.0f);
+        //GL11.glRotatef(player.getRy(), 0.0f, 1.0f, 0.0f);
         float x = player.getXo() + (player.getX() - player.getXo()) * timer.a;
         float y = player.getYo() + (player.getY() - player.getYo()) * timer.a;
         float z = player.getZo() + (player.getZ() - player.getZo()) * timer.a;
+
+        //double dst = 2 - ((player.getRx() / 180));
+        //System.out.println(dst);
+
+        //double camerax = 2 * Math.cos((player.getRy() + 270.0f) * 3.14159265358979323846264338327950288f / 180) + player.getX();
+        //double cameray = dst * Math.cos((-player.getRx() + 270.0f) * 3.14159265358979323846264338327950288f / 180) + player.getY();
+        //double cameraz = 2 * Math.sin((player.getRy() - 270.0f) * 3.14159265358979323846264338327950288f / 180) + player.getZ();
+
+        //GL11.glTranslated(-camerax, -y, -cameraz);
+
         GL11.glTranslatef(-x, -y, -z);
     }
 
@@ -457,7 +502,7 @@ public class OpenCraft
         return OpenCraft.version;
     }
 
-    public static Timer getTimer()
+    public static TickTimer getTimer()
     {
         return timer;
     }

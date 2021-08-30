@@ -1,5 +1,6 @@
 package OpenCraft.World.Entity;
 
+import OpenCraft.World.Entity.Models.Model;
 import OpenCraft.phys.AABB;
 import OpenCraft.Interfaces.ITick;
 import OpenCraft.OpenCraft;
@@ -93,6 +94,8 @@ public class Entity implements ITick
         this.width = w;
         this.height = h;
     }
+
+    public void render() { }
 
     public void move(float xa, float ya, float za) {
         float xaOrg = xa;

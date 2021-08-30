@@ -1,18 +1,34 @@
 package OpenCraft.World.Entity;
 
 import OpenCraft.Controls;
-import OpenCraft.RayCast;
+import OpenCraft.Rendering.TextureEngine;
+import OpenCraft.World.Entity.Models.PlayerModel;
+import OpenCraft.World.Entity.Models.ZombieModel;
+import OpenCraft.World.RayCast;
 import OpenCraft.gui.windows.PlayerInventory;
 import OpenCraft.phys.AABB;
 import OpenCraft.OpenCraft;
 import OpenCraft.World.Block.Block;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
+import org.lwjgl.opengl.GL11;
 
+import javax.imageio.ImageIO;
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 
 public class Player extends Entity
 {
+
+    public static int TEXTURE;
+    public static PlayerModel model = new PlayerModel();
+
+    static {
+        try {
+            TEXTURE = TextureEngine.load(ImageIO.read(new File("resources/entity/steve.png")));
+        } catch (IOException e) { }
+    }
 
     private Block[] inventory;
     private PlayerInventory playerInventory;
@@ -22,6 +38,7 @@ public class Player extends Entity
 
     public Player(float x, float y, float z) {
         super(x, y, z);
+        setModel(model);
         this.heightOffset = 1.62F;
         this.playerInventory = new PlayerInventory();
         clickedMouse = new HashMap<>();
@@ -162,6 +179,29 @@ public class Player extends Entity
     {
         if (i < 0 || i >= 38) return null;
         return inventory[i];
+    }
+
+    public Block getCurrentBlock()
+    {
+        return inventory[playerInventory.selected];
+    }
+
+    @Override
+    public void render() {
+        float a = OpenCraft.getTimer().a;
+        GL11.glEnable(3553);
+        GL11.glBindTexture(3553, TEXTURE);
+        GL11.glPushMatrix();
+        float size = 0.058333334F;
+        float yy = (float)(-Math.abs(Math.sin(0.6662D)) * 5.0D - 23.0D);
+        GL11.glTranslatef(this.x, this.y - 2, this.z);
+        GL11.glScalef(1.0F, -1.0F, 1.0F);
+        GL11.glScalef(size, size, size);
+        GL11.glTranslatef(0.0F, yy, 0.0F);
+        GL11.glRotatef(360 - this.ry, 0.0F, 1.0F, 0.0F);
+        super.model.render((float)0);
+        GL11.glPopMatrix();
+        GL11.glDisable(3553);
     }
 
 }

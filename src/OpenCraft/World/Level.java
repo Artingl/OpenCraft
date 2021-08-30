@@ -1,6 +1,7 @@
 package OpenCraft.World;
 
-import OpenCraft.generation.PerlinNoise;
+import OpenCraft.World.Entity.Entity;
+import OpenCraft.World.generation.PerlinNoise;
 import OpenCraft.phys.AABB;
 import OpenCraft.Interfaces.LevelRendererListener;
 import OpenCraft.OpenCraft;
@@ -23,12 +24,23 @@ public class Level
     private PerlinNoise noise;
     private boolean isPlayerStartPosSet = false;
     private ArrayList<LevelRendererListener> levelListeners = new ArrayList();
+    private ArrayList<Entity> entities = new ArrayList<>();
 
     public Level()
     {
         saveBlocks = new byte[WIDTH * HEIGHT * DEPTH];
         blocks = new Block[WIDTH * HEIGHT * DEPTH];
         lightDepths = new int[WIDTH * HEIGHT];
+    }
+
+    public void addEntity(Entity entity)
+    {
+        entities.add(entity);
+    }
+
+    public ArrayList<Entity> getEntities()
+    {
+        return entities;
     }
 
     public void generateWorld(int seed)
@@ -88,7 +100,7 @@ public class Level
                     {
                         if (i > y - getRandomNumber(5, 10))
                         {
-                            setBlockWithoutRendering(x, i, z, Block.gravel);
+                            setBlockWithoutRendering(x, i, z, Block.sandStone);
                         }
                         else
                         {
@@ -101,7 +113,7 @@ public class Level
                 {
                     for (int i = y; i < WATER_LEVEL - 3; i++)
                     {
-                        setBlockWithoutRendering(x, i, z, Block.water);
+                        setBlockWithoutRendering(x, i + 1, z, Block.water);
                         //blocks[(i * HEIGHT + z) * WIDTH + x] = Block.water;
                     }
                 }

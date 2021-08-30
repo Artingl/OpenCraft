@@ -25,9 +25,20 @@ public class WorldList extends Screen
         super(OpenCraft.getWidth(), OpenCraft.getHeight(), "Select world");
     }
 
-    public void selectWorld(String path)
+    public void selectWorld(int btn_id, String path)
     {
         ((Button)getElements().get(loadWorldBtnId)).enabled = true;
+        getElements().forEach((id, element) -> {
+            if (element instanceof Button)
+            {
+                Button btn = (Button)element;
+                if (btn.getId() == 3) {
+                    btn.selected = false;
+                }
+
+            }
+        });
+        ((Button)getElements().get(btn_id)).selected = true;
         levelName = path;
     }
 
@@ -63,7 +74,8 @@ public class WorldList extends Screen
                             String version = dis.readUTF();
                             int seed = dis.readInt();
 
-                            this.addElement(new Button(3, 0, 0, worldName, () -> selectWorld(file.getName())));
+                            final int id = this.getElements().size();
+                            this.addElement(new Button(3, 0, 0, worldName, () -> selectWorld(id, file.getName())));
                         }
 
                         dis.close();
@@ -76,7 +88,7 @@ public class WorldList extends Screen
 
     public void render(int screenWidth, int screenHeight, int scale)
     {
-        worldBtnPosition = 120;
+        worldBtnPosition = 70;
         getElements().forEach((id, element) -> {
             if (element instanceof Button)
             {

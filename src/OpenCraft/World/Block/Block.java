@@ -1,7 +1,7 @@
 package OpenCraft.World.Block;
 
 import OpenCraft.Rendering.Texture;
-import OpenCraft.Particle;
+import OpenCraft.World.Particle;
 import OpenCraft.phys.AABB;
 import OpenCraft.OpenCraft;
 import OpenCraft.World.Level;
@@ -20,10 +20,10 @@ public class Block
     public static Block log_oak = new BlockLogOak(8);
     public static Block leaves_oak = new BlockLeavesOak(9);
     public static Block glass = new BlockGlass(10);
-    public static Block block_void = new BlockVoid(11);
+    public static Block sandStone = new BlockSandStone(11);
 
     public static Block[] blocks = {
-      air, stone, dirt, grass_block, bedrock, water, sand, gravel, log_oak, leaves_oak, glass, block_void
+      air, stone, dirt, grass_block, bedrock, water, sand, gravel, log_oak, leaves_oak, glass, sandStone
     };
 
     private final int idi;

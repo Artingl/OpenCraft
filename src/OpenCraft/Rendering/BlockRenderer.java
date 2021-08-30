@@ -13,17 +13,27 @@ public class BlockRenderer
 
     public static void renderBlockIcon(VerticesBuffer t, float scale_x, float scale_y, float x, float y, Block block)
     {
+        renderBlockIcon(t, 0, 0, scale_x, scale_y, x, y, block);
+    }
+
+    public static void renderBlockIcon(VerticesBuffer t, float rot, float rot2, float scale_x, float scale_y, float x, float y, Block block)
+    {
         GL11.glPushMatrix();
         GL11.glTranslatef(x, y, -50.0F);
         GL11.glScalef(scale_x, scale_y, 16.0F);
-        GL11.glRotatef(-30.0F, 1.0F, 0.0F, 0.0F);
-        GL11.glRotatef(45.0F, 0.0F, 1.0F, 0.0F);
+        GL11.glRotatef(-35.0F + rot2, 1.0F, 0.0F, 0.0F);
+        GL11.glRotatef(45.0F + rot, 0.0F, 1.0F, 0.0F);
         GL11.glTranslatef(-1.5F, 0.5F, 0.5F);
         GL11.glScalef(-1.0F, -1.0F, -1.0F);
         GL11.glBindTexture(3553, TextureEngine.getTerrain());
         GL11.glEnable(3553);
         t.begin();
-        render(t, -2, 0, 0, block);
+        renderTopSide(t, -2, 0, 0, block);
+        if (rot == 0) renderBottomSide(t, -2, 0, 0, block);
+        if (rot == 0) renderBackSide(t, -2, 0, 0, block);
+        renderRightSide(t, -2, 0, 0, block);
+        if (rot == 0) renderFrontSide(t, -2, 0, 0, block);
+        if (rot == 0) renderLeftSide(t, -2, 0, 0, block);
         t.end();
         GL11.glDisable(3553);
         GL11.glPopMatrix();
@@ -87,12 +97,12 @@ public class BlockRenderer
             if (side == 5) return !OpenCraft.getLevel().getBlock((int)x - 1, (int)y, (int)z).isSolid();
         }
 //
-        if (side == 0) return !OpenCraft.getLevel().getBlock((int)x, (int)y + 1, (int)z).isSolid() || (OpenCraft.getLevel().getBlock((int)x, (int)y + 1, (int)z).hasTranslucent() && !block.hasTranslucent()) || OpenCraft.getLevel().getBlock((int)x, (int)y + 1, (int)z).isLiquid();
-        if (side == 1) return !OpenCraft.getLevel().getBlock((int)x, (int)y - 1, (int)z).isSolid() || (OpenCraft.getLevel().getBlock((int)x, (int)y - 1, (int)z).hasTranslucent() && !block.hasTranslucent()) || OpenCraft.getLevel().getBlock((int)x, (int)y - 1, (int)z).isLiquid();
-        if (side == 2) return !OpenCraft.getLevel().getBlock((int)x, (int)y, (int)z - 1).isSolid() || (OpenCraft.getLevel().getBlock((int)x, (int)y, (int)z - 1).hasTranslucent() && !block.hasTranslucent()) || OpenCraft.getLevel().getBlock((int)x, (int)y, (int)z - 1).isLiquid();
-        if (side == 3) return !OpenCraft.getLevel().getBlock((int)x + 1, (int)y, (int)z).isSolid() || (OpenCraft.getLevel().getBlock((int)x + 1, (int)y, (int)z).hasTranslucent() && !block.hasTranslucent()) || OpenCraft.getLevel().getBlock((int)x + 1, (int)y, (int)z).isLiquid();
-        if (side == 4) return !OpenCraft.getLevel().getBlock((int)x, (int)y, (int)z + 1).isSolid() || (OpenCraft.getLevel().getBlock((int)x, (int)y, (int)z + 1).hasTranslucent() && !block.hasTranslucent()) || OpenCraft.getLevel().getBlock((int)x, (int)y, (int)z + 1).isLiquid();
-        if (side == 5) return !OpenCraft.getLevel().getBlock((int)x - 1, (int)y, (int)z).isSolid() || (OpenCraft.getLevel().getBlock((int)x - 1, (int)y, (int)z).hasTranslucent() && !block.hasTranslucent()) || OpenCraft.getLevel().getBlock((int)x - 1, (int)y, (int)z).isLiquid();
+        if (side == 0) return !OpenCraft.getLevel().getBlock((int)x, (int)y + 1, (int)z).isSolid() || (OpenCraft.getLevel().getBlock((int)x, (int)y + 1, (int)z).hasTranslucent()/* && !block.hasTranslucent()*/) || OpenCraft.getLevel().getBlock((int)x, (int)y + 1, (int)z).isLiquid();
+        if (side == 1) return !OpenCraft.getLevel().getBlock((int)x, (int)y - 1, (int)z).isSolid() || (OpenCraft.getLevel().getBlock((int)x, (int)y - 1, (int)z).hasTranslucent()/* && !block.hasTranslucent()*/) || OpenCraft.getLevel().getBlock((int)x, (int)y - 1, (int)z).isLiquid();
+        if (side == 2) return !OpenCraft.getLevel().getBlock((int)x, (int)y, (int)z - 1).isSolid() || (OpenCraft.getLevel().getBlock((int)x, (int)y, (int)z - 1).hasTranslucent()/* && !block.hasTranslucent()*/) || OpenCraft.getLevel().getBlock((int)x, (int)y, (int)z - 1).isLiquid();
+        if (side == 3) return !OpenCraft.getLevel().getBlock((int)x + 1, (int)y, (int)z).isSolid() || (OpenCraft.getLevel().getBlock((int)x + 1, (int)y, (int)z).hasTranslucent()/* && !block.hasTranslucent()*/) || OpenCraft.getLevel().getBlock((int)x + 1, (int)y, (int)z).isLiquid();
+        if (side == 4) return !OpenCraft.getLevel().getBlock((int)x, (int)y, (int)z + 1).isSolid() || (OpenCraft.getLevel().getBlock((int)x, (int)y, (int)z + 1).hasTranslucent()/* && !block.hasTranslucent()*/) || OpenCraft.getLevel().getBlock((int)x, (int)y, (int)z + 1).isLiquid();
+        if (side == 5) return !OpenCraft.getLevel().getBlock((int)x - 1, (int)y, (int)z).isSolid() || (OpenCraft.getLevel().getBlock((int)x - 1, (int)y, (int)z).hasTranslucent()/* && !block.hasTranslucent()*/) || OpenCraft.getLevel().getBlock((int)x - 1, (int)y, (int)z).isLiquid();
 //
         return false;//OpenCraft.getLevel().isLit((int)x, (int)y, (int)z) ^ layer == 1;
     }
@@ -103,6 +113,8 @@ public class BlockRenderer
         int block_g=255;
         int block_b=255;
         float down = 0;
+        if (block.getIdInt() == Block.water.getIdInt() && OpenCraft.getLevel().getBlock((int)x, (int)y + 1, (int)z).getIdInt() != Block.water.getIdInt())
+            down = 0.1f;
 
         t.setColori(block_r, block_g, block_b);
         t.setTexCoord(block.getTexture().getTopTextureX() + 0.0f, block.getTexture().getTopTextureY() + TextureEngine.addTextCoord);
@@ -121,6 +133,8 @@ public class BlockRenderer
         int block_g=255;
         int block_b=255;
         float down = 0;
+        if (block.getIdInt() == Block.water.getIdInt() && OpenCraft.getLevel().getBlock((int)x, (int)y + 1, (int)z).getIdInt() != Block.water.getIdInt())
+            down = 0.1f;
 
         t.setColori(block_r, block_g, block_b);
         t.setTexCoord(block.getTexture().getBottomTextureX() + 0.0f, block.getTexture().getBottomTextureY() + TextureEngine.addTextCoord);
@@ -139,6 +153,8 @@ public class BlockRenderer
         int block_g=255;
         int block_b=255;
         float down = 0;
+        if (block.getIdInt() == Block.water.getIdInt() && OpenCraft.getLevel().getBlock((int)x, (int)y + 1, (int)z).getIdInt() != Block.water.getIdInt())
+            down = 0.1f;
 
         t.setColori(block_r - 40, block_g - 40, block_b - 40);
         t.setTexCoord(block.getTexture().getSideTextureX() + TextureEngine.addTextCoord, block.getTexture().getSideTextureY() + TextureEngine.addTextCoord);
@@ -157,6 +173,8 @@ public class BlockRenderer
         int block_g=255;
         int block_b=255;
         float down = 0;
+        if (block.getIdInt() == Block.water.getIdInt() && OpenCraft.getLevel().getBlock((int)x, (int)y + 1, (int)z).getIdInt() != Block.water.getIdInt())
+            down = 0.1f;
 
         t.setColori(block_r - 80, block_g - 80, block_b - 80);
         t.setTexCoord(block.getTexture().getSideTextureX() + TextureEngine.addTextCoord, block.getTexture().getSideTextureY() + TextureEngine.addTextCoord);
@@ -175,6 +193,8 @@ public class BlockRenderer
         int block_g=255;
         int block_b=255;
         float down = 0;
+        if (block.getIdInt() == Block.water.getIdInt() && OpenCraft.getLevel().getBlock((int)x, (int)y + 1, (int)z).getIdInt() != Block.water.getIdInt())
+            down = 0.1f;
 
         t.setColori(block_r - 40, block_g - 40, block_b - 40);
         t.setTexCoord(block.getTexture().getSideTextureX() + TextureEngine.addTextCoord, block.getTexture().getSideTextureY() + TextureEngine.addTextCoord);
@@ -193,6 +213,8 @@ public class BlockRenderer
         int block_g=255;
         int block_b=255;
         float down = 0;
+        if (block.getIdInt() == Block.water.getIdInt() && OpenCraft.getLevel().getBlock((int)x, (int)y + 1, (int)z).getIdInt() != Block.water.getIdInt())
+            down = 0.1f;
 
         t.setColori(block_r - 80, block_g - 80, block_b - 80);
         t.setTexCoord(block.getTexture().getSideTextureX() + TextureEngine.addTextCoord, block.getTexture().getSideTextureY() + TextureEngine.addTextCoord);

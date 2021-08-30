@@ -1,5 +1,6 @@
 package OpenCraft.gui.screens;
 
+import OpenCraft.Rendering.VerticesBuffer;
 import OpenCraft.gui.Button;
 import OpenCraft.gui.Screen;
 import OpenCraft.Rendering.BlockRenderer;
@@ -67,51 +68,51 @@ public class MainMenu extends Screen
             }
         });
 
-        GL11.glMatrixMode(5889);
-        GL11.glLoadIdentity();
-        GLU.gluPerspective(90, (float)width / (float)height, 0.05F, 1000.0F);
-        GL11.glMatrixMode(5888);
-        GL11.glLoadIdentity();
-        GL11.glEnable(3553);
+        //GL11.glMatrixMode(5889);
+        //GL11.glLoadIdentity();
+        //GLU.gluPerspective(90, (float)width / (float)height, 0.05F, 1000.0F);
+        //GL11.glMatrixMode(5888);
+        //GL11.glLoadIdentity();
+        //GL11.glEnable(3553);
 
-        GL11.glPushMatrix();
-        GL11.glRotatef(rotationY, 1, 0, 0);
-        GL11.glRotatef(rotationX, 0, 1, 0);
-        GL11.glTranslatef(0, 0, 0);
-        GL11.glScalef(3, 3, 3);
+        //GL11.glPushMatrix();
+        //GL11.glRotatef(rotationY, 1, 0, 0);
+        //GL11.glRotatef(rotationX, 0, 1, 0);
+        //GL11.glTranslatef(0, 0, 0);
+        //GL11.glScalef(3, 3, 3);
 
-        GL11.glBindTexture(3553, panoramaId4);
-        GL11.glBegin(GL11.GL_QUADS);
-        BlockRenderer.renderLegacyTop(0, 0, 0);
-        GL11.glEnd();
+        //GL11.glBindTexture(3553, panoramaId4);
+        //GL11.glBegin(GL11.GL_QUADS);
+        //BlockRenderer.renderLegacyTop(0, 0, 0);
+        //GL11.glEnd();
 
-        GL11.glBindTexture(3553, panoramaId5);
-        GL11.glBegin(GL11.GL_QUADS);
-        BlockRenderer.renderLegacyBottom(0, 0, 0);
-        GL11.glEnd();
+        //GL11.glBindTexture(3553, panoramaId5);
+        //GL11.glBegin(GL11.GL_QUADS);
+        //BlockRenderer.renderLegacyBottom(0, 0, 0);
+        //GL11.glEnd();
 
-        GL11.glBindTexture(3553, panoramaId0);
-        GL11.glBegin(GL11.GL_QUADS);
-        BlockRenderer.renderLegacyFront(0, 0, 0);
-        GL11.glEnd();
+        //GL11.glBindTexture(3553, panoramaId0);
+        //GL11.glBegin(GL11.GL_QUADS);
+        //BlockRenderer.renderLegacyFront(0, 0, 0);
+        //GL11.glEnd();
 
-        GL11.glBindTexture(3553, panoramaId2);
-        GL11.glBegin(GL11.GL_QUADS);
-        BlockRenderer.renderLegacyBack(0, 0, 0);
-        GL11.glEnd();
+        //GL11.glBindTexture(3553, panoramaId2);
+        //GL11.glBegin(GL11.GL_QUADS);
+        //BlockRenderer.renderLegacyBack(0, 0, 0);
+        //GL11.glEnd();
 
-        GL11.glBindTexture(3553, panoramaId1);
-        GL11.glBegin(GL11.GL_QUADS);
-        BlockRenderer.renderLegacyLeft(0, 0, 0);
-        GL11.glEnd();
+        //GL11.glBindTexture(3553, panoramaId1);
+        //GL11.glBegin(GL11.GL_QUADS);
+        //BlockRenderer.renderLegacyLeft(0, 0, 0);
+        //GL11.glEnd();
 
-        GL11.glBindTexture(3553, panoramaId3);
-        GL11.glBegin(GL11.GL_QUADS);
-        BlockRenderer.renderLegacyRight(0, 0, 0);
-        GL11.glEnd();
+        //GL11.glBindTexture(3553, panoramaId3);
+        //GL11.glBegin(GL11.GL_QUADS);
+        //BlockRenderer.renderLegacyRight(0, 0, 0);
+        //GL11.glEnd();
 
-        GL11.glPopMatrix();
-        GL11.glDisable(3553);
+        //GL11.glPopMatrix();
+        //GL11.glDisable(3553);
 
         if (rotationY < 25)
         {
@@ -145,6 +146,7 @@ public class MainMenu extends Screen
         //GL11.glTranslatef(screenWidth / 2f - (l_width / 2), 20, -50);
         //fillTexture(0, 0, l_width, l_height, logo);
         //GL11.glPopMatrix();
+        drawBackground(VerticesBuffer.instance, screenWidth, screenHeight, 0x808080);
 
         super.render(screenWidth, screenHeight, scale);
 

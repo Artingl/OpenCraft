@@ -28,7 +28,10 @@ public class Button extends Element
     }
 
     public boolean enabled = true;
+    public boolean selected = false;
+
     private final int id;
+    private long alive = -1;
     private String text;
     private Runnable onClick;
     private boolean mouseClicked;
@@ -51,27 +54,35 @@ public class Button extends Element
     @Override
     public void render(int screenWidth, int screenHeight, int scale)
     {
+
         int mx = Controls.getMouseX() * scale / OpenCraft.getHeight();
         int my = Controls.getMouseY() * scale / OpenCraft.getHeight();
 
         int id = BUTTON_TEXTURES[0];
+        if (selected) id = BUTTON_TEXTURES[1];
 
         if (mouseHover(mx, my, x, screenHeight - (y + height), width, height) && enabled)
         {
+            if (alive == -1) alive = System.currentTimeMillis();
             id = BUTTON_TEXTURES[1];
 
-            if (Controls.getMouseKey(0) && !mouseClicked)
+            if (alive + 100 < System.currentTimeMillis())
             {
-                Sound.loadAndPlay("resources/sounds/gui/click1.wav");
-                if (onClick != null) onClick.run();
-                mouseClicked = true;
-            }
-            else if(!Controls.getMouseKey(0))
-            {
-                mouseClicked = false;
+                if (Controls.getMouseKey(0) && !mouseClicked)
+                {
+                    mouseClicked = true;
+                }
+                else if(!Controls.getMouseKey(0) && mouseClicked)
+                {
+                    Sound.loadAndPlay("resources/sounds/gui/click1.wav");
+                    if (onClick != null && mouseHover(mx, my, x, screenHeight - (y + height), width, height) && enabled) onClick.run();
+                    mouseClicked = false;
+                }
             }
         }
         else if (!enabled) id = BUTTON_TEXTURES[2];
+
+        if(!Controls.getMouseKey(0) && mouseClicked) mouseClicked = false;
 
         GL11.glEnable(GL_BLEND);
         GL11.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
