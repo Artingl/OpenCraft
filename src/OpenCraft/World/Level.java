@@ -18,8 +18,9 @@ public class Level
     public static final int DEPTH = 256;
     public static final int WATER_LEVEL = 64;
 
-    private static Block[] blocks;
-    private static byte[] saveBlocks;
+    private Thread generationThread;
+    private LevelArrayList blocks;
+    //private static byte[] saveBlocks;
     private int[] lightDepths;
     private PerlinNoise noise;
     private boolean isPlayerStartPosSet = false;
@@ -28,8 +29,8 @@ public class Level
 
     public Level()
     {
-        saveBlocks = new byte[WIDTH * HEIGHT * DEPTH];
-        blocks = new Block[WIDTH * HEIGHT * DEPTH];
+        //saveBlocks = new byte[WIDTH * HEIGHT * DEPTH];
+        blocks = new LevelArrayList();
         lightDepths = new int[WIDTH * HEIGHT];
     }
 
@@ -43,21 +44,21 @@ public class Level
         return entities;
     }
 
-    public void generateWorld(int seed)
+    public void generateXZ(int x0, int z0, int x1, int z1)
     {
-        noise = new PerlinNoise(3, seed);
-
-        for (int x = 0; x < WIDTH; x++)
+        for (int x = x0; x <= x1; x++)
         {
-            for (int z = 0; z < HEIGHT; z++)
+            for (int z = z0; z <= z1; z++)
             {
+                if (getBlock(x, 0, z) != null) continue;
+
                 int y = getNoiseValue(16, (float) x, (float) z, .5f, .01f, -24, 24) + WATER_LEVEL;
 
                 if (y < 0) y = 0;
                 if (y > DEPTH) y = DEPTH;
 
                 for (int i = y + 1; i < DEPTH; i++)
-                    if (blocks[(i * HEIGHT + z) * WIDTH + x] == null)
+                    if (getBlock(x, i, z) == null)
                         setBlockWithoutRendering(x, i, z, Block.air);
 
                 boolean wasSand = false;
@@ -114,13 +115,25 @@ public class Level
                     for (int i = y; i < WATER_LEVEL - 3; i++)
                     {
                         setBlockWithoutRendering(x, i + 1, z, Block.water);
-                        //blocks[(i * HEIGHT + z) * WIDTH + x] = Block.water;
                     }
                 }
             }
         }
+    }
 
-        this.calcLightDepths(0, 0, WIDTH, HEIGHT);
+    public void generateWorld(int seed)
+    {
+        noise = new PerlinNoise(3, seed);
+        generateXZ(-256, -256, 256, 256);
+
+        new Thread(() -> {
+            while (true)
+            {
+                generateXZ((int) (OpenCraft.getPlayer().getX() - 256), (int) (OpenCraft.getPlayer().getZ() - 256),
+                        (int) (OpenCraft.getPlayer().getX() + 256), (int) (OpenCraft.getPlayer().getZ() + 256));
+
+            }
+        }).start();
     }
 
     public void generateTree(int x, int y, int z)
@@ -170,20 +183,12 @@ public class Level
 
     public void setBlockWithoutRendering(int x, int y, int z, Block block)
     {
-        if (x >= 0 && y >= 0 && z >= 0 && x < WIDTH && y < DEPTH && z < HEIGHT)
-        {
-            saveBlocks[(y * HEIGHT + z) * WIDTH + x] = (byte) block.getIdInt();
-            blocks[(y * HEIGHT + z) * WIDTH + x] = block;
-        }
+        blocks.set((y * HEIGHT + z) * WIDTH + x, block);
     }
 
     public void setBlockWithoutRendering(int i, Block block)
     {
-        if (i >= 0 && i < blocks.length)
-        {
-            saveBlocks[i] = (byte) block.getIdInt();
-            blocks[i] = block;
-        }
+        blocks.set(i, block);
     }
 
     public int getRandomNumber(int min, int max)
@@ -228,32 +233,33 @@ public class Level
         this.levelListeners.remove(levelListener);
     }
 
-    /* Return a block in the world by coordinates */
     public Block getBlock(int x, int y, int z)
     {
-        if (x >= 0 && y >= 0 && z >= 0 && x < WIDTH && y < DEPTH && z < HEIGHT) return blocks[(y * HEIGHT + z) * WIDTH + x];
-        return Block.air;
+        //if (y < WATER_LEVEL) return Block.stone;
+        //return Block.air;
+        if (blocks.contains((y * HEIGHT + z) * WIDTH + x))
+            return blocks.get((y * HEIGHT + z) * WIDTH + x);//blocks[(y * HEIGHT + z) * WIDTH + x];
+        return null;
     }
 
-    /* Remove a block in the world by coordinates */
     public void removeBlock(int x, int y, int z)
     {
         setBlock(x, y, z, Block.air);
     }
 
-    /* Set a block in the world by coordinates */
     public void setBlock(int x, int y, int z, Block block)
     {
-        if (x >= 0 && y >= 0 && z >= 0 && x < WIDTH && y < DEPTH && z < HEIGHT) {
-            saveBlocks[(y * HEIGHT + z) * WIDTH + x] = (byte) block.getIdInt();
-            blocks[(y * HEIGHT + z) * WIDTH + x] = block;
-            this.neighborChanged(x - 1, y, z);
-            this.neighborChanged(x + 1, y, z);
-            this.neighborChanged(x, y - 1, z);
-            this.neighborChanged(x, y + 1, z);
-            this.neighborChanged(x, y, z - 1);
-            this.neighborChanged(x, y, z + 1);
-            this.calcLightDepths(x, z, 1, 1);
+        {//(x >= 0 && y >= 0 && z >= 0 && x < WIDTH && y < DEPTH && z < HEIGHT) {
+            //saveBlocks[(y * HEIGHT + z) * WIDTH + x] = (byte) block.getIdInt();
+            //blocks[(y * HEIGHT + z) * WIDTH + x] = block;
+            blocks.set((y * HEIGHT + z) * WIDTH + x, block);
+            //this.neighborChanged(x - 1, y, z);
+            //this.neighborChanged(x + 1, y, z);
+            //this.neighborChanged(x, y - 1, z);
+            //this.neighborChanged(x, y + 1, z);
+            //this.neighborChanged(x, y, z - 1);
+            //this.neighborChanged(x, y, z + 1);
+            //this.calcLightDepths(x, z, 1, 1);
 
             for(int i = 0; i < this.levelListeners.size(); ++i) {
                 ((LevelRendererListener)this.levelListeners.get(i)).tileChanged(x, y, z);
@@ -262,43 +268,33 @@ public class Level
     }
 
     private void neighborChanged(int x, int y, int z) {
-        if (x >= 0 && y >= 0 && z >= 0 && x < WIDTH && y < DEPTH && z < HEIGHT) {
-            Block block = blocks[(y * HEIGHT + z) * WIDTH + x];
-            block.neighborChanged(this, x, y, z);
-        }
+        //if (x >= 0 && y >= 0 && z >= 0 && x < WIDTH && y < DEPTH && z < HEIGHT) {
+        //    Block block = blocks.get((y * HEIGHT + z) * WIDTH + x);//blocks[(y * HEIGHT + z) * WIDTH + x];
+        //    block.neighborChanged(this, x, y, z);
+        //}
     }
 
-    public ArrayList<AABB> getCubes(AABB aABB) {
-        ArrayList<AABB> aABBs = new ArrayList();
-        int x0 = (int)aABB.x0;
-        int x1 = (int)(aABB.x1 + 1.0F);
-        int y0 = (int)aABB.y0;
-        int y1 = (int)(aABB.y1 + 1.0F);
-        int z0 = (int)aABB.z0;
-        int z1 = (int)(aABB.z1 + 1.0F);
-        if (x0 < 0) {
-            x0 = 0;
-        }
-
-        if (y0 < 0) {
-            y0 = 0;
-        }
-
-        if (z0 < 0) {
-            z0 = 0;
-        }
+    public ArrayList<AABB> getCubes(AABB box) {
+        ArrayList<AABB> boxes = new ArrayList<>();
+        int x0 = (int)Math.floor((double)box.x0);
+        int x1 = (int)Math.floor((double)(box.x1 + 1.0F));
+        int y0 = (int)Math.floor((double)box.y0);
+        int y1 = (int)Math.floor((double)(box.y1 + 1.0F));
+        int z0 = (int)Math.floor((double)box.z0);
+        int z1 = (int)Math.floor((double)(box.z1 + 1.0F));
 
         for(int x = x0; x < x1; ++x) {
             for(int y = y0; y < y1; ++y) {
                 for(int z = z0; z < z1; ++z) {
+                    if (getBlock(x, y, z) == null) continue;
                     if (getBlock(x, y, z).isSolid() && !getBlock(x, y, z).isLiquid()) {
-                        aABBs.add(new AABB((float)x, (float)y, (float)z, (float)(x + 1), (float)(y + 1), (float)(z + 1)));
+                        boxes.add(new AABB((float)x, (float)y, (float)z, (float)(x + 1), (float)(y + 1), (float)(z + 1)));
                     }
                 }
             }
         }
 
-        return aABBs;
+        return boxes;
     }
 
     public boolean isLightBlocker(int x, int y, int z) {
@@ -371,6 +367,7 @@ public class Level
         for(int x = x0; x < x1; ++x) {
             for(int y = y0; y < y1; ++y) {
                 for(int z = z0; z < z1; ++z) {
+                    if (getBlock(x, y, z) == null) continue;
                     if (getBlock(x, y, z).isLiquid()) {
                         return true;
                     }
@@ -381,14 +378,14 @@ public class Level
         return false;
     }
 
-    public byte[] getByteBlocks() {
-        return saveBlocks;
-    }
+    //public byte[] getByteBlocks() {
+    //    return saveBlocks;
+    //}
 
     public void destroy()
     {
-        saveBlocks = new byte[WIDTH * HEIGHT * DEPTH];
-        blocks = new Block[WIDTH * HEIGHT * DEPTH];
+        //saveBlocks = new byte[WIDTH * HEIGHT * DEPTH];
+        blocks = new LevelArrayList();
         lightDepths = new int[WIDTH * HEIGHT];
     }
 }

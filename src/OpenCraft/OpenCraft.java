@@ -38,7 +38,7 @@ public class OpenCraft
 {
 
     // Game version
-    private static final String version = "0.2.31g";
+    private static final String version = "0.3.5i";
 
     // Window
     private static int width = 868;
@@ -64,6 +64,7 @@ public class OpenCraft
     private static int renderDistance = 8; // Render distance
     private static int blockCastList = -1;
     private static boolean inMenu = true;
+    private static long chunksUpdateTime = -1;
     private static boolean renderWhenInMenu = false;
     private static int chunksUpdate = 0;
     private static int FOV = 90; // Camera FOV
@@ -203,11 +204,6 @@ public class OpenCraft
 
     public static void quitToMainMenu()
     {
-        //guiInterface = new HashMap<>();
-        //ticks = new HashMap<>();
-        //guiTicks = new HashMap<>();
-        //initScreens();
-
         closeCurrentScreen();
         setCurrentScreen(mainMenu);
         mainMenu.setLoadingScreen("Quitting the world...");
@@ -235,11 +231,9 @@ public class OpenCraft
 
         player = new Player(128, 70, 128);
         level = new Level();
-        levelSaver = new LevelSaver(worldList.levelName, 3232343, load);
+        levelSaver = new LevelSaver(worldList.levelName, 525874385, load);
         levelRenderer = new LevelRenderer();
         particleEngine = new ParticleEngine();
-
-        //level.addEntity(new Zombie(70, 80, 70));
     }
 
     private void render()
@@ -257,14 +251,12 @@ public class OpenCraft
         this.setPerspective();
         Frustum frustum = Frustum.getFrustum();
         levelRenderer.cull(frustum);
-        levelRenderer.updateDirtyChunks(player);
-        //fog();
-        //GL11.glEnable(2912);
+        if (Chunk.CHUNK_UPDATES < 100) levelRenderer.updateDirtyChunks(player);
+        fog();
         levelRenderer.render(player, 0);
 
         for (int i = 0; i < entities.size(); i++)
         {
-            //player.render();
             Entity entity = entities.get(i);
             if (frustum.isVisible(entity.aabb))
             {
@@ -275,12 +267,11 @@ public class OpenCraft
         glEnable(GL_BLEND);
         particleEngine.render(player, timer.a, 0);
         glDisable(GL_BLEND);
-        //fog();
+        fog();
         levelRenderer.render(player, 1);
 
         for (int i = 0; i < entities.size(); i++)
         {
-            //player.render();
             Entity entity = entities.get(i);
             if (frustum.isVisible(entity.aabb))
             {
@@ -288,7 +279,7 @@ public class OpenCraft
             }
         }
 
-        //fog();
+        fog();
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glEnable(GL_BLEND);
         particleEngine.render(player, timer.a, 1);
@@ -296,6 +287,16 @@ public class OpenCraft
         levelRenderer.render(player, 2);
         GL11.glColorMask(true, true, true, true);
         levelRenderer.render(player, 2);
+
+        if (chunksUpdateTime + 1500 < System.currentTimeMillis())
+        {
+            chunksUpdateTime = System.currentTimeMillis();
+            new Thread(() -> {
+                levelRenderer.updateChunks();
+                Thread.currentThread().interrupt();
+            }).start();
+        }
+        levelRenderer.checkCopyState();
 
         pick();
         GL11.glPopMatrix();
@@ -397,19 +398,21 @@ public class OpenCraft
     private void fog()
     {
         FloatBuffer b = BufferUtils.createFloatBuffer(4);
-        b.put(0.5f).put(0.7f).put(1).put(1).flip();
 
-        if (player.inWater())
-        {
-            glFog(GL_FOG_COLOR, b);
-            glFogf(GL_FOG_START, 10);
-            glFogf(GL_FOG_END, 35);
-        }
-        else {
-            glFog(GL_FOG_COLOR, b);
-            glFogf(GL_FOG_START, 10);
-            glFogf(GL_FOG_END, 80);
-        }
+        //if (player.headInWater())
+        //{
+        //    b.put(0.16f).put(0.35f).put(0.92f).put(1).flip();
+        //    GL11.glEnable(2912);
+        //    glFog(GL_FOG_COLOR, b);
+        //    glFogf(GL_FOG_START, 10);
+        //    glFogf(GL_FOG_END, 35);
+        //}
+        //else {
+        //    b.put(0.5f).put(0.7f).put(1).put(1).flip();
+        //    glFog(GL_FOG_COLOR, b);
+        //    glFogf(GL_FOG_START, 10);
+        //    glFogf(GL_FOG_END, 80);
+        //}
     }
 
     private void pick()

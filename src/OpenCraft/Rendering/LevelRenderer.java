@@ -1,28 +1,24 @@
 package OpenCraft.Rendering;
 
+import OpenCraft.World.*;
 import OpenCraft.World.Entity.Player;
 import OpenCraft.Interfaces.LevelRendererListener;
 import OpenCraft.OpenCraft;
-import OpenCraft.World.Chunk;
-import OpenCraft.World.DirtyChunkSorter;
-import OpenCraft.World.DistanceSorter;
-import OpenCraft.World.Level;
 import org.lwjgl.opengl.GL11;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.lang.reflect.Array;
+import java.util.*;
 
 public class LevelRenderer implements LevelRendererListener
 {
 
-    public final static int C_WIDTH =( Level.WIDTH + 16 - 1) / 16;
-    public final static int C_HEIGHT = (Level.HEIGHT + 16 - 1) / 16;
+    public final static int C_WIDTH = OpenCraft.getRenderDistance();//(Level.WIDTH + 16 - 1) / 16;
+    public final static int C_HEIGHT = OpenCraft.getRenderDistance();//(Level.HEIGHT + 16 - 1) / 16;
     public final static int C_DEPTH = (Level.DEPTH + 16 - 1) / 16;
 
-    private Chunk[] chunks;
-    private Chunk[] sortedChunks;
+    private ChunkArrayList chunks;
+    private ChunkArrayList newChunks;
+    private boolean readyToCopy = false;
     private float lX;
     private float lY;
     private float lZ;
@@ -33,52 +29,27 @@ public class LevelRenderer implements LevelRendererListener
         this.lZ = -900000.0F;
 
         OpenCraft.getLevel().addListener(this);
-        chunks = new Chunk[C_WIDTH * C_DEPTH * C_HEIGHT];
-        sortedChunks = new Chunk[C_WIDTH * C_DEPTH * C_HEIGHT];
-
-        for(int x = 0; x < C_WIDTH; ++x) {
-            for(int y = 0; y < C_DEPTH; ++y) {
-                for(int z = 0; z < C_HEIGHT; ++z) {
-                    int x0 = x * 16;
-                    int y0 = y * 16;
-                    int z0 = z * 16;
-                    int x1 = (x + 1) * 16;
-                    int y1 = (y + 1) * 16;
-                    int z1 = (z + 1) * 16;
-                    if (x1 > Level.WIDTH) {
-                        x1 = Level.WIDTH;
-                    }
-
-                    if (y1 > Level.DEPTH) {
-                        y1 = Level.DEPTH;
-                    }
-
-                    if (z1 > Level.HEIGHT) {
-                        z1 = Level.HEIGHT;
-                    }
-
-                    this.chunks[(x + y * C_WIDTH) * C_HEIGHT + z] = new Chunk(OpenCraft.getLevel(), x0, y0, z0, x1, y1, z1);
-                    this.sortedChunks[(x + y * C_WIDTH) * C_HEIGHT + z] = this.chunks[(x + y * C_WIDTH) * C_HEIGHT + z];
-                }
-            }
-        }
-
+        chunks = new ChunkArrayList();
     }
 
     public void destroy()
     {
-        for(int i = 0; i < this.chunks.length; ++i) {
-            this.chunks[i].reset();
-            this.chunks[i] = null;
+        for(Map.Entry<String, Chunk> m: chunks.entry()) {
+            Chunk chunk = m.getValue();
+            if (chunk == null) continue;
+            chunk.reset();
         }
     }
 
     public List<Chunk> getAllDirtyChunks() {
         ArrayList<Chunk> dirty = null;
 
-        for(int i = 0; i < this.chunks.length; ++i) {
-            Chunk chunk = this.chunks[i];
-            if (chunk.isDirty()) {
+        for(Map.Entry<String, Chunk> m: chunks.entry()) {
+            Chunk chunk = m.getValue();
+            if (chunk == null) continue;
+
+            if (chunk.isDirty() || (chunk.haveToRerender && OpenCraft.getLevel().getBlock(chunk.getX() * 16, chunk.getY() * 16, chunk.getZ() * 16) != null)) {
+                chunk.haveToRerender = false;
                 if (dirty == null) {
                     dirty = new ArrayList();
                 }
@@ -90,33 +61,66 @@ public class LevelRenderer implements LevelRendererListener
         return dirty;
     }
 
+    public void checkCopyState() {
+        if (readyToCopy)
+        {
+            readyToCopy = false;
+            chunks = newChunks.copy();
+        }
+    }
+
+    public void updateChunks()
+    {
+        int start_x = (int) (((OpenCraft.getPlayer().getX()) / 16) - C_WIDTH / 2f);
+        int start_z = (int) (((OpenCraft.getPlayer().getZ()) / 16) - C_HEIGHT / 2f);
+        int end_x =  (int)  (((OpenCraft.getPlayer().getX()) / 16) + C_WIDTH / 2f);
+        int end_z =  (int)  (((OpenCraft.getPlayer().getZ()) / 16) + C_HEIGHT / 2f);
+
+        newChunks = chunks.copy();
+        for(int x = start_x; x < end_x; ++x) {
+            for(int y = 0; y < C_DEPTH; ++y) {
+                for(int z = start_z; z < end_z; ++z) {
+                    if (newChunks.contains(x, y, z)) continue;
+
+                    int x0 = x * 16;
+                    int y0 = y * 16;
+                    int z0 = z * 16;
+                    int x1 = (x + 1) * 16;
+                    int y1 = (y + 1) * 16;
+                    int z1 = (z + 1) * 16;
+
+                    newChunks.set(x, y, z, new Chunk(OpenCraft.getLevel(), x0, y0, z0, x1, y1, z1));
+                }
+            }
+        }
+
+        readyToCopy = true;
+    }
+
     public void render(Player player, int layer) {
-        //GL11.glEnable(GL11.GL_ALPHA_TEST);
         GL11.glEnable(GL11.GL_TEXTURE_2D);
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, TextureEngine.getTerrain());
 
-        float xd = player.getX() - this.lX;
-        float yd = player.getY() - this.lY;
-        float zd = player.getZ() - this.lZ;
-        if (xd * xd + yd * yd + zd * zd > 64.0F) {
-            this.lX = player.getX();
-            this.lY = player.getY();
-            this.lZ = player.getZ();
-            Arrays.sort(this.sortedChunks, new DistanceSorter(player));
-        }
+        Frustum frustum = Frustum.getFrustum();
 
-        for(int i = 0; i < this.sortedChunks.length; ++i) {
-            if (this.sortedChunks[i].visible) {
+        for(Map.Entry<String, Chunk> m: chunks.entry()) {
+            Chunk chunk = m.getValue();
+            if (chunk == null) continue;
+            if (chunk.visible) {
                 float dd = (float)(OpenCraft.getRenderDistance() * 16);
-                if (this.sortedChunks[i].distanceToSqr(player) < dd * dd) {
-                    this.sortedChunks[i].render(layer);
+                if (chunk.distanceToSqr(player) < dd * dd) {
+                    chunk.render(layer);
+                }
+                else {
+                    chunks.remove(chunk.getX(), chunk.getY(), chunk.getZ());
+                    chunk.reset();
+                    chunk = null;
                 }
             }
 
         }
 
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
-        //GL11.glDisable(GL11.GL_ALPHA_TEST);
     }
 
     public void updateDirtyChunks(Player player) {
@@ -125,8 +129,7 @@ public class LevelRenderer implements LevelRendererListener
             Collections.sort(dirty, new DirtyChunkSorter(player));
 
             for(int i = 0; i < 4 && i < dirty.size(); ++i) {
-                if (Frustum.getFrustum().isVisible(((Chunk)dirty.get(i)).aabb))
-                    ((Chunk)dirty.get(i)).prepare();
+                ((Chunk)dirty.get(i)).prepare();
             }
 
         }
@@ -166,7 +169,8 @@ public class LevelRenderer implements LevelRendererListener
         for(int x = x0; x <= x1; ++x) {
             for(int y = y0; y <= y1; ++y) {
                 for(int z = z0; z <= z1; ++z) {
-                    this.chunks[(x + y * C_WIDTH) * C_WIDTH + z].setDirty();
+                    this.chunks.get(x, y, z).setDirty();
+                    //this.chunks[(x + y * C_WIDTH) * C_WIDTH + z].setDirty();
                 }
             }
         }
@@ -186,13 +190,11 @@ public class LevelRenderer implements LevelRendererListener
     }
 
     public void cull(Frustum frustum) {
-        for(int i = 0; i < this.chunks.length; ++i) {
-            this.chunks[i].visible = frustum.isVisible(this.chunks[i].aabb);
+        for(Map.Entry<String, Chunk> m: chunks.entry()) {
+            Chunk chunk = m.getValue();
+            if (chunk == null) continue;
+            chunk.visible = frustum.isVisible(chunk.aabb);
         }
-
     }
 
-    public Chunk[] getChunks() {
-        return sortedChunks;
-    }
 }

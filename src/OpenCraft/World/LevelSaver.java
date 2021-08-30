@@ -53,41 +53,40 @@ public class LevelSaver implements ITick
                 dis.close();
             } catch (IOException e) {}
         }
-        else {
-            new File("saves").mkdir();
-            new File("saves" + File.separator + name).mkdir();
-            try {
-                DataOutputStream dos = new DataOutputStream(new GZIPOutputStream(new FileOutputStream("saves" + File.separator + name + File.separator + "level.data")));
-                dos.writeInt(78924536);
-                dos.writeUTF(name);
-                dos.writeUTF("author");
-                dos.writeUTF("creation_date");
-                dos.writeUTF(OpenCraft.getVersion());
-                dos.writeInt(seed);
-                dos.close();
-            } catch (IOException e) { }
+        //else {
+        //    new File("saves").mkdir();
+        //    new File("saves" + File.separator + name).mkdir();
+        //    try {
+        //        DataOutputStream dos = new DataOutputStream(new GZIPOutputStream(new FileOutputStream("saves" + File.separator + name + File.separator + "level.data")));
+        //        dos.writeInt(78924536);
+        //        dos.writeUTF(name);
+        //        dos.writeUTF("author");
+        //        dos.writeUTF("creation_date");
+        //        dos.writeUTF(OpenCraft.getVersion());
+        //        dos.writeInt(seed);
+        //        dos.close();
+        //    } catch (IOException e) { }
+        //}
 
-        }
-
-        if (!load)
-        {
+        //if (!load)
+        //{
             OpenCraft.getLevel().generateWorld(seed);
-        }
+        //}
 
         OpenCraft.registerTickEvent(this);
     }
 
     public void save()
     {
-        DataOutputStream dos;
-        try {
-            dos = new DataOutputStream(new GZIPOutputStream(new FileOutputStream("saves" + File.separator + name + File.separator + "blocks.data")));
-            dos.writeInt(78924536);
-            dos.writeInt(OpenCraft.getLevel().getByteBlocks().length);
-            dos.write(OpenCraft.getLevel().getByteBlocks());
-            dos.close();
-            OpenCraft.setWorldSavingState(true);
-        } catch (IOException e) { }
+        //DataOutputStream dos;
+        //try {
+        //    dos = new DataOutputStream(new GZIPOutputStream(new FileOutputStream("saves" + File.separator + name + File.separator + "blocks.data")));
+        //    dos.writeInt(78924536);
+        //    dos.writeInt(OpenCraft.getLevel().getByteBlocks().length);
+        //    dos.write(OpenCraft.getLevel().getByteBlocks());
+        //    dos.close();
+        //    OpenCraft.setWorldSavingState(true);
+        //} catch (IOException e) { }
     }
 
     public String getName() {
