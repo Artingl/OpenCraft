@@ -7,13 +7,20 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module-library" exported="">
+    <orderEntry type="module-library">
       <library>
         <CLASSES>
           <root url="file://$MODULE_DIR$/libs" />
         </CLASSES>
         <JAVADOC />
         <NATIVE>
+          <root url="file://$MODULE_DIR$/natives" />
+          <root url="file://$MODULE_DIR$/natives" />
+          <root url="file://$MODULE_DIR$/natives" />
+          <root url="file://$MODULE_DIR$/natives" />
+          <root url="file://$MODULE_DIR$/natives" />
+          <root url="file://$MODULE_DIR$/natives" />
+          <root url="file://$MODULE_DIR$/natives" />
           <root url="file://$MODULE_DIR$/natives" />
         </NATIVE>
         <SOURCES />

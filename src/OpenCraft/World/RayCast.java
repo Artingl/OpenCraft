@@ -30,7 +30,7 @@ public class RayCast
 
             if (block != null)
             {
-                if (block.isSolid() && !block.isLiquid())
+                if (block.isVisible() && !block.isLiquid())
                 {
                     return new float[][]{
                             {1},

@@ -59,9 +59,9 @@ public class Block
         return new AABB((float)x, (float)y, (float)z, (float)(x + 1), (float)(y + 1), (float)(z + 1));
     }
 
-    public boolean isSolid()
+    public boolean isVisible()
     {
-        return !getId().equals("air");
+        return getIdInt() != 0;
     }
 
     public boolean isLiquid()
@@ -110,7 +110,7 @@ public class Block
                 layerOk = OpenCraft.getLevel().isLit((int)x, (int)y, (int)z) ^ layer == 1;
             }
 
-            return !OpenCraft.getLevel().getBlock((int)x, (int)y, (int)z).isSolid() && layerOk;
+            return !OpenCraft.getLevel().getBlock((int)x, (int)y, (int)z).isVisible() && layerOk;
         }
     }
 

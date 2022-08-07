@@ -1,27 +1,29 @@
 package OpenCraft.Rendering;
 
-import OpenCraft.World.Entity.Player;
+import OpenCraft.World.Entity.PlayerController;
 import OpenCraft.World.Particle;
 import OpenCraft.Interfaces.ITick;
 import OpenCraft.OpenCraft;
-import OpenCraft.World.Level;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class ParticleEngine implements ITick {
-   protected Level level;
    private List<Particle> particles = new ArrayList();
 
    public ParticleEngine() {
-      this.level = OpenCraft.getLevel();
       OpenCraft.registerTickEvent(this);
    }
 
    public void add(Particle p) {
       this.particles.add(p);
 
+   }
+
+   public void destroy() {
+      this.particles.clear();
+      this.particles = null;
    }
 
    @Override
@@ -36,7 +38,7 @@ public class ParticleEngine implements ITick {
 
    }
 
-   public void render(Player player, float a, int layer) {
+   public void render(PlayerController player, float a, int layer) {
       if (this.particles.size() != 0) {
          GL11.glEnable(3553);
          GL11.glBindTexture(3553, TextureEngine.getTerrain());

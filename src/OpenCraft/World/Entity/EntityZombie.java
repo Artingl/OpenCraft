@@ -8,7 +8,7 @@ import javax.imageio.ImageIO;
 import java.io.File;
 import java.io.IOException;
 
-public class Zombie extends Entity
+public class EntityZombie extends Entity
 {
 
     public static int TEXTURE;
@@ -25,7 +25,7 @@ public class Zombie extends Entity
         } catch (IOException e) { }
     }
 
-    public Zombie(float x, float y, float z)
+    public EntityZombie(float x, float y, float z)
     {
         super(x, y, z);
         setModel(model);
@@ -46,7 +46,7 @@ public class Zombie extends Entity
         float xa = (float)Math.sin((double)this.rot);
         float ya = (float)Math.cos((double)this.rot);
 
-        if(OpenCraft.getLevel().getBlock(Math.round(this.x + xa), (int)(y - 1), (int)(this.z + ya)).isSolid() && !OpenCraft.getLevel().getBlock(Math.round(this.x + xa), (int)(y), Math.round(this.z + ya)).isSolid() && this.onGround)
+        if(OpenCraft.getLevel().getBlock(Math.round(this.x + xa), (int)(y - 1), (int)(this.z + ya)).isVisible() && !OpenCraft.getLevel().getBlock(Math.round(this.x + xa), (int)(y), Math.round(this.z + ya)).isVisible() && this.onGround)
         {
             this.yd = 0.43F;
         }

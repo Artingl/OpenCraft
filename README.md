@@ -2,7 +2,7 @@
 
 ![](images/logo.png) </br>
 
-OpenCraft is open source Minecraft client witch is written on Java.
+OpenCraft is an open source Minecraft client witch is written on Java.
 
 # Why?
 
@@ -21,6 +21,7 @@ If you found some bug, create an issue. Describe the bug (it will be good if you
 - [ ] Singleplayer
 - [ ] Mobs
 - [ ] Gamemodes
+- [ ] Dimensions
 - [ ] Infinity world generation
 - [ ] Mods Engine
 - [ ] Simple Mods API

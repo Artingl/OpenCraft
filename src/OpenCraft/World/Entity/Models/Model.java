@@ -12,4 +12,7 @@ public class Model
 
     public void render(float time) { }
 
+    public void destroy() {
+
+    }
 }

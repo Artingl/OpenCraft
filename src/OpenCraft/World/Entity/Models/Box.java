@@ -1,7 +1,7 @@
 package OpenCraft.World.Entity.Models;
 
 import OpenCraft.Rendering.Polygon;
-import OpenCraft.Rendering.Vertex;
+import OpenCraft.math.Vertex;
 import org.lwjgl.opengl.GL11;
 
 public class Box {

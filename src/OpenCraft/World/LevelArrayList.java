@@ -8,26 +8,29 @@ import java.util.HashMap;
 public class LevelArrayList
 {
 
-    private HashMap<Integer, Block> list;
+    private HashMap<Long, Block> list;
 
     public LevelArrayList()
     {
         list = new HashMap<>();
     }
 
-    public Block get(int i)
+    public Block get(long i)
     {
         return list.get(i);
     }
 
-    public boolean contains(int i)
+    public boolean contains(long i)
     {
         return list.containsKey(i);
     }
 
-    public void set(int i, Block block)
+    public void set(long i, Block block)
     {
         list.put(i, block);
     }
 
+    public void clear() {
+        list.clear();
+    }
 }

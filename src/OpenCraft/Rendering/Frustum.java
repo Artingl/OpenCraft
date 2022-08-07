@@ -1,6 +1,7 @@
 package OpenCraft.Rendering;
 
 import OpenCraft.phys.AABB;
+import OpenCraft.phys.SimpleAABB;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 
@@ -169,6 +170,10 @@ public class Frustum {
     }
 
     public boolean isVisible(AABB aabb) {
+        return this.cubeInFrustum(aabb.x0, aabb.y0, aabb.z0, aabb.x1, aabb.y1, aabb.z1);
+    }
+
+    public boolean isVisible(SimpleAABB aabb) {
         return this.cubeInFrustum(aabb.x0, aabb.y0, aabb.z0, aabb.x1, aabb.y1, aabb.z1);
     }
 }

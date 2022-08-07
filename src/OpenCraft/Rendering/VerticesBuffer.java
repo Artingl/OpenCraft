@@ -65,7 +65,7 @@ public class VerticesBuffer
         this.clear();
     }
 
-    private void clear() {
+    public void clear() {
         this.vertices = 0;
         this.buffer.clear();
         this.p = 0;

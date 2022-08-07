@@ -289,4 +289,7 @@ public class Entity implements ITick
         return this.level.isLit(xTile, yTile, zTile);
     }
 
+    public void destroy() {
+
+    }
 }

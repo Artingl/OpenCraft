@@ -1,5 +1,6 @@
 package OpenCraft.Rendering;
 
+import OpenCraft.math.Vertex;
 import org.lwjgl.opengl.GL11;
 
 public class Polygon {

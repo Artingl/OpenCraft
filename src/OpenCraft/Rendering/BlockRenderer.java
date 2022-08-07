@@ -1,9 +1,8 @@
 package OpenCraft.Rendering;
 
-import OpenCraft.World.Entity.Player;
+import OpenCraft.World.Entity.PlayerController;
 import OpenCraft.OpenCraft;
 import OpenCraft.World.Block.Block;
-import OpenCraft.World.Chunk;
 import org.lwjgl.opengl.GL11;
 
 import static org.lwjgl.opengl.GL11.*;
@@ -41,70 +40,64 @@ public class BlockRenderer
 
     public static void render(VerticesBuffer t, float x, float y, float z, Block block)
     {
-        renderTopSide(t, x, y, z, block);
-        renderBottomSide(t, x, y, z, block);
-        renderBackSide(t, x, y, z, block);
-        renderRightSide(t, x, y, z, block);
-        renderFrontSide(t, x, y, z, block);
-        renderLeftSide(t, x, y, z, block);
-    }
-
-    public static void render(int layer, float x, float y, float z, Block block)
-    {
-        render(Chunk.verticesBuffer, layer, x, y, z, block);
-    }
-
-    public static void render(VerticesBuffer t, int layer, float x, float y, float z, Block block)
-    {
-        if (haveToRenderSide(layer, 0, x, y, z, block))
+        if (haveToRenderSide(0, x, y, z, block))
         {
             renderTopSide(t, x, y, z, block);
         }
-        if (haveToRenderSide(layer, 1, x, y, z, block))
+        if (haveToRenderSide(1, x, y, z, block))
         {
             renderBottomSide(t, x, y, z, block);
         }
-        if (haveToRenderSide(layer, 2, x, y, z, block))
+        if (haveToRenderSide(2, x, y, z, block))
         {
             renderBackSide(t, x, y, z, block);
         }
-        if (haveToRenderSide(layer, 3, x, y, z, block))
+        if (haveToRenderSide(3, x, y, z, block))
         {
             renderRightSide(t, x, y, z, block);
         }
-        if (haveToRenderSide(layer, 4, x, y, z, block))
+        if (haveToRenderSide(4, x, y, z, block))
         {
             renderFrontSide(t, x, y, z, block);
         }
-        if (haveToRenderSide(layer, 5, x, y, z, block))
+        if (haveToRenderSide(5, x, y, z, block))
         {
             renderLeftSide(t, x, y, z, block);
         }
     }
 
-    public static boolean haveToRenderSide(int layer, int side, float x, float y, float z, Block block)
+    public static boolean haveToRenderSide(int side, float x, float y, float z, Block block)
     {
-        //if (layer != 2 && block.hasTranslucent()) return false;
-        //if (layer == 2 && !block.hasTranslucent()) return false;
+        Block block0 = null;
+
+        if (side == 0) block0 = OpenCraft.getLevel().getBlock((int)x, (int)y + 1, (int)z);
+        if (side == 1) block0 = OpenCraft.getLevel().getBlock((int)x, (int)y - 1, (int)z);
+        if (side == 2) block0 = OpenCraft.getLevel().getBlock((int)x, (int)y, (int)z - 1);
+        if (side == 3) block0 = OpenCraft.getLevel().getBlock((int)x + 1, (int)y, (int)z);
+        if (side == 4) block0 = OpenCraft.getLevel().getBlock((int)x, (int)y, (int)z + 1);
+        if (side == 5) block0 = OpenCraft.getLevel().getBlock((int)x - 1, (int)y, (int)z);
+
+        // todo: remove this
+        if (block0.getIdInt() == Block.glass.getIdInt()) return false;
 
         if (block.isLiquid())
         {
-            if (side == 0) return !OpenCraft.getLevel().getBlock((int)x, (int)y + 1, (int)z).isSolid();
-            if (side == 1) return !OpenCraft.getLevel().getBlock((int)x, (int)y - 1, (int)z).isSolid();
-            if (side == 2) return !OpenCraft.getLevel().getBlock((int)x, (int)y, (int)z - 1).isSolid();
-            if (side == 3) return !OpenCraft.getLevel().getBlock((int)x + 1, (int)y, (int)z).isSolid();
-            if (side == 4) return !OpenCraft.getLevel().getBlock((int)x, (int)y, (int)z + 1).isSolid();
-            if (side == 5) return !OpenCraft.getLevel().getBlock((int)x - 1, (int)y, (int)z).isSolid();
+            if (side == 0) return !block0.isVisible();
+            if (side == 1) return !block0.isVisible();
+            if (side == 2) return !block0.isVisible();
+            if (side == 3) return !block0.isVisible();
+            if (side == 4) return !block0.isVisible();
+            if (side == 5) return !block0.isVisible();
         }
-//
-        if (side == 0) return !OpenCraft.getLevel().getBlock((int)x, (int)y + 1, (int)z).isSolid() || (OpenCraft.getLevel().getBlock((int)x, (int)y + 1, (int)z).hasTranslucent()/* && !block.hasTranslucent()*/) || OpenCraft.getLevel().getBlock((int)x, (int)y + 1, (int)z).isLiquid();
-        if (side == 1) return !OpenCraft.getLevel().getBlock((int)x, (int)y - 1, (int)z).isSolid() || (OpenCraft.getLevel().getBlock((int)x, (int)y - 1, (int)z).hasTranslucent()/* && !block.hasTranslucent()*/) || OpenCraft.getLevel().getBlock((int)x, (int)y - 1, (int)z).isLiquid();
-        if (side == 2) return !OpenCraft.getLevel().getBlock((int)x, (int)y, (int)z - 1).isSolid() || (OpenCraft.getLevel().getBlock((int)x, (int)y, (int)z - 1).hasTranslucent()/* && !block.hasTranslucent()*/) || OpenCraft.getLevel().getBlock((int)x, (int)y, (int)z - 1).isLiquid();
-        if (side == 3) return !OpenCraft.getLevel().getBlock((int)x + 1, (int)y, (int)z).isSolid() || (OpenCraft.getLevel().getBlock((int)x + 1, (int)y, (int)z).hasTranslucent()/* && !block.hasTranslucent()*/) || OpenCraft.getLevel().getBlock((int)x + 1, (int)y, (int)z).isLiquid();
-        if (side == 4) return !OpenCraft.getLevel().getBlock((int)x, (int)y, (int)z + 1).isSolid() || (OpenCraft.getLevel().getBlock((int)x, (int)y, (int)z + 1).hasTranslucent()/* && !block.hasTranslucent()*/) || OpenCraft.getLevel().getBlock((int)x, (int)y, (int)z + 1).isLiquid();
-        if (side == 5) return !OpenCraft.getLevel().getBlock((int)x - 1, (int)y, (int)z).isSolid() || (OpenCraft.getLevel().getBlock((int)x - 1, (int)y, (int)z).hasTranslucent()/* && !block.hasTranslucent()*/) || OpenCraft.getLevel().getBlock((int)x - 1, (int)y, (int)z).isLiquid();
-//
-        return false;//OpenCraft.getLevel().isLit((int)x, (int)y, (int)z) ^ layer == 1;
+
+        if (side == 0) return !block0.isVisible() || block0.hasTranslucent() || block0.isLiquid();
+        if (side == 1) return !block0.isVisible() || block0.hasTranslucent() || block0.isLiquid();
+        if (side == 2) return !block0.isVisible() || block0.hasTranslucent() || block0.isLiquid();
+        if (side == 3) return !block0.isVisible() || block0.hasTranslucent() || block0.isLiquid();
+        if (side == 4) return !block0.isVisible() || block0.hasTranslucent() || block0.isLiquid();
+        if (side == 5) return !block0.isVisible() || block0.hasTranslucent() || block0.isLiquid();
+
+        return false;
     }
 
     public static void renderTopSide(VerticesBuffer t, float x, float y, float z, Block block)
@@ -227,7 +220,7 @@ public class BlockRenderer
         t.setVertexCoord(x, 1.f +y - down, 1.f +z);
     }
 
-    public static void renderFaceNoTexture(Player player, VerticesBuffer t, int x, int y, int z, int face) {
+    public static void renderFaceNoTexture(PlayerController player, VerticesBuffer t, int x, int y, int z, int face) {
         float x0 = (float)x + -0.001F;
         float x1 = (float)x +  1.001F;
         float y0 = (float)y + -0.001F;
