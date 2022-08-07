@@ -3,7 +3,7 @@ package OpenCraft.World.Entity;
 import OpenCraft.Controls;
 import OpenCraft.Rendering.TextureEngine;
 import OpenCraft.World.Entity.Models.PlayerModel;
-import OpenCraft.World.Level;
+import OpenCraft.World.Level.Level;
 import OpenCraft.World.RayCast;
 import OpenCraft.gui.windows.PlayerInventory;
 import OpenCraft.OpenCraft;

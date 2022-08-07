@@ -4,7 +4,7 @@ import OpenCraft.Rendering.Texture;
 import OpenCraft.World.Particle;
 import OpenCraft.phys.AABB;
 import OpenCraft.OpenCraft;
-import OpenCraft.World.Level;
+import OpenCraft.World.Level.Level;
 
 public class Block
 {

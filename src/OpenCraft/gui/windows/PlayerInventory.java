@@ -3,7 +3,6 @@ package OpenCraft.gui.windows;
 import OpenCraft.Rendering.BlockRenderer;
 import OpenCraft.Rendering.TextureEngine;
 import OpenCraft.Rendering.VerticesBuffer;
-import OpenCraft.gui.Screen;
 import OpenCraft.gui.Window;
 import OpenCraft.OpenCraft;
 import org.lwjgl.opengl.GL11;
@@ -57,8 +56,8 @@ public class PlayerInventory extends Window
 
         for (int i = 0; i < 9; i++)
         {
-            if (OpenCraft.getPlayer().getInventoryBlock(i) == null) continue;
-            BlockRenderer.renderBlockIcon(t, 9, 9, screenWidth / 2f - width / 2f + ((sel_width - 2) * i) + 11, screenHeight - 12, OpenCraft.getPlayer().getInventoryBlock(i));
+            if (OpenCraft.getPlayerController().getInventoryBlock(i) == null) continue;
+            BlockRenderer.renderBlockIcon(t, 9, 9, screenWidth / 2f - width / 2f + ((sel_width - 2) * i) + 11, screenHeight - 12, OpenCraft.getPlayerController().getInventoryBlock(i));
         }
 
         super.render(screenWidth, screenHeight, scale);

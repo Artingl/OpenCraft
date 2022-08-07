@@ -1,4 +1,4 @@
-package OpenCraft.World.generation;
+package OpenCraft.World.Generation.noise;
 
 public class Distort extends Synth {
    private Synth source;

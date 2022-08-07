@@ -1,4 +1,4 @@
-package OpenCraft.World;
+package OpenCraft.World.Level;
 
 import OpenCraft.World.Block.Block;
 

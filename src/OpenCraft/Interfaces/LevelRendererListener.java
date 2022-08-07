@@ -1,7 +1,7 @@
 package OpenCraft.Interfaces;
 
-import OpenCraft.World.Chunk;
-import OpenCraft.World.Level;
+import OpenCraft.World.Chunk.Chunk;
+import OpenCraft.World.Level.Level;
 
 public interface LevelRendererListener {
 

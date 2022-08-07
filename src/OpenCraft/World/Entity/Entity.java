@@ -4,7 +4,7 @@ import OpenCraft.World.Entity.Models.Model;
 import OpenCraft.phys.AABB;
 import OpenCraft.Interfaces.ITick;
 import OpenCraft.OpenCraft;
-import OpenCraft.World.Level;
+import OpenCraft.World.Level.Level;
 
 import java.util.List;
 

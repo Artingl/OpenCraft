@@ -4,7 +4,7 @@ import OpenCraft.World.Entity.Entity;
 import OpenCraft.Rendering.Texture;
 import OpenCraft.Rendering.TextureEngine;
 import OpenCraft.Rendering.VerticesBuffer;
-import OpenCraft.World.Level;
+import OpenCraft.World.Level.Level;
 
 public class Particle extends Entity {
     private float xd;

@@ -1,4 +1,4 @@
-package OpenCraft.World.generation;
+package OpenCraft.World.Generation.noise;
 
 public class Emboss extends Synth {
    private Synth synth;

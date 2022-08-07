@@ -1,4 +1,4 @@
-package OpenCraft.World.generation;
+package OpenCraft.World.Generation.noise;
 
 import java.util.Random;
 

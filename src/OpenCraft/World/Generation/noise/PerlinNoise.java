@@ -1,4 +1,4 @@
-package OpenCraft.World.generation;
+package OpenCraft.World.Generation.noise;
 
 import java.util.Random;
 
@@ -30,5 +30,9 @@ public class PerlinNoise extends Synth {
       }
 
       return value;
+   }
+
+   public void destroy() {
+      this.noiseLevels = null;
    }
 }

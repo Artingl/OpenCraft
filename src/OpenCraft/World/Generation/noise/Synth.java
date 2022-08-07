@@ -1,4 +1,4 @@
-package OpenCraft.World.generation;
+package OpenCraft.World.Generation.noise;
 
 public abstract class Synth {
    public abstract double getValue(double var1, double var3);

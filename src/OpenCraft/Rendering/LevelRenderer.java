@@ -1,19 +1,25 @@
 package OpenCraft.Rendering;
 
+import OpenCraft.Interfaces.ITick;
 import OpenCraft.Interfaces.LevelRendererListener;
 import OpenCraft.OpenCraft;
-import OpenCraft.World.Chunk;
-import OpenCraft.World.Level;
+import OpenCraft.World.Chunk.Chunk;
+import OpenCraft.World.Chunk.ChunksSorter;
+import OpenCraft.World.Entity.PlayerController;
+import OpenCraft.World.Level.Level;
 import OpenCraft.math.Vector2i;
+import OpenCraft.math.Vector3i;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
+import java.util.List;
 
-public class LevelRenderer
+public class LevelRenderer implements ITick
 {
     public static int CHUNK_UPDATES = 0;
-    public static int CHUNK_RENDERED = 0;
+    public static int CHUNKS_RENDERED = 0;
 
+    private int chunksUpdate;
     private ArrayList<Chunk> chunks;
     private ArrayList<LevelRendererListener> listeners;
 
@@ -21,7 +27,7 @@ public class LevelRenderer
         this.chunks = new ArrayList<>();
         this.listeners = new ArrayList<>();
 
-        this.prepareChunks();
+        OpenCraft.registerTickEvent(this);
     }
 
     public void prepareChunks()
@@ -50,13 +56,21 @@ public class LevelRenderer
         GL11.glEnable(GL11.GL_TEXTURE_2D);
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, TextureEngine.getTerrain());
 
-        CHUNK_RENDERED = 0;
+        CHUNKS_RENDERED = 0;
+        int updates = 0;
+
+        chunks.sort(new ChunksSorter(OpenCraft.getPlayerController()));
+
         for(Chunk chunk: chunks) {
-            if (!chunk.isDirty() && frustum.isVisible(chunk.getAABB())) {
+            if (frustum.isVisible(chunk.getAABB())) {
                 for (int layer = 0; layer < Chunk.CHUNK_LAYERS; layer++) {
                     if (frustum.isVisible(chunk.getSimpleAABB(layer))) {
+                        if (!chunk.layerState(layer) && ++updates < 28) {
+                            chunk.buildLayer(layer);
+                        }
+
                         chunk.render(layer);
-                        CHUNK_RENDERED++;
+                        CHUNKS_RENDERED++;
                     }
                 }
             }
@@ -80,10 +94,10 @@ public class LevelRenderer
         System.gc();
     }
 
-    public void sendEvent(LevelRendererListener.Events event, Level level, Chunk chunk) {
+    public void sendEvent(LevelRendererListener.Events event, Level level, Chunk chunk, Vector3i position) {
         if (event == LevelRendererListener.Events.CHUNK_UPDATE) {
             if (chunk != null)
-                chunk.prepare();
+                chunk.buildLayer(position.y / (16 * Chunk.CHUNK_LAYERS));
         }
 
         this.publishListenersEvent(event, level, chunk);
@@ -105,6 +119,10 @@ public class LevelRenderer
 
     public Chunk getChunkByBlockPos(int x, int z) {
         for (Chunk chunk: this.chunks) {
+            if (chunk == null) {
+                continue;
+            }
+
             if (chunk.getPosition().x == x >> 4 && chunk.getPosition().y == z >> 4) {
                 return chunk;
             }
@@ -130,5 +148,59 @@ public class LevelRenderer
         // this place might be in a thread,
         // so we'd like to run it inside GL context
         OpenCraft.runInGLContext(this::prepareChunks);
+    }
+
+    @Override
+    public void tick() {
+        // check if we're able to render new chunks
+        int renderDistance = OpenCraft.getRenderDistance();
+
+        Level level = OpenCraft.getLevel();
+        PlayerController player = OpenCraft.getPlayerController();
+
+        for (int x = -renderDistance; x < renderDistance; x++) {
+            for (int z = -renderDistance; z < renderDistance; z++) {
+                Vector2i chunkPosition = new Vector2i(
+                        (x * 16) + (int)player.getX(),
+                        (z * 16) + (int)player.getZ()
+                );
+
+                if (getChunkByBlockPos(chunkPosition.x, chunkPosition.y) == null) {
+                    Chunk chunk = new Chunk(new Vector2i(chunkPosition.x >> 4, chunkPosition.y >> 4));
+                    chunks.add(chunk);
+
+                    this.publishListenersEvent(LevelRendererListener.Events.CHUNK_UPDATE, level, chunk);
+                    chunksUpdate++;
+                }
+            }
+        }
+
+        // remove chunks which out of our render distance
+        for (int index = 0; index < chunks.size(); index++) {
+            Chunk chunk = chunks.get(index);
+
+            if (chunk == null) {
+                continue;
+            }
+
+            int dist = (int) (chunk.distanceToEntity(player));
+
+            if (dist > OpenCraft.getRenderDistance() + 2) {
+                chunk.destroy();
+                chunks.remove(chunk);
+                chunksUpdate++;
+            }
+        }
+
+        if (chunksUpdate > 4096) {
+            // clear memory after some time (in case some garbage is still in memory)
+            System.out.println("Clearing memory");
+            new Thread(System::gc).start();
+            chunksUpdate = 0;
+        }
+    }
+
+    public int getChunksAmount() {
+        return chunks.size();
     }
 }

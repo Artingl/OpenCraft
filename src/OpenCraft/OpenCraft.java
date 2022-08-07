@@ -5,7 +5,7 @@ import OpenCraft.Interfaces.IGuiTick;
 import OpenCraft.Interfaces.ITick;
 import OpenCraft.Rendering.*;
 import OpenCraft.World.Entity.PlayerController;
-import OpenCraft.World.Level;
+import OpenCraft.World.Level.Level;
 import OpenCraft.World.RayCast;
 import OpenCraft.World.TickTimer;
 import OpenCraft.gui.Font;
@@ -32,7 +32,7 @@ public class OpenCraft
 {
 
     // Game version
-    private static final String version = "0.6.57iD";
+    private static final String version = "0.7.0";
 
     // Window
     private static int width = 868;
@@ -58,7 +58,7 @@ public class OpenCraft
     private static HashMap<Integer, IGuiTick> guiTicks = new HashMap<>();
     private static HashMap<Integer, ITick> ticks = new HashMap<>();
     private static ArrayList<Runnable> glContext = new ArrayList<>();
-    private static int renderDistance = 6; // Render distance
+    private static int renderDistance = 10; // Render distance
     private static int blockCastList = -1;
     private static boolean inMenu = true;
     private static long chunksUpdateTime = -1;
@@ -176,7 +176,7 @@ public class OpenCraft
             }
 
 
-            while(System.currentTimeMillis() >= lastTime + 10000L) {
+            while(System.currentTimeMillis() >= lastTime + 1000L) {
                 FPS = frames;
                 chunksUpdate = LevelRenderer.CHUNK_UPDATES;
                 LevelRenderer.CHUNK_UPDATES = 0;
@@ -256,10 +256,12 @@ public class OpenCraft
         OpenCraft.currentLevel = Level.LevelType.OVERWORLD;
 
         player = new PlayerController(0, 70, 0);
+        levelRenderer = new LevelRenderer();
         overworld = new Level(Level.LevelType.OVERWORLD, ThreadLocalRandom.current().nextInt(0, Integer.MAX_VALUE));
         nether = new Level(Level.LevelType.NETHER, ThreadLocalRandom.current().nextInt(0, Integer.MAX_VALUE));
-        levelRenderer = new LevelRenderer();
         particleEngine = new ParticleEngine();
+
+        levelRenderer.prepareChunks();
     }
 
     private void render()
@@ -343,7 +345,7 @@ public class OpenCraft
 
                 font.drawShadow("OpenCraft " + version, 2, 2, 0xFFFFFF);
                 font.drawShadow("X Y Z: " + player.getX() + " " +  + player.getY() + " " +  + player.getZ(), 2, 2 + (++line * 10), 0xFFFFFF);
-                font.drawShadow("FPS: " + FPS + ", Chunks updated: " + chunksUpdate + ", Chunks rendered: " + LevelRenderer.CHUNK_RENDERED, 2, 2 + (++line * 10), 0xFFFFFF);
+                font.drawShadow("FPS: " + FPS + ", Chunks updated: " + chunksUpdate + ", Chunks rendered: " + LevelRenderer.CHUNKS_RENDERED + ", Chunks amount: " + levelRenderer.getChunksAmount(), 2, 2 + (++line * 10), 0xFFFFFF);
                 font.drawShadow("Level: " + (currentLevel == Level.LevelType.OVERWORLD ? "OVERWORLD" : "NETHER") + ", Seed: " + getLevel().getSeed(), 2, 2 + (++line * 10), 0xFFFFFF);
 
                 ++line;
@@ -503,7 +505,7 @@ public class OpenCraft
         return OpenCraft.FOV;
     }
 
-    public static PlayerController getPlayer()
+    public static PlayerController getPlayerController()
     {
         return OpenCraft.player;
     }
@@ -551,19 +553,36 @@ public class OpenCraft
         return newWorldConfigurator;
     }
 
-    public static void registerTickEvent(ITick tick)
+    public static int registerTickEvent(ITick tick)
     {
         ticks.put(ticks.size(), tick);
+        return ticks.size();
     }
 
-    public static void registerGuiTickEvent(IGuiTick tick)
+    public static void unregisterTickEvent(int index)
+    {
+        ticks.remove(index);
+    }
+
+    public static int registerGuiTickEvent(IGuiTick tick)
     {
         guiTicks.put(guiTicks.size(), tick);
+        return guiTicks.size();
     }
 
-    public static void registerGuiInterfaceEvent(IGuiInterface iGuiInterface)
+    public static void unregisterGuiTickEvent(int index)
+    {
+        guiTicks.remove(index);
+    }
+
+    public static int registerGuiInterfaceEvent(IGuiInterface iGuiInterface)
     {
         guiInterface.put(guiInterface.size(), iGuiInterface);
+        return guiInterface.size();
+    }
+
+    public static void unregisterGuiInterfaceEvent(int index) {
+        guiInterface.remove(index);
     }
 
     public static void runInGLContext(Runnable func)
