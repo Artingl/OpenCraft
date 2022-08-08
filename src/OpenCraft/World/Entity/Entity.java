@@ -161,10 +161,6 @@ public class Entity implements ITick
         this.zo = this.z;
     }
 
-    protected static long symmetricRound( double d ) {
-        return d < 0 ? - Math.round( -d ) : Math.round( d );
-    }
-
     public boolean inWater() {
         return OpenCraft.getLevel().containsLiquid(this.aabb.grow(0.0F, -0.4F, 0.0F));
     }
@@ -271,6 +267,10 @@ public class Entity implements ITick
 
     public void setRy(float ry) {
         this.ry = ry;
+    }
+
+    public void changeLevel(Level level) {
+        this.level = level;
     }
 
     protected void setPosition(float x, float y, float z) {

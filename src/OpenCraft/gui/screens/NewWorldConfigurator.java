@@ -15,6 +15,7 @@ public class NewWorldConfigurator extends Screen
     public String levelName;
     private boolean escapeClick;
     private int levelEditArea;
+    private int seedEditArea;
     private int createNewWorldBtn;
 
     public NewWorldConfigurator() {
@@ -24,7 +25,7 @@ public class NewWorldConfigurator extends Screen
     public void init() {
         super.init();
 
-        levelEditArea = this.addElement(new EditArea(0, 0, 0, "New World", () -> {
+        levelEditArea = this.addElement(new EditArea(0, 0, 0, "World name", () -> {
             if (new File("saves" + File.separator + ((EditArea) getElements().get(levelEditArea)).getText()).exists())
             {
                 ((Button)getElements().get(createNewWorldBtn)).enabled = false;
@@ -33,10 +34,12 @@ public class NewWorldConfigurator extends Screen
                 ((Button)getElements().get(createNewWorldBtn)).enabled = true;
             }
         }));
+        seedEditArea = this.addElement(new EditArea(1, 0, 0, "World seed", () -> {}));
         createNewWorldBtn = this.addElement(new Button(0, 0, 0, "Create a new world", () -> {
             setLoadingScreen("Loading world...");
             OpenCraft.getWorldListScreen().levelName = ((EditArea)getElements().get(levelEditArea)).getText();
-            OpenCraft.startNewGame(false);
+            int seed = ((EditArea)getElements().get(seedEditArea)).getText().hashCode();
+            OpenCraft.startNewGame(false, seed);
         }));
 
         if (new File("saves" + File.separator + ((EditArea) getElements().get(levelEditArea)).getText()).exists())
@@ -47,6 +50,8 @@ public class NewWorldConfigurator extends Screen
             ((Button)getElements().get(createNewWorldBtn)).enabled = true;
         }
 
+        ((EditArea)getElements().get(levelEditArea)).setText("New World");
+        ((Button)getElements().get(createNewWorldBtn)).enabled = true;
     }
 
     public void render(int screenWidth, int screenHeight, int scale)
@@ -55,8 +60,14 @@ public class NewWorldConfigurator extends Screen
             if (element instanceof EditArea)
             {
                 EditArea edit = (EditArea)element;
-                edit.setX(screenWidth / 2f - edit.getWidth() / 2f);
-                edit.setY(screenHeight / 4f);
+                if (edit.getId() == levelEditArea) {
+                    edit.setX(screenWidth / 2f - edit.getWidth() / 2f);
+                    edit.setY(screenHeight / 4f);
+                }
+                else if (edit.getId() == seedEditArea) {
+                    edit.setX(screenWidth / 2f - edit.getWidth() / 2f);
+                    edit.setY(screenHeight / 4f + edit.getHeight() + 10);
+                }
             }
 
             if (element instanceof Button)

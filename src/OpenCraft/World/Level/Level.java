@@ -6,23 +6,25 @@ import OpenCraft.World.Block.Block;
 import OpenCraft.World.Chunk.Chunk;
 import OpenCraft.World.Chunk.Region;
 import OpenCraft.World.Entity.Entity;
-import OpenCraft.World.Generation.LevelGeneration;
+import OpenCraft.World.Entity.EntityPlayer;
+import OpenCraft.math.Vector3f;
 import OpenCraft.math.Vector3i;
 import OpenCraft.phys.AABB;
 import java.util.ArrayList;
 
 public class Level
 {
-
     public static final int WATER_LEVEL = 64;
 
     public enum LevelType {
-        OVERWORLD, NETHER
+        WORLD, HELL
     };
 
     private ArrayList<Entity> entities = new ArrayList<>();
     private final LevelType levelType;
     private LevelGeneration levelGeneration;
+    private EntityPlayer entityPlayer;
+    private int entityPlayerId;
     private int seed;
     private int initialSeed;
 
@@ -32,7 +34,18 @@ public class Level
         this.seed = seed;
         this.initialSeed = seed;
 
-        this.levelGeneration = new LevelGeneration(this);
+        if (this.levelType == LevelType.WORLD) {
+            this.levelGeneration = new LevelGenerationWorld(this);
+        }
+        else {
+            this.levelGeneration = new LevelGenerationHell(this);
+        }
+    }
+
+    public void setPlayerEntity(EntityPlayer entityPlayer) {
+        addEntity(entityPlayer);
+        this.entityPlayerId = entities.size()-1;
+        this.entityPlayer = entityPlayer;
     }
 
     public void addEntity(Entity entity)
@@ -44,9 +57,21 @@ public class Level
     {
         return entities;
     }
+    public EntityPlayer getPlayerEntity()
+    {
+        return entityPlayer;
+    }
 
     public LevelGeneration getGenerator() {
         return levelGeneration;
+    }
+
+    public Vector3f getSkyColor() {
+        if (this.levelType == LevelType.HELL) {
+            return new Vector3f(0.34f, 0.05f, 0.06f);
+        }
+
+        return new Vector3f(0.5f, 0.7f, 1);
     }
 
     public LevelType getLevelType() {
@@ -57,6 +82,16 @@ public class Level
     {
         seed = seed * 1664525 + 1013904223;
         return (seed >> 24) % (max + 1 - min) + min;
+    }
+
+    public void movePlayerEntity(Level level) {
+        this.entities.remove(entityPlayerId);
+        level.setPlayerEntity(entityPlayer);
+        level.getGenerator().setPlayerSpawnPoint();
+        level.getPlayerEntity().teleportToSpawnPoint();
+        this.entityPlayerId = -1;
+        this.entityPlayer = null;
+        this.seed = this.initialSeed;
     }
 
     public Block getBlock(int x, int y, int z)
@@ -100,12 +135,18 @@ public class Level
     {
         this.setBlockWithoutRendering(x, y, z, block);
 
-        OpenCraft.getLevelRenderer().sendEvent(
-                LevelRendererListener.Events.CHUNK_UPDATE,
-                this,
-                OpenCraft.getLevelRenderer().getChunkByBlockPos(x, z),
-                new Vector3i(x, y, z)
-        );
+        for (int i = -1; i < 2; i++) {
+            for (int j = -1; j < 2; j++) {
+                for (int k = -1; k < 2; k++) {
+                    OpenCraft.getLevelRenderer().sendEvent(
+                            LevelRendererListener.Events.CHUNK_UPDATE,
+                            this,
+                            OpenCraft.getLevelRenderer().getChunkByBlockPos(x + i, z + j),
+                            new Vector3i(x, y + k, z)
+                    );
+                }
+            }
+        }
     }
 
     public void removeBlock(int x, int y, int z)
@@ -173,7 +214,6 @@ public class Level
         for(int x = x0; x < x1; ++x) {
             for(int y = y0; y < y1; ++y) {
                 for(int z = z0; z < z1; ++z) {
-                    if (getBlock(x, y, z) == null) continue;
                     if (getBlock(x, y, z).isLiquid()) {
                         return true;
                     }
@@ -189,6 +229,7 @@ public class Level
 
     public void destroy()
     {
+        // todo: destroy all entities
         this.levelGeneration.destroy();
     }
 }

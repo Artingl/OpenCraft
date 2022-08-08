@@ -1,5 +1,6 @@
 package OpenCraft.Rendering;
 
+import OpenCraft.World.Entity.EntityPlayer;
 import OpenCraft.World.Entity.PlayerController;
 import OpenCraft.OpenCraft;
 import OpenCraft.World.Block.Block;
@@ -77,8 +78,8 @@ public class BlockRenderer
         if (side == 4) block0 = OpenCraft.getLevel().getBlock((int)x, (int)y, (int)z + 1);
         if (side == 5) block0 = OpenCraft.getLevel().getBlock((int)x - 1, (int)y, (int)z);
 
-        // todo: remove this
-        if (block0.getIdInt() == Block.glass.getIdInt()) return false;
+//         todo: remove this
+//        if (block0.getIdInt() == Block.glass.getIdInt()) return false;
 
         if (block.isLiquid())
         {
@@ -106,7 +107,7 @@ public class BlockRenderer
         int block_g=255;
         int block_b=255;
         float down = 0;
-        if (block.getIdInt() == Block.water.getIdInt() && OpenCraft.getLevel().getBlock((int)x, (int)y + 1, (int)z).getIdInt() != Block.water.getIdInt())
+        if (block.isLiquid() && !OpenCraft.getLevel().getBlock((int)x, (int)y + 1, (int)z).isLiquid())
             down = 0.1f;
 
         t.setColori(block_r, block_g, block_b);
@@ -126,7 +127,7 @@ public class BlockRenderer
         int block_g=255;
         int block_b=255;
         float down = 0;
-        if (block.getIdInt() == Block.water.getIdInt() && OpenCraft.getLevel().getBlock((int)x, (int)y + 1, (int)z).getIdInt() != Block.water.getIdInt())
+        if (block.isLiquid() && !OpenCraft.getLevel().getBlock((int)x, (int)y + 1, (int)z).isLiquid())
             down = 0.1f;
 
         t.setColori(block_r, block_g, block_b);
@@ -146,7 +147,7 @@ public class BlockRenderer
         int block_g=255;
         int block_b=255;
         float down = 0;
-        if (block.getIdInt() == Block.water.getIdInt() && OpenCraft.getLevel().getBlock((int)x, (int)y + 1, (int)z).getIdInt() != Block.water.getIdInt())
+        if (block.isLiquid() && !OpenCraft.getLevel().getBlock((int)x, (int)y + 1, (int)z).isLiquid())
             down = 0.1f;
 
         t.setColori(block_r - 40, block_g - 40, block_b - 40);
@@ -166,7 +167,7 @@ public class BlockRenderer
         int block_g=255;
         int block_b=255;
         float down = 0;
-        if (block.getIdInt() == Block.water.getIdInt() && OpenCraft.getLevel().getBlock((int)x, (int)y + 1, (int)z).getIdInt() != Block.water.getIdInt())
+        if (block.isLiquid() && !OpenCraft.getLevel().getBlock((int)x, (int)y + 1, (int)z).isLiquid())
             down = 0.1f;
 
         t.setColori(block_r - 80, block_g - 80, block_b - 80);
@@ -186,7 +187,7 @@ public class BlockRenderer
         int block_g=255;
         int block_b=255;
         float down = 0;
-        if (block.getIdInt() == Block.water.getIdInt() && OpenCraft.getLevel().getBlock((int)x, (int)y + 1, (int)z).getIdInt() != Block.water.getIdInt())
+        if (block.isLiquid() && !OpenCraft.getLevel().getBlock((int)x, (int)y + 1, (int)z).isLiquid())
             down = 0.1f;
 
         t.setColori(block_r - 40, block_g - 40, block_b - 40);
@@ -206,7 +207,7 @@ public class BlockRenderer
         int block_g=255;
         int block_b=255;
         float down = 0;
-        if (block.getIdInt() == Block.water.getIdInt() && OpenCraft.getLevel().getBlock((int)x, (int)y + 1, (int)z).getIdInt() != Block.water.getIdInt())
+        if (block.isLiquid() && !OpenCraft.getLevel().getBlock((int)x, (int)y + 1, (int)z).isLiquid())
             down = 0.1f;
 
         t.setColori(block_r - 80, block_g - 80, block_b - 80);
@@ -220,7 +221,7 @@ public class BlockRenderer
         t.setVertexCoord(x, 1.f +y - down, 1.f +z);
     }
 
-    public static void renderFaceNoTexture(PlayerController player, VerticesBuffer t, int x, int y, int z, int face) {
+    public static void renderFaceNoTexture(EntityPlayer player, VerticesBuffer t, int x, int y, int z, int face) {
         float x0 = (float)x + -0.001F;
         float x1 = (float)x +  1.001F;
         float y0 = (float)y + -0.001F;

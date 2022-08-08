@@ -1,13 +1,14 @@
 package OpenCraft.World.Chunk;
 
+import OpenCraft.World.Entity.EntityPlayer;
 import OpenCraft.World.Entity.PlayerController;
 
 import java.util.Comparator;
 
 public class ChunksSorter implements Comparator<Chunk> {
-    private final PlayerController player;
+    private final EntityPlayer player;
 
-    public ChunksSorter(PlayerController player) {
+    public ChunksSorter(EntityPlayer player) {
         this.player = player;
     }
 

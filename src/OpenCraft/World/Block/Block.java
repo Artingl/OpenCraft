@@ -9,21 +9,26 @@ import OpenCraft.World.Level.Level;
 public class Block
 {
 
-    public static Block air = new BlockAir(0);
-    public static Block stone = new BlockStone(1);
-    public static Block dirt = new BlockDirt(2);
-    public static Block grass_block = new BlockGrassBlock(3);
-    public static Block bedrock = new BlockBedrock(4);
-    public static Block water = new BlockWater(5);
-    public static Block sand = new BlockSand(6);
-    public static Block gravel = new BlockGravel(7);
-    public static Block log_oak = new BlockLogOak(8);
-    public static Block leaves_oak = new BlockLeavesOak(9);
-    public static Block glass = new BlockGlass(10);
-    public static Block sandStone = new BlockSandStone(11);
+    public static int BLOCK_COUNT = 0;
+
+    public static Block air = new BlockAir(BLOCK_COUNT++);
+    public static Block stone = new BlockStone(BLOCK_COUNT++);
+    public static Block dirt = new BlockDirt(BLOCK_COUNT++);
+    public static Block grass_block = new BlockGrassBlock(BLOCK_COUNT++);
+    public static Block bedrock = new BlockBedrock(BLOCK_COUNT++);
+    public static Block water = new BlockWater(BLOCK_COUNT++);
+    public static Block lava = new BlockLava(BLOCK_COUNT++);
+    public static Block sand = new BlockSand(BLOCK_COUNT++);
+    public static Block gravel = new BlockGravel(BLOCK_COUNT++);
+    public static Block log_oak = new BlockLogOak(BLOCK_COUNT++);
+    public static Block leaves_oak = new BlockLeavesOak(BLOCK_COUNT++);
+    public static Block glass = new BlockGlass(BLOCK_COUNT++);
+    public static Block sandStone = new BlockSandStone(BLOCK_COUNT++);
+    public static Block hellrock = new BlockHellrock(BLOCK_COUNT++);
 
     public static Block[] blocks = {
-      air, stone, dirt, grass_block, bedrock, water, sand, gravel, log_oak, leaves_oak, glass, sandStone
+            air, stone, dirt, grass_block, bedrock, water,
+            sand, gravel, log_oak, leaves_oak, glass, sandStone, hellrock, lava
     };
 
     private final int idi;
@@ -61,7 +66,7 @@ public class Block
 
     public boolean isVisible()
     {
-        return getIdInt() != 0;
+        return getIdInt() != Block.air.getIdInt();
     }
 
     public boolean isLiquid()

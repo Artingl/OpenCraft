@@ -32,6 +32,7 @@ public class EditArea extends Element
     private boolean selected = false;
     private final int id;
     private String text;
+    private String hint;
     private boolean mouseClicked;
     private Runnable onEdit;
 
@@ -39,7 +40,8 @@ public class EditArea extends Element
     {
         super(x, y, 0, 0);
         keyDown = new HashMap<>();
-        this.text = text;
+        this.hint = text;
+        this.text = "";
         this.id = id;
         this.onEdit = onEdit;
     }
@@ -111,13 +113,21 @@ public class EditArea extends Element
             if (Controls.getMouseKey(0)) selected = false;
         }
 
+        boolean isHint = false;
+        String text = this.text;
+
+        if (text.isEmpty()) {
+            text = this.hint;
+            isHint = true;
+        }
+
         GL11.glPushMatrix();
         GL11.glTranslatef(this.x, this.y, 50);
         fillTexture(0, 0, width, height, id);
-        OpenCraft.getFont().drawShadow(text, (int)5, (int)(this.height / 2f) - 5, 16777215);
+        OpenCraft.getFont().drawShadow(text, (int)5, (int)(this.height / 2f) - 5, isHint ? 0xcccccc : 16777215);
         if (selected)
         {
-            OpenCraft.getFont().drawShadow("_", (int)7 + OpenCraft.getFont().getTextWidth(text), (int)(this.height / 2f) - 5, 16777215);
+            OpenCraft.getFont().drawShadow("_", (int)(isHint ? 5 : 7 + OpenCraft.getFont().getTextWidth(text)), (int)(this.height / 2f) - 5, 16777215);
         }
         GL11.glPopMatrix();
         GL11.glLoadIdentity();

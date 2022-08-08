@@ -7,10 +7,10 @@ import java.nio.FloatBuffer;
 
 public class VerticesBuffer
 {
-    private static final int MAX_MEMORY_USE = 4194304;
-    private static final int MAX_FLOATS = 524288;
-    private FloatBuffer buffer = BufferUtils.createFloatBuffer(524288);
-    private float[] array = new float[524288];
+    public static int MAX_VALUE = 524288*5  ;
+
+    private final FloatBuffer buffer = BufferUtils.createFloatBuffer(MAX_VALUE);
+    private final float[] array = new float[MAX_VALUE];
     private int vertices = 0;
     private float u;
     private float v;
@@ -126,7 +126,7 @@ public class VerticesBuffer
         this.array[this.p++] = y;
         this.array[this.p++] = z;
         ++this.vertices;
-        if (this.vertices % 4 == 0 && this.p >= 524288 - this.len * 4) {
+        if (this.vertices % 4 == 0 && this.p >= MAX_VALUE - this.len * 4) {
             this.end();
         }
 

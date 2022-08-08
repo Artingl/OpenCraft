@@ -4,6 +4,8 @@ import OpenCraft.Interfaces.IGuiInterface;
 import OpenCraft.Interfaces.IGuiTick;
 import OpenCraft.Interfaces.ITick;
 import OpenCraft.Rendering.*;
+import OpenCraft.World.Biomes.Biomes;
+import OpenCraft.World.Entity.EntityPlayer;
 import OpenCraft.World.Entity.PlayerController;
 import OpenCraft.World.Level.Level;
 import OpenCraft.World.RayCast;
@@ -14,6 +16,8 @@ import OpenCraft.gui.screens.MainMenu;
 import OpenCraft.gui.screens.NewWorldConfigurator;
 import OpenCraft.gui.screens.PauseMenu;
 import OpenCraft.gui.screens.WorldList;
+import OpenCraft.math.Vector3f;
+import OpenCraft.utils.StackTrace;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
@@ -32,7 +36,7 @@ public class OpenCraft
 {
 
     // Game version
-    private static final String version = "0.7.0";
+    private static final String version = "0.7.1";
 
     // Window
     private static int width = 868;
@@ -41,27 +45,26 @@ public class OpenCraft
     private static boolean close = false;
 
     // Player
-    private static PlayerController player;
+    private static PlayerController playerController;
 
     // World
     private static boolean worldIsSaving = false;
     private static long worldSavingElapsed;
     private static ParticleEngine particleEngine; // Particle engine
     private static LevelRenderer levelRenderer; // World renderer
-    private static Level overworld;
-    private static Level nether;
+    private static Level world;
+    private static Level hell;
     private static Level.LevelType currentLevel; // current loaded world
     private static boolean isWorldDestroyed; // Is world destroyed
 
     // Rendering and other game stuff
-    private static HashMap<Integer, IGuiInterface> guiInterface = new HashMap<>();
+    private static final HashMap<Integer, IGuiInterface> guiInterface = new HashMap<>();
     private static HashMap<Integer, IGuiTick> guiTicks = new HashMap<>();
-    private static HashMap<Integer, ITick> ticks = new HashMap<>();
-    private static ArrayList<Runnable> glContext = new ArrayList<>();
-    private static int renderDistance = 10; // Render distance
+    private static final HashMap<Integer, ITick> ticks = new HashMap<>();
+    private static final ArrayList<Runnable> glContext = new ArrayList<>();
+    private static int renderDistance = 6; // Render distance
     private static int blockCastList = -1;
     private static boolean inMenu = true;
-    private static long chunksUpdateTime = -1;
     private static boolean renderWhenInMenu = false;
     private static int chunksUpdate = 0;
     private static int FOV = 90; // Camera FOV
@@ -134,7 +137,13 @@ public class OpenCraft
 
             updateGlContext();
 
-            GL11.glClearColor(0.5f, 0.7f, 1, 1);
+            Vector3f sky = new Vector3f(0, 0, 0);
+
+            if (getLevel() != null) {
+                sky = getLevel().getSkyColor();
+            }
+
+            GL11.glClearColor(sky.x, sky.y, sky.z, 1);
             GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
             GL11.glLoadIdentity();
 
@@ -142,7 +151,7 @@ public class OpenCraft
 
             if (inMenu)
             {
-                if (renderWhenInMenu && overworld != null) {
+                if (renderWhenInMenu && world != null) {
                     render();
                 }
                 GL11.glColor4f(1F, 1F, 1F, 1.0F);
@@ -166,7 +175,11 @@ public class OpenCraft
                 for(int i = 0; i < timer.ticks; ++i) {
                     if (!isWorldDestroyed) {
                         new HashMap<>(ticks).forEach(((id, tick) -> {
-                            if (tick != null) tick.tick();
+                            try {
+                                if (tick != null) tick.tick();
+                            } catch (Exception e) {
+                                System.out.println("Error occurred while running tick function: " + StackTrace.getStackTrace(e));
+                            }
                         }));
                     }
                 }
@@ -212,14 +225,14 @@ public class OpenCraft
 
         new Thread(() -> {
             ticks.clear();
-            overworld.destroy();
-            nether.destroy();
+            world.destroy();
+            hell.destroy();
             levelRenderer.destroy();
             particleEngine.destroy();
-            player.destroy();
-            player = null;
-            overworld = null;
-            nether = null;
+            playerController.destroy();
+            playerController = null;
+            world = null;
+            hell = null;
             levelRenderer = null;
             particleEngine = null;
 
@@ -248,18 +261,23 @@ public class OpenCraft
         setCurrentScreen(mainMenu);
     }
 
-    public static void startNewGame(boolean load)
+    public static void startNewGame(boolean load, int seed)
     {
         closeCurrentScreen();
 
         OpenCraft.isWorldDestroyed = false;
-        OpenCraft.currentLevel = Level.LevelType.OVERWORLD;
+        OpenCraft.currentLevel = Level.LevelType.WORLD;
 
-        player = new PlayerController(0, 70, 0);
         levelRenderer = new LevelRenderer();
-        overworld = new Level(Level.LevelType.OVERWORLD, ThreadLocalRandom.current().nextInt(0, Integer.MAX_VALUE));
-        nether = new Level(Level.LevelType.NETHER, ThreadLocalRandom.current().nextInt(0, Integer.MAX_VALUE));
+        world = new Level(Level.LevelType.WORLD, seed);
+        hell = new Level(Level.LevelType.HELL, seed+1);
+        playerController = new PlayerController();
         particleEngine = new ParticleEngine();
+
+        EntityPlayer entityPlayer = new EntityPlayer(playerController);
+
+        world.setPlayerEntity(entityPlayer);
+        world.getGenerator().setPlayerSpawnPoint();
 
         levelRenderer.prepareChunks();
     }
@@ -271,7 +289,7 @@ public class OpenCraft
                 return;
 
             if (!inMenu) {
-                player.rotate();
+                getLevel().getPlayerEntity().rotate();
                 Controls.update();
                 Mouse.setGrabbed(true);
             }
@@ -282,7 +300,7 @@ public class OpenCraft
             levelRenderer.render(frustum);
 
             glEnable(GL_BLEND);
-            particleEngine.render(player, timer.a, 0);
+            particleEngine.render(timer.a, 0);
             glDisable(GL_BLEND);
 
             pick();
@@ -294,7 +312,7 @@ public class OpenCraft
 
             drawGui();
         } catch (Exception e) {
-            System.out.println("Error occurred while rendering: " + e.getLocalizedMessage());
+            System.out.println("Error occurred while rendering: " + StackTrace.getStackTrace(e));
         }
     }
 
@@ -340,16 +358,28 @@ public class OpenCraft
             if (!inMenu && !isWorldDestroyed)
             {
                 String gpuRenderer  = GL11.glGetString(GL_RENDERER);
+                EntityPlayer entityPlayer = getLevel().getPlayerEntity();
+
+                EntityPlayer player = getLevel().getPlayerEntity();
+                String biome = "";
 
                 int line = 0;
 
+                if (currentLevel == Level.LevelType.HELL) {
+                    biome = getLevel().getGenerator().getBiome().getHellBiome((int)player.getX(), (int)player.getZ()).name();
+                }
+                else {
+                    biome = getLevel().getGenerator().getBiome().getWorldBiome((int)player.getX(), (int)player.getZ()).name();
+                }
+
                 font.drawShadow("OpenCraft " + version, 2, 2, 0xFFFFFF);
-                font.drawShadow("X Y Z: " + player.getX() + " " +  + player.getY() + " " +  + player.getZ(), 2, 2 + (++line * 10), 0xFFFFFF);
+                font.drawShadow("X Y Z: " + entityPlayer.getX() + " " +  + entityPlayer.getY() + " " +  + entityPlayer.getZ(), 2, 2 + (++line * 10), 0xFFFFFF);
                 font.drawShadow("FPS: " + FPS + ", Chunks updated: " + chunksUpdate + ", Chunks rendered: " + LevelRenderer.CHUNKS_RENDERED + ", Chunks amount: " + levelRenderer.getChunksAmount(), 2, 2 + (++line * 10), 0xFFFFFF);
-                font.drawShadow("Level: " + (currentLevel == Level.LevelType.OVERWORLD ? "OVERWORLD" : "NETHER") + ", Seed: " + getLevel().getSeed(), 2, 2 + (++line * 10), 0xFFFFFF);
+                font.drawShadow("Level: " + (currentLevel == Level.LevelType.WORLD ? "WORLD" : "HELL") + ", Seed: " + getLevel().getSeed() + ", Biome: " + biome, 2, 2 + (++line * 10), 0xFFFFFF);
 
                 ++line;
                 font.drawShadow("GPU: " + gpuRenderer, 2, 2 + (++line * 10), 0xFFFFFF);
+                font.drawShadow("Display: " + Display.getWidth() + "x" + Display.getHeight(), 2, 2 + (++line * 10), 0xFFFFFF);
 
 
                 if (worldIsSaving)
@@ -383,7 +413,7 @@ public class OpenCraft
                     GL11.glTranslatef(0.0F, 0.0F, 0.0F);
                 }));
 
-                if (player.getCurrentBlock() != null)
+                if (playerController.getCurrentBlock() != null)
                 {
                     //BlockRenderer.renderBlockIcon(t, 20, 0, 128, 128, screenWidth - 10, screenHeight + 78, player.getCurrentBlock());
                 }
@@ -394,13 +424,15 @@ public class OpenCraft
             GL11.glDisable(3553);
             GL11.glDisable(2912);
         } catch (Exception e) {
-            System.out.println("Error occurred while drawing gui: " + e.getLocalizedMessage());
+            System.out.println("Error occurred while drawing gui: " + StackTrace.getStackTrace(e));
         }
     }
 
     private void pick()
     {
-        float[][] ray = RayCast.rayCastToBlock(6, player.getRx(), player.getRy(), player.getX(), player.getY(), player.getZ());
+        EntityPlayer entityPlayer = getLevel().getPlayerEntity();
+
+        float[][] ray = RayCast.rayCastToBlock(6, entityPlayer.getRx(), entityPlayer.getRy(), entityPlayer.getX(), entityPlayer.getY(), entityPlayer.getZ());
         if (ray[0][0] == 1)
         {
             if (blockCastList != -1)
@@ -412,7 +444,7 @@ public class OpenCraft
             VerticesBuffer t = VerticesBuffer.instance;
             for(int i = 0; i < 6; ++i) {
                 t.begin();
-                BlockRenderer.renderFaceNoTexture(player, t, (int)ray[1][0], (int)ray[1][1], (int)ray[1][2], i);
+                BlockRenderer.renderFaceNoTexture(entityPlayer, t, (int)ray[1][0], (int)ray[1][1], (int)ray[1][2], i);
                 t.end();
             }
             GL11.glEndList();
@@ -433,18 +465,20 @@ public class OpenCraft
         GL11.glMatrixMode(5888);
         GL11.glLoadIdentity();
 
+        EntityPlayer entityPlayer = getLevel().getPlayerEntity();
+
         GL11.glTranslatef(0.0F, 0.0F, -0.3F);
-        GL11.glRotatef(player.getRx(), 1.0F, 0.0F, 0.0F);
-        GL11.glRotatef(player.getRy(), 0.0F, 1.0F, 0.0F);
-        float x = player.getXo() + (player.getX() - player.getXo()) * timer.a;
-        float y = player.getYo() + (player.getY() - player.getYo()) * timer.a;
-        float z = player.getZo() + (player.getZ() - player.getZo()) * timer.a;
+        GL11.glRotatef(entityPlayer.getRx(), 1.0F, 0.0F, 0.0F);
+        GL11.glRotatef(entityPlayer.getRy(), 0.0F, 1.0F, 0.0F);
+        float x = entityPlayer.getXo() + (entityPlayer.getX() - entityPlayer.getXo()) * timer.a;
+        float y = entityPlayer.getYo() + (entityPlayer.getY() - entityPlayer.getYo()) * timer.a;
+        float z = entityPlayer.getZo() + (entityPlayer.getZ() - entityPlayer.getZo()) * timer.a;
 
         GL11.glTranslatef(-x, -y, -z);
     }
 
     private static void updateGlContext() {
-        for (Runnable r: glContext) {
+        for (Runnable r: new ArrayList<>(glContext)) {
             r.run();
         }
 
@@ -453,16 +487,18 @@ public class OpenCraft
 
     public static Level getLevel()
     {
-        return currentLevel == Level.LevelType.OVERWORLD ? overworld : nether;
+        return currentLevel == Level.LevelType.WORLD ? world : hell;
     }
 
     public static void switchWorld(Level.LevelType level) {
         if (OpenCraft.isWorldDestroyed)
             return;
 
+        Level oldLevel = getLevel();
         currentLevel = level;
 
         new Thread(() -> {
+            oldLevel.movePlayerEntity(getLevel());
             levelRenderer.switchWorld();
 
             OpenCraft.isWorldDestroyed = true;
@@ -478,7 +514,6 @@ public class OpenCraft
         while (!isWorldDestroyed || !glContext.isEmpty());
 
         System.gc();
-
         OpenCraft.isWorldDestroyed = false;
     }
 
@@ -507,7 +542,7 @@ public class OpenCraft
 
     public static PlayerController getPlayerController()
     {
-        return OpenCraft.player;
+        return OpenCraft.playerController;
     }
 
     public static String getVersion()
@@ -556,7 +591,7 @@ public class OpenCraft
     public static int registerTickEvent(ITick tick)
     {
         ticks.put(ticks.size(), tick);
-        return ticks.size();
+        return ticks.size()-1;
     }
 
     public static void unregisterTickEvent(int index)
@@ -567,7 +602,7 @@ public class OpenCraft
     public static int registerGuiTickEvent(IGuiTick tick)
     {
         guiTicks.put(guiTicks.size(), tick);
-        return guiTicks.size();
+        return guiTicks.size()-1;
     }
 
     public static void unregisterGuiTickEvent(int index)
@@ -578,7 +613,7 @@ public class OpenCraft
     public static int registerGuiInterfaceEvent(IGuiInterface iGuiInterface)
     {
         guiInterface.put(guiInterface.size(), iGuiInterface);
-        return guiInterface.size();
+        return guiInterface.size()-1;
     }
 
     public static void unregisterGuiInterfaceEvent(int index) {

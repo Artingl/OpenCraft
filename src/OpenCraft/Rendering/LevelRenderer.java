@@ -5,6 +5,7 @@ import OpenCraft.Interfaces.LevelRendererListener;
 import OpenCraft.OpenCraft;
 import OpenCraft.World.Chunk.Chunk;
 import OpenCraft.World.Chunk.ChunksSorter;
+import OpenCraft.World.Entity.EntityPlayer;
 import OpenCraft.World.Entity.PlayerController;
 import OpenCraft.World.Level.Level;
 import OpenCraft.math.Vector2i;
@@ -38,7 +39,9 @@ public class LevelRenderer implements ITick
         if (chunks.isEmpty()) {
             for (int x = -renderDistance; x < renderDistance; x++) {
                 for (int z = -renderDistance; z < renderDistance; z++) {
-                    Chunk chunk = new Chunk(new Vector2i(x, z));
+                    Chunk chunk = new Chunk(new Vector2i(x >> 4, z >> 4));
+                    for (int i = 0; i < Chunk.CHUNK_LAYERS; i++)
+                        chunk.buildLayer(i);
                     chunks.add(chunk);
 
                     this.publishListenersEvent(LevelRendererListener.Events.CHUNK_UPDATE, level, chunk);
@@ -59,14 +62,15 @@ public class LevelRenderer implements ITick
         CHUNKS_RENDERED = 0;
         int updates = 0;
 
-        chunks.sort(new ChunksSorter(OpenCraft.getPlayerController()));
+        chunks.sort(new ChunksSorter(OpenCraft.getLevel().getPlayerEntity()));
 
         for(Chunk chunk: chunks) {
             if (frustum.isVisible(chunk.getAABB())) {
                 for (int layer = 0; layer < Chunk.CHUNK_LAYERS; layer++) {
                     if (frustum.isVisible(chunk.getSimpleAABB(layer))) {
-                        if (!chunk.layerState(layer) && ++updates < 28) {
-                            chunk.buildLayer(layer);
+                        if (!chunk.layerState(layer) && ++updates < 5) {
+                            if (!chunk.buildLayer(layer))
+                                updates--;
                         }
 
                         chunk.render(layer);
@@ -97,7 +101,7 @@ public class LevelRenderer implements ITick
     public void sendEvent(LevelRendererListener.Events event, Level level, Chunk chunk, Vector3i position) {
         if (event == LevelRendererListener.Events.CHUNK_UPDATE) {
             if (chunk != null)
-                chunk.buildLayer(position.y / (16 * Chunk.CHUNK_LAYERS));
+                chunk.buildLayer(position.y / (256 / Chunk.CHUNK_LAYERS));
         }
 
         this.publishListenersEvent(event, level, chunk);
@@ -156,7 +160,7 @@ public class LevelRenderer implements ITick
         int renderDistance = OpenCraft.getRenderDistance();
 
         Level level = OpenCraft.getLevel();
-        PlayerController player = OpenCraft.getPlayerController();
+        EntityPlayer player = level.getPlayerEntity();
 
         for (int x = -renderDistance; x < renderDistance; x++) {
             for (int z = -renderDistance; z < renderDistance; z++) {

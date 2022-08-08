@@ -48,7 +48,7 @@ public class WorldList extends Screen
         this.addElement(new Button(0, 0, 0, "Create a new world", () -> OpenCraft.setCurrentScreen(OpenCraft.getNewWorldConfigurator())));
         loadWorldBtnId = this.addElement(new Button(1, 0, 0, "Load world", () -> {
             setLoadingScreen("Loading world...");
-            OpenCraft.startNewGame(true);
+            OpenCraft.startNewGame(true, -1);
         }));
 
         levelName = "";

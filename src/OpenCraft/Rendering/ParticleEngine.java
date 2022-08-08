@@ -1,6 +1,8 @@
 package OpenCraft.Rendering;
 
+import OpenCraft.World.Entity.EntityPlayer;
 import OpenCraft.World.Entity.PlayerController;
+import OpenCraft.World.Level.Level;
 import OpenCraft.World.Particle;
 import OpenCraft.Interfaces.ITick;
 import OpenCraft.OpenCraft;
@@ -38,10 +40,13 @@ public class ParticleEngine implements ITick {
 
    }
 
-   public void render(PlayerController player, float a, int layer) {
+   public void render(float a, int layer) {
       if (this.particles.size() != 0) {
          GL11.glEnable(3553);
          GL11.glBindTexture(3553, TextureEngine.getTerrain());
+
+         Level level = OpenCraft.getLevel();
+         EntityPlayer player = level.getPlayerEntity();
 
          float xa = -((float)Math.cos((double)player.getRy() * 3.141592653589793D / 180.0D));
          float za = -((float)Math.sin((double)player.getRy() * 3.141592653589793D / 180.0D));

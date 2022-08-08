@@ -16,7 +16,7 @@ import java.util.ArrayList;
 
 public class Chunk
 {
-    public static int CHUNK_LAYERS = 128;
+    public static int CHUNK_LAYERS = 64;
 
     private VerticesBuffer verticesBuffer = VerticesBuffer.instance;
 
@@ -24,9 +24,7 @@ public class Chunk
     private Region chunkRegion;
     private AABB aabb;
     private ArrayList<Boolean> layersState;
-
-    private boolean dirty;
-    private int chunksList = -1;
+    private int chunksList;
 
     public Chunk(Vector2i chunkListPosition)
     {
@@ -37,19 +35,21 @@ public class Chunk
                 chunkListPosition.x * 16, 0, chunkListPosition.y * 16,
                 chunkListPosition.x * 16 + 16, 256, chunkListPosition.y * 16 + 16);
 
-        this.dirty = true;
-
         for (int i = 0; i < CHUNK_LAYERS; i++)
             layersState.add(false);
 
         this.chunksList = GL11.glGenLists(CHUNK_LAYERS);
     }
 
-    public void buildLayer(int layer) {
+    public boolean buildLayer(int layer) {
         ++LevelRenderer.CHUNK_UPDATES;
 
         if (this.chunksList != -1)
             GL11.glDeleteLists(this.chunksList + layer, 1);
+
+        layersState.set(layer, false);
+
+        boolean isVisible = false;
 
         GL11.glNewList(this.chunksList + layer, GL11.GL_COMPILE);
         verticesBuffer.begin();
@@ -66,16 +66,21 @@ public class Chunk
 
                     if (block.isVisible()) {
                         BlockRenderer.render(verticesBuffer, x, y, z, block);
+                        isVisible = true;
                     }
                 }
             }
         }
 
-        layersState.set(layer, true);
+        if (isVisible) {
+            layersState.set(layer, true);
+            verticesBuffer.end();
+        }
 
-        verticesBuffer.end();
-        GL11.glEndList();
         verticesBuffer.clear();
+        GL11.glEndList();
+
+        return isVisible;
     }
 
     public Region getRegion() {
@@ -86,16 +91,8 @@ public class Chunk
         return chunkListPosition;
     }
 
-    public boolean isDirty() {
-        return this.dirty;
-    }
-
     public void render(int i) {
         GL11.glCallList(this.chunksList + i);
-    }
-
-    public void setDirty(boolean b) {
-        this.dirty = b;
     }
 
     public AABB getAABB() {

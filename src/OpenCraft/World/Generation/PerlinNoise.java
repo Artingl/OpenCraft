@@ -1,4 +1,4 @@
-package OpenCraft.World.Generation.noise;
+package OpenCraft.World.Generation;
 
 import java.util.Random;
 
@@ -34,5 +34,30 @@ public class PerlinNoise extends Synth {
 
    public void destroy() {
       this.noiseLevels = null;
+   }
+
+   public int getNoiseValue(int num_iterations, float x, float y, float persistence, float scale, float low, float high)
+   {
+      float maxAmp = 0;
+      float amp = 1;
+      float freq = scale;
+      float noise = 0;
+
+      //add successively smaller, higher-frequency terms
+      for(int i = 0; i < num_iterations; ++i)
+      {
+         noise += getValue(x * freq, y * freq) * amp;
+         maxAmp += amp;
+         amp *= persistence;
+         freq *= 2;
+      }
+
+      //take the average value of the iterations
+      noise /= maxAmp;
+
+      //normalize the result
+      noise = noise * (high - low) / 2 + (high + low) / 2;
+
+      return (int) noise;
    }
 }
