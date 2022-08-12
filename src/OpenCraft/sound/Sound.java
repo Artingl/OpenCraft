@@ -17,6 +17,10 @@ public class Sound
                 clip = AudioSystem.getClip();
                 clip.open(audioIn);
                 clip.start();
+//                while(clip.isActive()){}
+//                clip.stop();
+//                clip = null;
+//                audioIn.close();
             } catch (LineUnavailableException | IOException | UnsupportedAudioFileException e) {
                 System.out.println(e.getMessage());
             }

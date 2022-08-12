@@ -1,14 +1,17 @@
 package OpenCraft.World.Block;
 
 import OpenCraft.Rendering.Texture;
+import OpenCraft.World.Drop.Drop;
+import OpenCraft.World.Item.ItemBlock;
+import OpenCraft.World.Item.Tool;
 import OpenCraft.World.Particle;
+import OpenCraft.math.Vector3i;
 import OpenCraft.phys.AABB;
 import OpenCraft.OpenCraft;
 import OpenCraft.World.Level.Level;
 
 public class Block
 {
-
     public static int BLOCK_COUNT = 0;
 
     public static Block air = new BlockAir(BLOCK_COUNT++);
@@ -25,19 +28,30 @@ public class Block
     public static Block glass = new BlockGlass(BLOCK_COUNT++);
     public static Block sandStone = new BlockSandStone(BLOCK_COUNT++);
     public static Block hellrock = new BlockHellrock(BLOCK_COUNT++);
+    public static Block grass = new BlockGrass(BLOCK_COUNT++);
+    public static Block rose = new BlockRose(BLOCK_COUNT++);
 
     public static Block[] blocks = {
             air, stone, dirt, grass_block, bedrock, water,
-            sand, gravel, log_oak, leaves_oak, glass, sandStone, hellrock, lava
+            sand, gravel, log_oak, leaves_oak, glass, sandStone, hellrock, lava, grass, rose
     };
 
+    private int randomization;
     private final int idi;
     private final String id;
+
     protected Texture texture;
+
+    private float strength;
+
+    private Tool tool;
 
     public Block(String id, int idi) {
         this.id = id;
         this.idi = idi;
+        this.tool = Tool.HAND;
+        this.strength = 1;
+        this.makeRandomization();
     }
 
     public void setTexture(Texture texture)
@@ -60,6 +74,8 @@ public class Block
         return this.idi;
     }
 
+    public int getRandomization() { return this.randomization; }
+
     public static AABB getAABB(int x, int y, int z) {
         return new AABB((float)x, (float)y, (float)z, (float)(x + 1), (float)(y + 1), (float)(z + 1));
     }
@@ -70,6 +86,11 @@ public class Block
     }
 
     public boolean isLiquid()
+    {
+        return false;
+    }
+
+    public boolean isTile()
     {
         return false;
     }
@@ -126,4 +147,38 @@ public class Block
     public void neighborChanged(Level level, int x, int y, int z) {
     }
 
+    protected void makeRandomization() {
+        // todo: fix it. right now it may change world generation
+        //       because it uses level seed
+        // this.randomization = OpenCraft.getLevel().getRandomNumber(-100, 100);
+    }
+
+    public float getStrength() {
+        return strength;
+    }
+
+    public Tool getTool() {
+        return tool;
+    }
+
+    public void setStrength(float strength) {
+        this.strength = strength;
+    }
+
+    public void setDefaultTool(Tool tool) {
+        this.tool = tool;
+    }
+
+    public void createDrop(int x, int y, int z) {
+//        new Drop(new ItemBlock(this, 1), new Vector3i(x, y, z));
+    }
+
+    public int getStackAmount() {
+        return 64;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return getIdInt() == ((Block)obj).getIdInt();
+    }
 }

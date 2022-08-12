@@ -1,7 +1,13 @@
 package OpenCraft.World.Entity;
 
+import OpenCraft.OpenCraft;
 import OpenCraft.Rendering.TextureEngine;
+import OpenCraft.World.Entity.Gamemode.Gamemode;
+import OpenCraft.World.Entity.Gamemode.Survival;
 import OpenCraft.World.Entity.Models.PlayerModel;
+import OpenCraft.World.PlayerController;
+import OpenCraft.gui.screens.DeadScreen;
+import OpenCraft.sound.Sound;
 import org.lwjgl.input.Mouse;
 
 import javax.imageio.ImageIO;
@@ -20,12 +26,14 @@ public class EntityPlayer extends Entity {
     }
 
     private PlayerController controller;
+    private Gamemode gamemode;
 
     public EntityPlayer(PlayerController controller) {
         setModel(model);
 
-        this.heightOffset = 1.62F;
+        this.heightOffset = 1.82F;
         this.controller = controller;
+        this.gamemode = Survival.instance;
     }
 
     public void rotate()
@@ -45,4 +53,29 @@ public class EntityPlayer extends Entity {
     public void destroy() {
         super.destroy();
     }
+
+    public Gamemode getGamemode() {
+        return this.gamemode;
+    }
+
+    public void setGamemode(Gamemode gm) {
+        this.gamemode = gm;
+    }
+
+    @Override
+    public boolean hitHandler(float fallHeight) {
+        boolean result = super.hitHandler(fallHeight);
+
+        if (result)
+            Sound.loadAndPlay("resources/sounds/player/damage.wav");
+
+        if (this.getHearts() == 0)
+        {
+            OpenCraft.setCurrentScreen(new DeadScreen());
+            OpenCraft.changeMenuStatus(true);
+        }
+
+        return result;
+    }
+
 }

@@ -6,12 +6,12 @@ import OpenCraft.gui.Screen;
 import OpenCraft.OpenCraft;
 import org.lwjgl.input.Keyboard;
 
-public class PauseMenu extends Screen
+public class PauseMenuScreen extends Screen
 {
 
     private boolean escapeClick;
 
-    public PauseMenu() {
+    public PauseMenuScreen() {
         super(OpenCraft.getWidth(), OpenCraft.getHeight(), "Game menu");
     }
 

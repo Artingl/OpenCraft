@@ -9,7 +9,7 @@ import org.lwjgl.input.Keyboard;
 
 import java.io.File;
 
-public class NewWorldConfigurator extends Screen
+public class NewWorldConfiguratorScreen extends Screen
 {
 
     public String levelName;
@@ -18,7 +18,7 @@ public class NewWorldConfigurator extends Screen
     private int seedEditArea;
     private int createNewWorldBtn;
 
-    public NewWorldConfigurator() {
+    public NewWorldConfiguratorScreen() {
         super(OpenCraft.getWidth(), OpenCraft.getHeight(), "Create a new world");
     }
 
@@ -39,6 +39,11 @@ public class NewWorldConfigurator extends Screen
             setLoadingScreen("Loading world...");
             OpenCraft.getWorldListScreen().levelName = ((EditArea)getElements().get(levelEditArea)).getText();
             int seed = ((EditArea)getElements().get(seedEditArea)).getText().hashCode();
+
+            if (((EditArea) getElements().get(seedEditArea)).getText().equals("")) {
+                // todo: make it random
+                seed = 3556498;
+            }
             OpenCraft.startNewGame(false, seed);
         }));
 

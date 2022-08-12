@@ -6,14 +6,12 @@ import OpenCraft.OpenCraft;
 import OpenCraft.World.Chunk.Chunk;
 import OpenCraft.World.Chunk.ChunksSorter;
 import OpenCraft.World.Entity.EntityPlayer;
-import OpenCraft.World.Entity.PlayerController;
 import OpenCraft.World.Level.Level;
 import OpenCraft.math.Vector2i;
 import OpenCraft.math.Vector3i;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class LevelRenderer implements ITick
 {
@@ -73,8 +71,10 @@ public class LevelRenderer implements ITick
                                 updates--;
                         }
 
-                        chunk.render(layer);
-                        CHUNKS_RENDERED++;
+                        if (chunk.getLayersVisible(layer)) {
+                            chunk.render(layer);
+                            CHUNKS_RENDERED++;
+                        }
                     }
                 }
             }

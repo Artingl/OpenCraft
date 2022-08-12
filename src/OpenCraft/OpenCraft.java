@@ -3,19 +3,20 @@ package OpenCraft;
 import OpenCraft.Interfaces.IGuiInterface;
 import OpenCraft.Interfaces.IGuiTick;
 import OpenCraft.Interfaces.ITick;
+import OpenCraft.Interfaces.IRenderHandler;
 import OpenCraft.Rendering.*;
-import OpenCraft.World.Biomes.Biomes;
+import OpenCraft.World.Block.BlockDestroy;
 import OpenCraft.World.Entity.EntityPlayer;
-import OpenCraft.World.Entity.PlayerController;
+import OpenCraft.World.PlayerController;
 import OpenCraft.World.Level.Level;
 import OpenCraft.World.RayCast;
 import OpenCraft.World.TickTimer;
 import OpenCraft.gui.Font;
 import OpenCraft.gui.Screen;
-import OpenCraft.gui.screens.MainMenu;
-import OpenCraft.gui.screens.NewWorldConfigurator;
-import OpenCraft.gui.screens.PauseMenu;
-import OpenCraft.gui.screens.WorldList;
+import OpenCraft.gui.screens.MainMenuScreen;
+import OpenCraft.gui.screens.NewWorldConfiguratorScreen;
+import OpenCraft.gui.screens.PauseMenuScreen;
+import OpenCraft.gui.screens.WorldListScreen;
 import OpenCraft.math.Vector3f;
 import OpenCraft.utils.StackTrace;
 import org.lwjgl.input.Keyboard;
@@ -28,7 +29,6 @@ import org.lwjgl.util.glu.GLU;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.concurrent.ThreadLocalRandom;
 
 import static org.lwjgl.opengl.GL11.*;
 
@@ -36,7 +36,7 @@ public class OpenCraft
 {
 
     // Game version
-    private static final String version = "0.7.1";
+    private static final String version = "0.7.6";
 
     // Window
     private static int width = 868;
@@ -61,23 +61,23 @@ public class OpenCraft
     private static final HashMap<Integer, IGuiInterface> guiInterface = new HashMap<>();
     private static HashMap<Integer, IGuiTick> guiTicks = new HashMap<>();
     private static final HashMap<Integer, ITick> ticks = new HashMap<>();
+    private static final HashMap<Integer, IRenderHandler> glUpdateEvent = new HashMap<>();
     private static final ArrayList<Runnable> glContext = new ArrayList<>();
-    private static int renderDistance = 6; // Render distance
-    private static int blockCastList = -1;
+    private static final int renderDistance = 3; // Render distance
     private static boolean inMenu = true;
     private static boolean renderWhenInMenu = false;
     private static int chunksUpdate = 0;
-    private static int FOV = 90; // Camera FOV
+    private static final int FOV = 90; // Camera FOV
     private static int FPS = 0;
     private static TickTimer timer;
     private static Screen currentScreen;
 
 
     // Gui
-    private static NewWorldConfigurator newWorldConfigurator;
-    private static PauseMenu pauseMenu;
-    private static WorldList worldList;
-    private static MainMenu mainMenu;
+    private static NewWorldConfiguratorScreen newWorldConfigurator;
+    private static PauseMenuScreen pauseMenu;
+    private static WorldListScreen worldList;
+    private static MainMenuScreen mainMenu;
     private static Font font;
     private static int guiScale = 3;
 
@@ -135,8 +135,6 @@ public class OpenCraft
 
             timer.advanceTime();
 
-            updateGlContext();
-
             Vector3f sky = new Vector3f(0, 0, 0);
 
             if (getLevel() != null) {
@@ -165,7 +163,7 @@ public class OpenCraft
                 {
                     escapeClick = true;
                 }
-                else if (escapeClick && !isWorldDestroyed)
+                else if (escapeClick && !isWorldDestroyed && !getLevel().getPlayerEntity().isDead())
                 {
                     escapeClick = false;
                     inMenu = true;
@@ -208,11 +206,11 @@ public class OpenCraft
     public static void initScreens()
     {
         try {
-            mainMenu = new MainMenu();
+            mainMenu = new MainMenuScreen();
         } catch (IOException e) { }
-        worldList = new WorldList();
-        pauseMenu = new PauseMenu();
-        newWorldConfigurator = new NewWorldConfigurator();
+        worldList = new WorldListScreen();
+        pauseMenu = new PauseMenuScreen();
+        newWorldConfigurator = new NewWorldConfiguratorScreen();
     }
 
     public static void quitToMainMenu()
@@ -286,7 +284,10 @@ public class OpenCraft
     {
         try {
             if (isWorldDestroyed)
+            {
+                updateGlContext();
                 return;
+            }
 
             if (!inMenu) {
                 getLevel().getPlayerEntity().rotate();
@@ -298,12 +299,23 @@ public class OpenCraft
             this.setPerspective();
             Frustum frustum = Frustum.getFrustum();
             levelRenderer.render(frustum);
+            updateGlContext();
+
 
             glEnable(GL_BLEND);
+
+            new HashMap<>(glUpdateEvent).forEach(((id, tick) -> {
+                try {
+                    if (tick != null) tick.render();
+                } catch (Exception e) {
+                    System.out.println("Error occurred while running GL update function: " + StackTrace.getStackTrace(e));
+                }
+            }));
+
             particleEngine.render(timer.a, 0);
+            pick();
             glDisable(GL_BLEND);
 
-            pick();
             GL11.glPopMatrix();
             GL11.glDisable(3042);
             GL11.glDisable(2896);
@@ -412,11 +424,6 @@ public class OpenCraft
                     if (iGuiInterface != null) iGuiInterface.render(screenWidth, screenHeight, finalScale);
                     GL11.glTranslatef(0.0F, 0.0F, 0.0F);
                 }));
-
-                if (playerController.getCurrentBlock() != null)
-                {
-                    //BlockRenderer.renderBlockIcon(t, 20, 0, 128, 128, screenWidth - 10, screenHeight + 78, player.getCurrentBlock());
-                }
             }
 
             GL11.glDisable(3042);
@@ -432,28 +439,42 @@ public class OpenCraft
     {
         EntityPlayer entityPlayer = getLevel().getPlayerEntity();
 
-        float[][] ray = RayCast.rayCastToBlock(6, entityPlayer.getRx(), entityPlayer.getRy(), entityPlayer.getX(), entityPlayer.getY(), entityPlayer.getZ());
-        if (ray[0][0] == 1)
+        RayCast.RayResult[] ray = RayCast.rayCastToBlock(6, entityPlayer.getRx(), entityPlayer.getRy(), entityPlayer.getX(), entityPlayer.getY(), entityPlayer.getZ());
+        if (ray[0].state)
         {
-            if (blockCastList != -1)
-            {
-                GL11.glDeleteLists(blockCastList, 1);
-            }
-            blockCastList = GL11.glGenLists(1);
-            GL11.glNewList(blockCastList, GL_COMPILE);
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+            glColor3d(0, 0, 0);
             VerticesBuffer t = VerticesBuffer.instance;
             for(int i = 0; i < 6; ++i) {
                 t.begin();
-                BlockRenderer.renderFaceNoTexture(entityPlayer, t, (int)ray[1][0], (int)ray[1][1], (int)ray[1][2], i);
+                BlockRenderer.renderFaceNoTexture(entityPlayer, t, ray[0].x, ray[0].y, ray[0].z, i);
                 t.end();
             }
-            GL11.glEndList();
 
-            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-            glColor3d(0, 0, 0);
-            GL11.glCallList(blockCastList);
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
             glColor3d(1, 1, 1);
+
+            float value = playerController.getBlockBreakState();
+
+            if (value > 0) {
+                value++;
+                if (value > 10) value = 10;
+
+                GL11.glEnable(GL11.GL_TEXTURE_2D);
+                GL11.glBindTexture(GL11.GL_TEXTURE_2D, TextureEngine.getTerrain());
+
+                t.begin();
+                BlockRenderer.renderBackSide(t, ray[0].x, ray[0].y, ray[0].z, new BlockDestroy((int) value-1));
+                BlockRenderer.renderTopSide(t, ray[0].x, ray[0].y, ray[0].z, new BlockDestroy((int) value-1));
+                BlockRenderer.renderLeftSide(t, ray[0].x, ray[0].y, ray[0].z, new BlockDestroy((int) value-1));
+                BlockRenderer.renderRightSide(t, ray[0].x, ray[0].y, ray[0].z, new BlockDestroy((int) value-1));
+                BlockRenderer.renderBottomSide(t, ray[0].x, ray[0].y, ray[0].z, new BlockDestroy((int) value-1));
+                BlockRenderer.renderFrontSide(t, ray[0].x, ray[0].y, ray[0].z, new BlockDestroy((int) value-1));
+                t.end();
+
+                GL11.glEndList();
+                GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
+            }
         }
     }
 
@@ -471,7 +492,7 @@ public class OpenCraft
         GL11.glRotatef(entityPlayer.getRx(), 1.0F, 0.0F, 0.0F);
         GL11.glRotatef(entityPlayer.getRy(), 0.0F, 1.0F, 0.0F);
         float x = entityPlayer.getXo() + (entityPlayer.getX() - entityPlayer.getXo()) * timer.a;
-        float y = entityPlayer.getYo() + (entityPlayer.getY() - entityPlayer.getYo()) * timer.a;
+        float y = entityPlayer.getYo() + (entityPlayer.getY() - entityPlayer.getYo()) * timer.a - 2 + entityPlayer.getHeightOffset();
         float z = entityPlayer.getZo() + (entityPlayer.getZ() - entityPlayer.getZo()) * timer.a;
 
         GL11.glTranslatef(-x, -y, -z);
@@ -573,19 +594,30 @@ public class OpenCraft
         return levelRenderer;
     }
 
-    public static WorldList getWorldListScreen()
+    public static WorldListScreen getWorldListScreen()
     {
         return worldList;
     }
 
-    public static MainMenu getMainMenuScreen()
+    public static MainMenuScreen getMainMenuScreen()
     {
         return mainMenu;
     }
 
-    public static NewWorldConfigurator getNewWorldConfigurator()
+    public static NewWorldConfiguratorScreen getNewWorldConfigurator()
     {
         return newWorldConfigurator;
+    }
+
+    public static int registerRenderEvent(IRenderHandler tick)
+    {
+        glUpdateEvent.put(glUpdateEvent.size(), tick);
+        return glUpdateEvent.size()-1;
+    }
+
+    public static void unregisterRenderEvent(int index)
+    {
+        glUpdateEvent.remove(index);
     }
 
     public static int registerTickEvent(ITick tick)
@@ -678,4 +710,7 @@ public class OpenCraft
         close = true;
     }
 
+    public static void changeMenuStatus(boolean b) {
+        inMenu = b;
+    }
 }

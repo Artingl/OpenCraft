@@ -37,25 +37,27 @@ public class Biomes {
     }
 
     public World getWorldBiome(int x, int z) {
-        double value = this.noise.getNoiseValue(12, (float) x, (float) z, .5f, .01f, 0, 50);
-        World biome;
-
-        if (value > 10 && value <= 30) {
-            biome = World.Desert;
-        }
-        else if (value > 30 && value <= 46) {
-            if (previousBiome == World.Forest || previousBiome == World.Mountains)
-            {
-                biome = World.Mountains;
-            }
-            else biome = World.Forest;
-        }
-        else {
-            biome = World.Forest;
-        }
-
-        previousBiome = biome;
-        return biome;
+        return World.Forest;
+//
+//        double value = this.noise.getNoiseValue(12, (float) x, (float) z, .5f, .01f, 0, 50);
+//        World biome;
+//
+//        if (value > 10 && value <= 30) {
+//            biome = World.Desert;
+//        }
+//        else if (value > 30 && value <= 46) {
+//            if (previousBiome == World.Forest || previousBiome == World.Mountains)
+//            {
+//                biome = World.Mountains;
+//            }
+//            else biome = World.Forest;
+//        }
+//        else {
+//            biome = World.Forest;
+//        }
+//
+//        previousBiome = biome;
+//        return biome;
     }
 
     public Hell getHellBiome(int x, int z) {

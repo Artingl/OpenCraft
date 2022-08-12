@@ -67,6 +67,14 @@ public class TextureEngine
         return load(terrainImage);
     }
 
+    public static int load(String path) {
+        try {
+            return load(ImageIO.read(new File(path)));
+        } catch (Exception e) {}
+
+        return terrainId;
+    }
+
     public static int load(BufferedImage image)
     {
         return load(image, GL11.GL_NEAREST);

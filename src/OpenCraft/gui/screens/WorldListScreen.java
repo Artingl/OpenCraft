@@ -13,7 +13,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.zip.GZIPInputStream;
 
-public class WorldList extends Screen
+public class WorldListScreen extends Screen
 {
 
     public String levelName;
@@ -21,7 +21,7 @@ public class WorldList extends Screen
     private int worldBtnPosition;
     private int loadWorldBtnId;
 
-    public WorldList() {
+    public WorldListScreen() {
         super(OpenCraft.getWidth(), OpenCraft.getHeight(), "Select world");
     }
 

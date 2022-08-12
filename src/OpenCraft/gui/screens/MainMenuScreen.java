@@ -3,17 +3,15 @@ package OpenCraft.gui.screens;
 import OpenCraft.Rendering.VerticesBuffer;
 import OpenCraft.gui.Button;
 import OpenCraft.gui.Screen;
-import OpenCraft.Rendering.BlockRenderer;
 import OpenCraft.Rendering.TextureEngine;
 import OpenCraft.OpenCraft;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.util.glu.GLU;
 
 import javax.imageio.ImageIO;
 import java.io.File;
 import java.io.IOException;
 
-public class MainMenu extends Screen
+public class MainMenuScreen extends Screen
 {
 
     private final int panoramaId0;
@@ -28,7 +26,7 @@ public class MainMenu extends Screen
     private float rotationY = 0;
     private boolean b_rotation;
 
-    public MainMenu() throws IOException {
+    public MainMenuScreen() throws IOException {
         super(OpenCraft.getWidth(), OpenCraft.getHeight(), "");
 
         panoramaId0 = TextureEngine.load(ImageIO.read(new File("resources/title/bg/panorama0.png")));

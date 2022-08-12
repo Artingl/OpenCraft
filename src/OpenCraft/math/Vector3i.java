@@ -30,4 +30,10 @@ public class Vector3i
     public Vector3i addZ(int i) {
         return new Vector3i(x, y, z + i);
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        Vector3i v3 = (Vector3i) obj;
+        return x ==  v3.x && y == v3.y && z == v3.z;
+    }
 }

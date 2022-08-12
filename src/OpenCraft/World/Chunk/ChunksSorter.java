@@ -1,7 +1,6 @@
 package OpenCraft.World.Chunk;
 
 import OpenCraft.World.Entity.EntityPlayer;
-import OpenCraft.World.Entity.PlayerController;
 
 import java.util.Comparator;
 

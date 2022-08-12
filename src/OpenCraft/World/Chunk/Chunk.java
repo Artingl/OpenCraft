@@ -24,12 +24,14 @@ public class Chunk
     private Region chunkRegion;
     private AABB aabb;
     private ArrayList<Boolean> layersState;
+    private ArrayList<Boolean> layersVisible;
     private int chunksList;
 
     public Chunk(Vector2i chunkListPosition)
     {
         this.chunkListPosition = chunkListPosition;
         this.layersState = new ArrayList<>();
+        this.layersVisible = new ArrayList<>();
         this.chunkRegion = new Region(this);
         this.aabb = new AABB(
                 chunkListPosition.x * 16, 0, chunkListPosition.y * 16,
@@ -37,6 +39,9 @@ public class Chunk
 
         for (int i = 0; i < CHUNK_LAYERS; i++)
             layersState.add(false);
+
+        for (int i = 0; i < CHUNK_LAYERS; i++)
+            layersVisible.add(false);
 
         this.chunksList = GL11.glGenLists(CHUNK_LAYERS);
     }
@@ -72,10 +77,9 @@ public class Chunk
             }
         }
 
-        if (isVisible) {
-            layersState.set(layer, true);
-            verticesBuffer.end();
-        }
+        layersVisible.set(layer, isVisible);
+        layersState.set(layer, true);
+        verticesBuffer.end();
 
         verticesBuffer.clear();
         GL11.glEndList();
@@ -113,6 +117,7 @@ public class Chunk
 
         this.chunkRegion.destroy();
         this.layersState.clear();
+        this.layersVisible.clear();
         this.verticesBuffer.clear();
 
         this.verticesBuffer = null;
@@ -130,5 +135,9 @@ public class Chunk
 
     public boolean layerState(int layer) {
         return this.layersState.get(layer);
+    }
+
+    public boolean getLayersVisible(int layer) {
+        return this.layersVisible.get(layer);
     }
 }

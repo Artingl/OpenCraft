@@ -2,6 +2,7 @@ package OpenCraft.World.Level;
 
 import OpenCraft.World.Biomes.Biomes;
 import OpenCraft.World.Chunk.Region;
+import OpenCraft.World.Generation.NoiseGenerator3D;
 import OpenCraft.World.Generation.PerlinNoise;
 
 public class LevelGeneration {
@@ -9,12 +10,14 @@ public class LevelGeneration {
     protected Biomes biomes;
     protected Level level;
     protected PerlinNoise noise;
+    protected NoiseGenerator3D noise3d;
 
     public LevelGeneration(Level level) {
         this.level = level;
 
         this.biomes = new Biomes(this, level.getLevelType(), level.getSeed());
         this.noise = new PerlinNoise(3, level.getSeed());
+        this.noise3d = new NoiseGenerator3D(level.getSeed());
     }
 
     public void generateRegion(Region region, int region_x, int region_z, int world_x, int world_z) {}

@@ -30,4 +30,10 @@ public class Vector3f
     public Vector3f addZ(float i) {
         return new Vector3f(x, y, z + i);
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        Vector3f v3 = (Vector3f) obj;
+        return x ==  v3.x && y == v3.y && z == v3.z;
+    }
 }

@@ -1,7 +1,6 @@
 package OpenCraft.Rendering;
 
 import OpenCraft.World.Entity.EntityPlayer;
-import OpenCraft.World.Entity.PlayerController;
 import OpenCraft.World.Level.Level;
 import OpenCraft.World.Particle;
 import OpenCraft.Interfaces.ITick;

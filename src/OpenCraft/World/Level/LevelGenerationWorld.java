@@ -21,34 +21,53 @@ public class LevelGenerationWorld extends LevelGeneration
     @Override
     public void generateRegion(Region region, int region_x, int region_z, int world_x, int world_z)
     {
-        Biomes.World biome = this.biomes.getWorldBiome(world_x, world_z);
-
-        int y = getHeightValue(world_x, world_z, biome);
+        int y = getHeightValue(world_x, world_z);
+        boolean wasSand = false;
 
         region.setBlock(Block.bedrock, region_x, 0, region_z);
 
-        Block mainBlock = Block.grass_block;
-
-        if (biome == Biomes.World.Desert) {
-            mainBlock = Block.sand;
+        for (int i = 0; i < level.getRandomNumber(0, 3); i++) {
+            region.setBlock(Block.bedrock, region_x, i, region_z);
         }
 
-        if (biome == Biomes.World.Ocean) {
-            mainBlock = Block.water;
+        if (y < Level.WATER_LEVEL - 1)
+        {
+            region.setBlock(Block.sand, region_x, y, region_z);
+            wasSand = true;
         }
+        else
+        {
+            region.setBlock(Block.grass_block, region_x, y, region_z);
 
-        region.setBlock(mainBlock, region_x, y, region_z);
-
-        if (!(y < Level.WATER_LEVEL - 3)) {
-            if (biome == Biomes.World.Forest && level.getRandomNumber(20, 1500) == level.getRandomNumber(20, 1500)) {
-                int treeHeight = level.getRandomNumber(5, 7);
-                generateTree(region, treeHeight, region_x, y + 1, region_z);
+            if (level.getRandomNumber(10, 20) == level.getRandomNumber(10, 20)) {
+                region.setBlock(Block.grass, region_x, y+1, region_z);
             }
+
+            if (level.getRandomNumber(10, 25) == level.getRandomNumber(10, 25)) {
+                region.setBlock(Block.rose, region_x, y+1, region_z);
+            }
+        }
+
+        if (!wasSand && level.getRandomNumber(20, 1500) == level.getRandomNumber(20, 1500))
+        {
+            int treeHeight = level.getRandomNumber(5, 7);
+            generateTree(region, treeHeight, region_x, y + 1, region_z);
         }
 
         for (int i = 1; i < y; i++)
         {
-            if (biome == Biomes.World.Desert)
+            if (!wasSand)
+            {
+                if (i > y - level.getRandomNumber(5, 10))
+                {
+                    region.setBlock(Block.dirt, region_x, i, region_z);
+                }
+                else
+                {
+                    region.setBlock(Block.stone, region_x, i, region_z);
+                }
+            }
+            else
             {
                 if (i > y - level.getRandomNumber(5, 10))
                 {
@@ -59,18 +78,8 @@ public class LevelGenerationWorld extends LevelGeneration
                     region.setBlock(Block.stone, region_x, i, region_z);
                 }
             }
-            else {
-                if (i > y - level.getRandomNumber(5, 10))
-                {
-                    region.setBlock(Block.dirt, region_x, i, region_z);
-                }
-                else
-                {
-                    region.setBlock(Block.stone, region_x, i, region_z);
-                }
-            }
-        }
 
+        }
         if (y < Level.WATER_LEVEL - 3)
         {
             for (int i = y; i < Level.WATER_LEVEL - 3; i++)
@@ -78,24 +87,6 @@ public class LevelGenerationWorld extends LevelGeneration
                 region.setBlock(Block.water, region_x, i + 1, region_z);
             }
         }
-
-    }
-
-    public int getHeightValue(int x, int z, Biomes.World biome) {
-//        if (biome == Biomes.World.Mountains) {
-//            this.setBiomeHeightValue(40);
-//        }
-//        else if (biome == Biomes.World.Forest) {
-//            this.setBiomeHeightValue(20);
-//        }
-//        else if (biome == Biomes.World.Desert) {
-//            this.setBiomeHeightValue(18);
-//        }
-//        else {
-//            this.setBiomeHeightValue(12);
-//        }
-
-        return this.noise.getNoiseValue(38, (float) x, (float) z, .5f, .01f, -10, 10) + Level.WATER_LEVEL;
     }
 
     public void generateTree(Region region, int treeHeight, int x, int y, int z)

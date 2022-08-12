@@ -5,7 +5,9 @@ import OpenCraft.phys.AABB;
 import OpenCraft.Interfaces.ITick;
 import OpenCraft.OpenCraft;
 import OpenCraft.World.Level.Level;
+import OpenCraft.sound.Sound;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Entity implements ITick
@@ -16,7 +18,7 @@ public class Entity implements ITick
     public float yd;
     public float zd;
     public AABB aabb;
-    public boolean onGround = false;
+    public boolean onGround = true;
     public boolean horizontalCollision = false;
     public boolean removed = false;
 
@@ -43,6 +45,10 @@ public class Entity implements ITick
     /* Entity rotation */
     protected float rx; // X rotation
     protected float ry; // Y rotation
+    private int hearts;
+    private int maxHearts;
+    private float fallValue;
+    private boolean dead;
 
     public Entity(Level level)
     {
@@ -71,7 +77,11 @@ public class Entity implements ITick
         this.ry = 0;
         float w = 0.3F;
         float h = 0.9F;
+        this.fallValue = 0;
         this.aabb = new AABB(x - w, y - h, z - w, x + w, y + h, z + w);
+        this.hearts = 20;
+        this.maxHearts = 20;
+        this.dead = false;
         OpenCraft.registerTickEvent(this);
     }
 
@@ -120,9 +130,19 @@ public class Entity implements ITick
             za = ((AABB)aABBs.get(i)).clipZCollide(this.aabb, za);
         }
 
+        if (!this.onGround && (yaOrg != ya && yaOrg < 0.0F)) {
+            this.fallValue = Math.round(this.fallValue);
+            this.hitHandler(this.fallValue);
+            this.fallValue = 0;
+        }
+        else {
+            this.fallValue -= ya;
+        }
+
         this.aabb.move(0.0F, 0.0F, za);
         this.horizontalCollision = xaOrg != xa || zaOrg != za;
         this.onGround = yaOrg != ya && yaOrg < 0.0F;
+
         if (xaOrg != xa) {
             this.xd = 0.0F;
         }
@@ -159,6 +179,77 @@ public class Entity implements ITick
         this.xo = this.x;
         this.yo = this.y;
         this.zo = this.z;
+    }
+
+    public int getHearts() {
+        return hearts;
+    }
+
+    public void setHearts(int h) {
+        this.hearts = h;
+    }
+
+    public int getMaxHearts() {
+        return maxHearts;
+    }
+
+    public void setMaxHearts(int h) {
+        this.maxHearts = h;
+
+        if (this.hearts > this.maxHearts) {
+            this.hearts = this.maxHearts;
+        }
+    }
+
+    public boolean hitHandler(float fallHeight) {
+        if (fallHeight >= 4) {
+            this.hearts -= 5;
+
+            if (fallHeight >= 47) {
+                this.hearts = 0;
+            }
+            else if (fallHeight >= 30) {
+                this.hearts -= 17;
+            }
+            else if (fallHeight >= 23) {
+                this.hearts -= 13;
+            }
+            else if (fallHeight >= 16) {
+                this.hearts -= 9;
+            }
+            else if (fallHeight >= 10) {
+                this.hearts -= 7;
+            }
+
+            if (this.hearts < 0) {
+                this.die();
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
+    public void die() {
+        this.hearts = 0;
+        this.dead = true;
+    }
+
+    public boolean isDead() {
+        return this.dead;
+    }
+
+    public void respawn() {
+        this.dead = false;
+        this.teleportToSpawnPoint();
+        this.hearts = this.maxHearts;
+        this.xd = 0;
+        this.yd = 0;
+        this.zd = 0;
+        this.rx = 0;
+        this.ry = 0;
+        this.fallValue = 0;
     }
 
     public boolean inWater() {
@@ -291,5 +382,13 @@ public class Entity implements ITick
 
     public void destroy() {
 
+    }
+
+    public float getHeightOffset() {
+        return this.heightOffset;
+    }
+
+    public void setHeightOffset(float heightOffset) {
+        this.heightOffset = heightOffset;
     }
 }

@@ -2,6 +2,7 @@ package OpenCraft.World.Block;
 
 import OpenCraft.Rendering.Texture;
 import OpenCraft.Rendering.TextureEngine;
+import OpenCraft.World.Item.Tool;
 
 public class BlockStone extends Block
 {
@@ -20,6 +21,8 @@ public class BlockStone extends Block
         sx = TextureEngine.getBlockTextureX(this.getId());
         sy = TextureEngine.getBlockTextureY(this.getId());
         int id = TextureEngine.getBlockTextureId(this.getId());
+        this.setStrength(0.4f);
+        this.setDefaultTool(Tool.PICKAXE);
 
         this.texture = new Texture(id, tx, ty, bx, by, sx, sy);
 

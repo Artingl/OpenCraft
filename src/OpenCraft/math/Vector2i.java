@@ -25,4 +25,10 @@ public class Vector2i
     public Vector2i addY(int i) {
         return new Vector2i(x, y + i);
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        Vector2i v3 = (Vector2i) obj;
+        return x ==  v3.x && y == v3.y;
+    }
 }

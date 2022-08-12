@@ -1,7 +1,6 @@
 package OpenCraft.Rendering;
 
 import OpenCraft.World.Entity.EntityPlayer;
-import OpenCraft.World.Entity.PlayerController;
 import OpenCraft.OpenCraft;
 import OpenCraft.World.Block.Block;
 import org.lwjgl.opengl.GL11;
@@ -41,29 +40,35 @@ public class BlockRenderer
 
     public static void render(VerticesBuffer t, float x, float y, float z, Block block)
     {
-        if (haveToRenderSide(0, x, y, z, block))
-        {
-            renderTopSide(t, x, y, z, block);
+        if (block.isTile()) {
+            renderTile0(t, x, y, z, block);
+            renderTile1(t, x, y, z, block);
         }
-        if (haveToRenderSide(1, x, y, z, block))
-        {
-            renderBottomSide(t, x, y, z, block);
-        }
-        if (haveToRenderSide(2, x, y, z, block))
-        {
-            renderBackSide(t, x, y, z, block);
-        }
-        if (haveToRenderSide(3, x, y, z, block))
-        {
-            renderRightSide(t, x, y, z, block);
-        }
-        if (haveToRenderSide(4, x, y, z, block))
-        {
-            renderFrontSide(t, x, y, z, block);
-        }
-        if (haveToRenderSide(5, x, y, z, block))
-        {
-            renderLeftSide(t, x, y, z, block);
+        else {
+            if (haveToRenderSide(0, x, y, z, block))
+            {
+                renderTopSide(t, x, y, z, block);
+            }
+            if (haveToRenderSide(1, x, y, z, block))
+            {
+                renderBottomSide(t, x, y, z, block);
+            }
+            if (haveToRenderSide(2, x, y, z, block))
+            {
+                renderBackSide(t, x, y, z, block);
+            }
+            if (haveToRenderSide(3, x, y, z, block))
+            {
+                renderRightSide(t, x, y, z, block);
+            }
+            if (haveToRenderSide(4, x, y, z, block))
+            {
+                renderFrontSide(t, x, y, z, block);
+            }
+            if (haveToRenderSide(5, x, y, z, block))
+            {
+                renderLeftSide(t, x, y, z, block);
+            }
         }
     }
 
@@ -78,9 +83,6 @@ public class BlockRenderer
         if (side == 4) block0 = OpenCraft.getLevel().getBlock((int)x, (int)y, (int)z + 1);
         if (side == 5) block0 = OpenCraft.getLevel().getBlock((int)x - 1, (int)y, (int)z);
 
-//         todo: remove this
-//        if (block0.getIdInt() == Block.glass.getIdInt()) return false;
-
         if (block.isLiquid())
         {
             if (side == 0) return !block0.isVisible();
@@ -91,12 +93,12 @@ public class BlockRenderer
             if (side == 5) return !block0.isVisible();
         }
 
-        if (side == 0) return !block0.isVisible() || block0.hasTranslucent() || block0.isLiquid();
-        if (side == 1) return !block0.isVisible() || block0.hasTranslucent() || block0.isLiquid();
-        if (side == 2) return !block0.isVisible() || block0.hasTranslucent() || block0.isLiquid();
-        if (side == 3) return !block0.isVisible() || block0.hasTranslucent() || block0.isLiquid();
-        if (side == 4) return !block0.isVisible() || block0.hasTranslucent() || block0.isLiquid();
-        if (side == 5) return !block0.isVisible() || block0.hasTranslucent() || block0.isLiquid();
+        if (side == 0) return !block0.isVisible() || block0.hasTranslucent() || block0.isLiquid() || block0.isTile();
+        if (side == 1) return !block0.isVisible() || block0.hasTranslucent() || block0.isLiquid() || block0.isTile();
+        if (side == 2) return !block0.isVisible() || block0.hasTranslucent() || block0.isLiquid() || block0.isTile();
+        if (side == 3) return !block0.isVisible() || block0.hasTranslucent() || block0.isLiquid() || block0.isTile();
+        if (side == 4) return !block0.isVisible() || block0.hasTranslucent() || block0.isLiquid() || block0.isTile();
+        if (side == 5) return !block0.isVisible() || block0.hasTranslucent() || block0.isLiquid() || block0.isTile();
 
         return false;
     }
@@ -219,6 +221,46 @@ public class BlockRenderer
         t.setVertexCoord(x, 1.f +y - down, z);
         t.setTexCoord(block.getTexture().getSideTextureX() + TextureEngine.addTextCoord, block.getTexture().getSideTextureY() + 0.0f);
         t.setVertexCoord(x, 1.f +y - down, 1.f +z);
+    }
+
+    public static void renderTile1(VerticesBuffer t, float x, float y, float z, Block block) {
+        int block_r=255;
+        int block_g=255;
+        int block_b=255;
+
+//        float randomization = (block.getRandomization() / 170f);
+//        x -= randomization;
+//        z -= randomization;
+
+        t.setColori(block_r - 80, block_g - 80, block_b - 80);
+        t.setTexCoord(block.getTexture().getSideTextureX() + TextureEngine.addTextCoord, block.getTexture().getSideTextureY() + TextureEngine.addTextCoord);
+        t.setVertexCoord(x+0.1f, y, z+0.1f);
+        t.setTexCoord(block.getTexture().getSideTextureX() + 0.0f, block.getTexture().getSideTextureY() + TextureEngine.addTextCoord);
+        t.setVertexCoord(x+0.9f, y, z+0.9f);
+        t.setTexCoord(block.getTexture().getSideTextureX() + 0.0f, block.getTexture().getSideTextureY() + 0.0f);
+        t.setVertexCoord(x+0.9f, y+0.9f, z+0.9f);
+        t.setTexCoord(block.getTexture().getSideTextureX() + TextureEngine.addTextCoord, block.getTexture().getSideTextureY() + 0.0f);
+        t.setVertexCoord(x+0.1f, y+0.9f, z+0.1f);
+    }
+
+    public static void renderTile0(VerticesBuffer t, float x, float y, float z, Block block) {
+        int block_r=255;
+        int block_g=255;
+        int block_b=255;
+
+//        float randomization = (block.getRandomization() / 170f);
+//        x -= randomization;
+//        z -= randomization;
+
+        t.setColori(block_r - 80, block_g - 80, block_b - 80);
+        t.setTexCoord(block.getTexture().getSideTextureX() + TextureEngine.addTextCoord, block.getTexture().getSideTextureY() + TextureEngine.addTextCoord);
+        t.setVertexCoord(x+0.9f, y, z+0.1f);
+        t.setTexCoord(block.getTexture().getSideTextureX() + 0.0f, block.getTexture().getSideTextureY() + TextureEngine.addTextCoord);
+        t.setVertexCoord(x+0.1f, y, z+0.9f);
+        t.setTexCoord(block.getTexture().getSideTextureX() + 0.0f, block.getTexture().getSideTextureY() + 0.0f);
+        t.setVertexCoord(x+0.1f, y+0.9f, z+0.9f);
+        t.setTexCoord(block.getTexture().getSideTextureX() + TextureEngine.addTextCoord, block.getTexture().getSideTextureY() + 0.0f);
+        t.setVertexCoord(x+0.9f, y+0.9f, z+0.1f);
     }
 
     public static void renderFaceNoTexture(EntityPlayer player, VerticesBuffer t, int x, int y, int z, int face) {

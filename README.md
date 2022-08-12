@@ -21,7 +21,7 @@ If you found some bug, create an issue. Describe the bug (it will be good if you
 - [ ] Singleplayer
 - [ ] Mobs
 - [ ] Gamemodes
-- [X] Biomes
+- [ ] Biomes
 - [X] Dimensions
 - [X] Infinity world generation
 - [ ] Mods Engine

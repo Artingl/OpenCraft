@@ -24,4 +24,10 @@ public class Vector2f
     public Vector2f addY(float i) {
         return new Vector2f(x, y + i);
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        Vector2f v3 = (Vector2f) obj;
+        return x ==  v3.x && y == v3.y;
+    }
 }

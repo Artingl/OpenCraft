@@ -1,7 +1,10 @@
 package OpenCraft.World.Level;
 
+import OpenCraft.Interfaces.ITick;
+import OpenCraft.Interfaces.IRenderHandler;
 import OpenCraft.Interfaces.LevelRendererListener;
 import OpenCraft.OpenCraft;
+import OpenCraft.World.Ambient.Ambient;
 import OpenCraft.World.Block.Block;
 import OpenCraft.World.Chunk.Chunk;
 import OpenCraft.World.Chunk.Region;
@@ -12,7 +15,7 @@ import OpenCraft.math.Vector3i;
 import OpenCraft.phys.AABB;
 import java.util.ArrayList;
 
-public class Level
+public class Level implements IRenderHandler, ITick
 {
     public static final int WATER_LEVEL = 64;
 
@@ -22,17 +25,21 @@ public class Level
 
     private ArrayList<Entity> entities = new ArrayList<>();
     private final LevelType levelType;
+    private Ambient ambient;
     private LevelGeneration levelGeneration;
     private EntityPlayer entityPlayer;
     private int entityPlayerId;
     private int seed;
     private int initialSeed;
+    private int glUpdateEvent;
+    private int tickEvent;
 
     public Level(LevelType levelType, int seed)
     {
         this.levelType = levelType;
         this.seed = seed;
         this.initialSeed = seed;
+        this.ambient = new Ambient(this);
 
         if (this.levelType == LevelType.WORLD) {
             this.levelGeneration = new LevelGenerationWorld(this);
@@ -40,6 +47,9 @@ public class Level
         else {
             this.levelGeneration = new LevelGenerationHell(this);
         }
+
+        this.glUpdateEvent = OpenCraft.registerRenderEvent(this);
+        this.tickEvent = OpenCraft.registerTickEvent(this);
     }
 
     public void setPlayerEntity(EntityPlayer entityPlayer) {
@@ -176,8 +186,10 @@ public class Level
         for(int x = x0; x < x1; ++x) {
             for(int y = y0; y < y1; ++y) {
                 for(int z = z0; z < z1; ++z) {
-                    if (getBlock(x, y, z) == null) continue;
-                    if (getBlock(x, y, z).isVisible() && !getBlock(x, y, z).isLiquid()) {
+                    Block block = getBlock(x, y, z);
+
+                    if (block == null) continue;
+                    if (block.isVisible() && !block.isLiquid() && !block.isTile()) {
                         boxes.add(new AABB((float)x, (float)y, (float)z, (float)(x + 1), (float)(y + 1), (float)(z + 1)));
                     }
                 }
@@ -231,5 +243,18 @@ public class Level
     {
         // todo: destroy all entities
         this.levelGeneration.destroy();
+
+        OpenCraft.unregisterRenderEvent(this.glUpdateEvent);
+        OpenCraft.unregisterTickEvent(this.tickEvent);
+    }
+
+    @Override
+    public void render() {
+        this.ambient.update();
+    }
+
+    @Override
+    public void tick() {
+        this.ambient.tick();
     }
 }
