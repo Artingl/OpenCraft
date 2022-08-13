@@ -2,7 +2,7 @@ package OpenCraft.Rendering;
 
 import OpenCraft.World.Entity.EntityPlayer;
 import OpenCraft.World.Level.Level;
-import OpenCraft.World.Particle;
+import OpenCraft.World.Ambient.Block.Particle;
 import OpenCraft.Interfaces.ITick;
 import OpenCraft.OpenCraft;
 import org.lwjgl.opengl.GL11;

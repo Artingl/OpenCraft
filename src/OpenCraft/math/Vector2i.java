@@ -31,4 +31,9 @@ public class Vector2i
         Vector2i v3 = (Vector2i) obj;
         return x ==  v3.x && y == v3.y;
     }
+
+    @Override
+    public String toString() {
+        return "Vector2i{x=" + x + ", y=" + y + "}";
+    }
 }

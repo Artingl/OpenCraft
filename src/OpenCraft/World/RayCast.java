@@ -42,8 +42,8 @@ public class RayCast
                 if (block.isVisible() && !block.isLiquid())
                 {
                     return new RayResult[]{
-                            new RayResult((int)(x),  (int)(y),  (int)(z), true),
-                            new RayResult((int) ox, (int) oy, (int) oz, true)
+                            new RayResult((int) Math.floor(x),  (int)Math.floor(y),  (int)Math.floor(z), true),
+                            new RayResult((int) Math.floor(ox), (int)Math.floor(oy), (int)Math.floor(oz), true)
                     };
                 }
             }

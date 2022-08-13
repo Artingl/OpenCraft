@@ -1,5 +1,6 @@
 package OpenCraft.gui.screens;
 
+import OpenCraft.World.Level.LevelSaver;
 import OpenCraft.gui.Button;
 import OpenCraft.gui.Screen;
 import OpenCraft.Rendering.VerticesBuffer;
@@ -66,7 +67,7 @@ public class WorldListScreen extends Screen
                     try {
                         DataInputStream dis = new DataInputStream(new GZIPInputStream(new FileInputStream("saves" + File.separator + file.getName() + File.separator + "level.data")));
                         int header = dis.readInt();
-                        if (header <= 78924536)
+                        if (header == LevelSaver.MAGIC)
                         {
                             String worldName = dis.readUTF();
                             String author = dis.readUTF();

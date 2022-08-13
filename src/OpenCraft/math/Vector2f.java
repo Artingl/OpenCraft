@@ -30,4 +30,9 @@ public class Vector2f
         Vector2f v3 = (Vector2f) obj;
         return x ==  v3.x && y == v3.y;
     }
+
+    @Override
+    public String toString() {
+        return "Vector2f{x=" + x + ", y=" + y + "}";
+    }
 }

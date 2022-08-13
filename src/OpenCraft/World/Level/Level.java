@@ -159,6 +159,11 @@ public class Level implements IRenderHandler, ITick
         }
     }
 
+    public void removeBlock(Vector3i position)
+    {
+        removeBlock(position.x, position.y, position.z);
+    }
+
     public void removeBlock(int x, int y, int z)
     {
         setBlock(x, y, z, Block.air);
@@ -256,5 +261,10 @@ public class Level implements IRenderHandler, ITick
     @Override
     public void tick() {
         this.ambient.tick();
+    }
+
+    @Override
+    public String toString() {
+        return "Level{type=" + levelType + "}";
     }
 }

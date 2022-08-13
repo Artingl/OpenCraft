@@ -2,10 +2,13 @@ package OpenCraft.World.Chunk;
 
 import OpenCraft.OpenCraft;
 import OpenCraft.World.Block.Block;
-import OpenCraft.World.Chunk.Chunk;
+import OpenCraft.World.Direction;
 import OpenCraft.World.Level.Level;
 import OpenCraft.math.Vector2i;
 import OpenCraft.math.Vector3i;
+
+import java.io.DataOutputStream;
+import java.io.IOException;
 
 public class Region {
 
@@ -44,6 +47,41 @@ public class Region {
         }
 
         this.blocks[x][y][z] = block;
+
+        if (y + 1 < 256) {
+            getBlock(x, y + 1, z).neighborChanged(
+                    OpenCraft.getLevel(),
+                    chunk.translateToRealCoords(x, y + 1, z),
+                    Direction.Values.UP,
+                    block
+            );
+        }
+
+        OpenCraft.getLevelSaver().appendRegion(this, OpenCraft.getLevel());
+    }
+
+    public Chunk getChunk() {
+        return chunk;
+    }
+
+    public Block[][][] getBlocks() {
+        return blocks;
+    }
+
+    public void writeBlocksBytes(DataOutputStream local_dos) throws IOException {
+        for (int i = 0; i < 16; i++) {
+            for (int j = 0; j < 256; j++) {
+                for (int k = 0; k < 16; k++) {
+                    Block block = this.blocks[i][j][k];
+                    if (block != null) {
+                        local_dos.writeInt(i);                // x
+                        local_dos.writeInt(j);                // y
+                        local_dos.writeInt(k);                // z
+                        local_dos.writeInt(block.getIdInt()); // block id
+                    }
+                }
+            }
+        }
     }
 
     public void destroy() {

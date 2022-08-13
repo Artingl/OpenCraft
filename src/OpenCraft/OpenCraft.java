@@ -7,6 +7,7 @@ import OpenCraft.Interfaces.IRenderHandler;
 import OpenCraft.Rendering.*;
 import OpenCraft.World.Block.BlockDestroy;
 import OpenCraft.World.Entity.EntityPlayer;
+import OpenCraft.World.Level.LevelSaver;
 import OpenCraft.World.PlayerController;
 import OpenCraft.World.Level.Level;
 import OpenCraft.World.RayCast;
@@ -36,7 +37,7 @@ public class OpenCraft
 {
 
     // Game version
-    private static final String version = "0.7.6";
+    private static final String version = "0.7.7";
 
     // Window
     private static int width = 868;
@@ -54,6 +55,7 @@ public class OpenCraft
     private static LevelRenderer levelRenderer; // World renderer
     private static Level world;
     private static Level hell;
+    private static LevelSaver levelSaver;
     private static Level.LevelType currentLevel; // current loaded world
     private static boolean isWorldDestroyed; // Is world destroyed
 
@@ -222,6 +224,7 @@ public class OpenCraft
         OpenCraft.renderWhenInMenu = false;
 
         new Thread(() -> {
+            levelSaver.destroy();
             ticks.clear();
             world.destroy();
             hell.destroy();
@@ -271,6 +274,9 @@ public class OpenCraft
         hell = new Level(Level.LevelType.HELL, seed+1);
         playerController = new PlayerController();
         particleEngine = new ParticleEngine();
+        levelSaver = new LevelSaver(OpenCraft.getWorldListScreen().levelName);
+        if (!load) levelSaver.create();
+        else       levelSaver.load();
 
         EntityPlayer entityPlayer = new EntityPlayer(playerController);
 
@@ -301,6 +307,7 @@ public class OpenCraft
             levelRenderer.render(frustum);
             updateGlContext();
 
+            levelSaver.update();
 
             glEnable(GL_BLEND);
 
@@ -699,6 +706,10 @@ public class OpenCraft
             scr.init();
         }
         currentScreen = scr;
+    }
+
+    public static LevelSaver getLevelSaver() {
+        return levelSaver;
     }
 
     public static Screen getCurrentScreen()

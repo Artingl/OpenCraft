@@ -36,4 +36,9 @@ public class Vector3f
         Vector3f v3 = (Vector3f) obj;
         return x ==  v3.x && y == v3.y && z == v3.z;
     }
+
+    @Override
+    public String toString() {
+        return "Vector3f{x=" + x + ", y=" + y + ", z=" + z + "}";
+    }
 }

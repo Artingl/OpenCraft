@@ -21,7 +21,7 @@ public class BlockStone extends Block
         sx = TextureEngine.getBlockTextureX(this.getId());
         sy = TextureEngine.getBlockTextureY(this.getId());
         int id = TextureEngine.getBlockTextureId(this.getId());
-        this.setStrength(0.4f);
+        this.setStrength(2);
         this.setDefaultTool(Tool.PICKAXE);
 
         this.texture = new Texture(id, tx, ty, bx, by, sx, sy);

@@ -153,17 +153,18 @@ public class PlayerController
         {
             if (Controls.getMouseKey(0) && this.breakingBlock.block != null && this.breakingBlock.blockPos.equals(ray[0]))
             {
-                if (this.breakingBlock.block.getTool() != Tool.UNBREAKABLE) {
-                    this.breakingBlock.blockBreakState += 4 * this.breakingBlock.block.getStrength() * OpenCraft.getTimer().a;
+                Block block = this.breakingBlock.block;
 
-                    if (this.breakingBlock.block.getStrength() == 0 || this.breakingBlock.blockBreakState >= 9) {
+                if (block.getTool() != Tool.UNBREAKABLE && !block.isLiquid()) {
+                    this.breakingBlock.blockBreakState += 0.5 / this.breakingBlock.block.getStrength();
+                    this.breakingBlock.blockPos = ray[0];
+
+                    if (this.breakingBlock.block.getStrength() == 0 || this.breakingBlock.blockBreakState >= 9 || block.getTool() == Tool.IMMEDIATELY) {
                         this.breakingBlock.blockBreakState = 0;
 
-                        appendInventory(new ItemBlock(OpenCraft.getLevel().getBlock(ray[0].x, ray[0].y, ray[0].z), 1));
-
-                        OpenCraft.getLevel().getBlock(ray[0].x, ray[0].y, ray[0].z).destroy(ray[0].x, ray[0].y, ray[0].z);
-                        OpenCraft.getLevel().getBlock(ray[0].x, ray[0].y, ray[0].z).createDrop(ray[0].x, ray[0].y, ray[0].z);
-                        OpenCraft.getLevel().removeBlock(ray[0].x, ray[0].y, ray[0].z);
+                        OpenCraft.getLevel().getBlock(ray[0]).destroy(ray[0]);
+                        OpenCraft.getLevel().getBlock(ray[0]).createDrop(ray[0]);
+                        OpenCraft.getLevel().removeBlock(ray[0]);
                     }
                 }
                 else {
@@ -173,20 +174,20 @@ public class PlayerController
             else {
                 this.breakingBlock.blockBreakState = 0;
                 this.breakingBlock.blockPos = ray[0];
-                this.breakingBlock.block = OpenCraft.getLevel().getBlock(ray[0].x, ray[0].y, ray[0].z);
+                this.breakingBlock.block = OpenCraft.getLevel().getBlock(ray[0]);
             }
 
-            if (Controls.getMouseKey(1) && !clickedMouse.get(1) && !entityPlayer.aabb.intersects(Block.getAABB(ray[1].x, ray[1].y, ray[1].z))
+            if (Controls.getMouseKey(1) && !clickedMouse.get(1) && !entityPlayer.aabb.intersects(Block.getAABB(ray[1]))
                     && getInventoryItem(playerInventory.selected) != null)
             {
                 if (getInventoryItem(playerInventory.selected) instanceof ItemBlock) {
                     RayCast.RayResult rayResult = ray[1];
 
-                    if (OpenCraft.getLevel().getBlock(ray[0].x, ray[0].y, ray[0].z).getIdInt() == Block.grass.getIdInt()) {
+                    if (OpenCraft.getLevel().getBlock(ray[0]).getIdInt() == Block.grass.getIdInt()) {
                         rayResult = ray[0];
                     }
 
-                    OpenCraft.getLevel().setBlock(rayResult.x, rayResult.y, rayResult.z, ((ItemBlock)getInventoryItem(playerInventory.selected)).getBlock());
+                    OpenCraft.getLevel().setBlock(rayResult, ((ItemBlock)getInventoryItem(playerInventory.selected)).getBlock());
                     decreaseSlot(playerInventory.selected);
                 }
 
@@ -244,7 +245,10 @@ public class PlayerController
     }
 
     public void appendInventory(Item item) {
-        // todo
+        if (item instanceof ItemBlock) {
+            appendInventory((ItemBlock) item);
+            return;
+        }
     }
 
     public void appendInventory(ItemBlock item) {

@@ -1,17 +1,18 @@
 package OpenCraft.World.Entity;
 
 import OpenCraft.World.Entity.Models.Model;
+import OpenCraft.World.Item.Item;
 import OpenCraft.phys.AABB;
 import OpenCraft.Interfaces.ITick;
 import OpenCraft.OpenCraft;
 import OpenCraft.World.Level.Level;
-import OpenCraft.sound.Sound;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class Entity implements ITick
 {
+    public static int ENTITIES_ID = 0;
+
 
     /* Collision and physics */
     public float xd;
@@ -49,21 +50,26 @@ public class Entity implements ITick
     private int maxHearts;
     private float fallValue;
     private boolean dead;
+    private int entityId;
+    private int tickEvent;
 
     public Entity(Level level)
     {
+        this.entityId = ENTITIES_ID++;
         this.level = level;
         reset(0, 0, 0);
     }
 
     public Entity()
     {
+        this.entityId = ENTITIES_ID++;
         this.level = OpenCraft.getLevel();
         reset(0, 0, 0);
     }
 
     public Entity(float x, float y, float z)
     {
+        this.entityId = ENTITIES_ID++;
         this.level = OpenCraft.getLevel();
         reset(x, y, z);
     }
@@ -82,7 +88,7 @@ public class Entity implements ITick
         this.hearts = 20;
         this.maxHearts = 20;
         this.dead = false;
-        OpenCraft.registerTickEvent(this);
+        this.tickEvent = OpenCraft.registerTickEvent(this);
     }
 
     public void setModel(Model model)
@@ -380,8 +386,17 @@ public class Entity implements ITick
         return this.level.isLit(xTile, yTile, zTile);
     }
 
-    public void destroy() {
+    public int getEntityId() {
+        return this.entityId;
+    }
 
+    @Override
+    public boolean equals(Object obj) {
+        return ((Entity)obj).getEntityId() == this.entityId;
+    }
+
+    public void destroy() {
+        OpenCraft.unregisterTickEvent(this.tickEvent);
     }
 
     public float getHeightOffset() {
@@ -391,4 +406,11 @@ public class Entity implements ITick
     public void setHeightOffset(float heightOffset) {
         this.heightOffset = heightOffset;
     }
+
+    public boolean hasInventory() {
+        return false;
+    }
+
+    public void pick(Item item) {}
+
 }

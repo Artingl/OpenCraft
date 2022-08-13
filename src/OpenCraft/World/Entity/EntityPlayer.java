@@ -5,6 +5,7 @@ import OpenCraft.Rendering.TextureEngine;
 import OpenCraft.World.Entity.Gamemode.Gamemode;
 import OpenCraft.World.Entity.Gamemode.Survival;
 import OpenCraft.World.Entity.Models.PlayerModel;
+import OpenCraft.World.Item.Item;
 import OpenCraft.World.PlayerController;
 import OpenCraft.gui.screens.DeadScreen;
 import OpenCraft.sound.Sound;
@@ -47,7 +48,13 @@ public class EntityPlayer extends Entity {
 
     public void tick() {
         super.tick();
-        this.controller.tick();
+
+        // In case we might play on some sort of server, there might be more
+        // than one player entity (for future reference)
+        if (this.equals(OpenCraft.getLevel().getPlayerEntity()))
+        {
+            this.controller.tick();
+        }
     }
 
     public void destroy() {
@@ -76,6 +83,14 @@ public class EntityPlayer extends Entity {
         }
 
         return result;
+    }
+
+    public boolean hasInventory() {
+        return true;
+    }
+
+    public void pick(Item item) {
+        OpenCraft.getPlayerController().appendInventory(item);
     }
 
 }

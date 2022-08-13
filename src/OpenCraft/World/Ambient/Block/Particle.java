@@ -1,4 +1,4 @@
-package OpenCraft.World;
+package OpenCraft.World.Ambient.Block;
 
 import OpenCraft.World.Entity.Entity;
 import OpenCraft.Rendering.Texture;
@@ -11,8 +11,8 @@ public class Particle extends Entity {
     private float yd;
     private float zd;
     public Texture tex;
-    private int age = 0;
-    private int lifetime = 0;
+    private int age;
+    private int lifetime;
     private float size;
     private float uo;
     private float vo;

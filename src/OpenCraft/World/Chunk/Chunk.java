@@ -19,7 +19,6 @@ public class Chunk
     public static int CHUNK_LAYERS = 64;
 
     private VerticesBuffer verticesBuffer = VerticesBuffer.instance;
-
     private Vector2i chunkListPosition;
     private Region chunkRegion;
     private AABB aabb;
@@ -139,5 +138,18 @@ public class Chunk
 
     public boolean getLayersVisible(int layer) {
         return this.layersVisible.get(layer);
+    }
+
+
+    public Vector3i translateToRealCoords(Vector3i position) {
+        return translateToRealCoords(position.x, position.y, position.z);
+    }
+
+    public Vector3i translateToRealCoords(int x, int y, int z) {
+        return new Vector3i(
+                x + this.chunkListPosition.x * 16,
+                y,
+                z + this.chunkListPosition.y * 16
+        );
     }
 }

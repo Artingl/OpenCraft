@@ -27,12 +27,18 @@ public class BlockRenderer
         GL11.glBindTexture(3553, TextureEngine.getTerrain());
         GL11.glEnable(3553);
         t.begin();
-        renderTopSide(t, -2, 0, 0, block);
-        if (rot == 0) renderBottomSide(t, -2, 0, 0, block);
-        if (rot == 0) renderBackSide(t, -2, 0, 0, block);
-        renderRightSide(t, -2, 0, 0, block);
-        if (rot == 0) renderFrontSide(t, -2, 0, 0, block);
-        if (rot == 0) renderLeftSide(t, -2, 0, 0, block);
+        if (block.isTile()) {
+            renderTile0(t, -2, 0, 0, block);
+            renderTile1(t, -2, 0, 0, block);
+        }
+        else {
+            renderTopSide(t, -2, 0, 0, block);
+            if (rot == 0) renderBottomSide(t, -2, 0, 0, block);
+            if (rot == 0) renderBackSide(t, -2, 0, 0, block);
+            renderRightSide(t, -2, 0, 0, block);
+            if (rot == 0) renderFrontSide(t, -2, 0, 0, block);
+            if (rot == 0) renderLeftSide(t, -2, 0, 0, block);
+        }
         t.end();
         GL11.glDisable(3553);
         GL11.glPopMatrix();
@@ -105,6 +111,36 @@ public class BlockRenderer
 
     public static void renderTopSide(VerticesBuffer t, float x, float y, float z, Block block)
     {
+        renderTopSide(t, x, y, z, 1, block);
+    }
+
+    public static void renderBottomSide(VerticesBuffer t, float x, float y, float z, Block block)
+    {
+        renderBottomSide(t, x, y, z, 1, block);
+    }
+
+    public static void renderBackSide(VerticesBuffer t, float x, float y, float z, Block block)
+    {
+        renderBackSide(t, x, y, z, 1, block);
+    }
+
+    public static void renderRightSide(VerticesBuffer t, float x, float y, float z, Block block)
+    {
+        renderRightSide(t, x, y, z, 1, block);
+    }
+
+    public static void renderFrontSide(VerticesBuffer t, float x, float y, float z, Block block)
+    {
+        renderFrontSide(t, x, y, z, 1, block);
+    }
+
+    public static void renderLeftSide(VerticesBuffer t, float x, float y, float z, Block block)
+    {
+        renderLeftSide(t, x, y, z, 1, block);
+    }
+    
+    public static void renderTopSide(VerticesBuffer t, float x, float y, float z, float blockSize, Block block)
+    {
         int block_r=255;
         int block_g=255;
         int block_b=255;
@@ -114,16 +150,16 @@ public class BlockRenderer
 
         t.setColori(block_r, block_g, block_b);
         t.setTexCoord(block.getTexture().getTopTextureX() + 0.0f, block.getTexture().getTopTextureY() + TextureEngine.addTextCoord);
-        t.setVertexCoord(x, 1.f +y - down, z);
+        t.setVertexCoord(x, blockSize + y - down, z);
         t.setTexCoord(block.getTexture().getTopTextureX() + 0.0f, block.getTexture().getTopTextureY() + 0.0f);
-        t.setVertexCoord(1.f +x, 1.f +y - down, z);
+        t.setVertexCoord(blockSize + x, blockSize + y - down, z);
         t.setTexCoord(block.getTexture().getTopTextureX() + TextureEngine.addTextCoord, block.getTexture().getTopTextureY() + 0.0f);
-        t.setVertexCoord(1.f +x, 1.f +y - down, 1.f +z);
+        t.setVertexCoord(blockSize + x, blockSize + y - down, blockSize + z);
         t.setTexCoord(block.getTexture().getTopTextureX() + TextureEngine.addTextCoord, block.getTexture().getTopTextureY() + TextureEngine.addTextCoord);
-        t.setVertexCoord(x, 1.f +y - down, 1.f +z);
+        t.setVertexCoord(x, blockSize + y - down, blockSize + z);
     }
 
-    public static void renderBottomSide(VerticesBuffer t, float x, float y, float z, Block block)
+    public static void renderBottomSide(VerticesBuffer t, float x, float y, float z, float blockSize, Block block)
     {
         int block_r=255;
         int block_g=255;
@@ -134,16 +170,16 @@ public class BlockRenderer
 
         t.setColori(block_r, block_g, block_b);
         t.setTexCoord(block.getTexture().getBottomTextureX() + 0.0f, block.getTexture().getBottomTextureY() + TextureEngine.addTextCoord);
-        t.setVertexCoord(x, y, 1.f +z);
+        t.setVertexCoord(x, y, blockSize + z);
         t.setTexCoord(block.getTexture().getBottomTextureX() + 0.0f, block.getTexture().getBottomTextureY() + 0.0f);
-        t.setVertexCoord(1.f +x, y, 1.f +z);
+        t.setVertexCoord(blockSize + x, y, blockSize + z);
         t.setTexCoord(block.getTexture().getBottomTextureX() + TextureEngine.addTextCoord, block.getTexture().getBottomTextureY() + 0.0f);
-        t.setVertexCoord(1.f +x, y, z);
+        t.setVertexCoord(blockSize + x, y, z);
         t.setTexCoord(block.getTexture().getBottomTextureX() + TextureEngine.addTextCoord, block.getTexture().getBottomTextureY() + TextureEngine.addTextCoord);
         t.setVertexCoord(x, y, z);
     }
 
-    public static void renderBackSide(VerticesBuffer t, float x, float y, float z, Block block)
+    public static void renderBackSide(VerticesBuffer t, float x, float y, float z, float blockSize, Block block)
     {
         int block_r=255;
         int block_g=255;
@@ -156,14 +192,14 @@ public class BlockRenderer
         t.setTexCoord(block.getTexture().getSideTextureX() + TextureEngine.addTextCoord, block.getTexture().getSideTextureY() + TextureEngine.addTextCoord);
         t.setVertexCoord(x, y - down, z);
         t.setTexCoord(block.getTexture().getSideTextureX() + 0.0f, block.getTexture().getSideTextureY() + TextureEngine.addTextCoord);
-        t.setVertexCoord(1.f +x, y - down, z);
+        t.setVertexCoord(blockSize + x, y - down, z);
         t.setTexCoord(block.getTexture().getSideTextureX() + 0.0f, block.getTexture().getSideTextureY() + 0.0f);
-        t.setVertexCoord(1.f +x, 1.f +y - down, z);
+        t.setVertexCoord(blockSize + x, blockSize + y - down, z);
         t.setTexCoord(block.getTexture().getSideTextureX() + TextureEngine.addTextCoord, block.getTexture().getSideTextureY() + 0.0f);
-        t.setVertexCoord(x, 1.f +y - down, z);
+        t.setVertexCoord(x, blockSize + y - down, z);
     }
 
-    public static void renderRightSide(VerticesBuffer t, float x, float y, float z, Block block)
+    public static void renderRightSide(VerticesBuffer t, float x, float y, float z, float blockSize, Block block)
     {
         int block_r=255;
         int block_g=255;
@@ -174,16 +210,16 @@ public class BlockRenderer
 
         t.setColori(block_r - 80, block_g - 80, block_b - 80);
         t.setTexCoord(block.getTexture().getSideTextureX() + TextureEngine.addTextCoord, block.getTexture().getSideTextureY() + TextureEngine.addTextCoord);
-        t.setVertexCoord(1.f +x, y - down, z);
+        t.setVertexCoord(blockSize + x, y - down, z);
         t.setTexCoord(block.getTexture().getSideTextureX() + 0.0f, block.getTexture().getSideTextureY() + TextureEngine.addTextCoord);
-        t.setVertexCoord(1.f +x, y - down, 1.f +z);
+        t.setVertexCoord(blockSize + x, y - down, blockSize + z);
         t.setTexCoord(block.getTexture().getSideTextureX() + 0.0f, block.getTexture().getSideTextureY() + 0.0f);
-        t.setVertexCoord(1.f +x, 1.f +y - down, 1.f +z);
+        t.setVertexCoord(blockSize + x, blockSize + y - down, blockSize + z);
         t.setTexCoord(block.getTexture().getSideTextureX() + TextureEngine.addTextCoord, block.getTexture().getSideTextureY() + 0.0f);
-        t.setVertexCoord(1.f +x, 1.f +y - down, z);
+        t.setVertexCoord(blockSize + x, blockSize + y - down, z);
     }
 
-    public static void renderFrontSide(VerticesBuffer t, float x, float y, float z, Block block)
+    public static void renderFrontSide(VerticesBuffer t, float x, float y, float z, float blockSize, Block block)
     {
         int block_r=255;
         int block_g=255;
@@ -194,16 +230,16 @@ public class BlockRenderer
 
         t.setColori(block_r - 40, block_g - 40, block_b - 40);
         t.setTexCoord(block.getTexture().getSideTextureX() + TextureEngine.addTextCoord, block.getTexture().getSideTextureY() + TextureEngine.addTextCoord);
-        t.setVertexCoord(1.f +x, y - down, 1.f +z);
+        t.setVertexCoord(blockSize + x, y - down, blockSize + z);
         t.setTexCoord(block.getTexture().getSideTextureX() + 0.0f, block.getTexture().getSideTextureY() + TextureEngine.addTextCoord);
-        t.setVertexCoord(x, y - down, 1.f +z);
+        t.setVertexCoord(x, y - down, blockSize + z);
         t.setTexCoord(block.getTexture().getSideTextureX() + 0.0f, block.getTexture().getSideTextureY() + 0.0f);
-        t.setVertexCoord(x, 1.f +y - down, 1.f +z);
+        t.setVertexCoord(x, blockSize + y - down, blockSize + z);
         t.setTexCoord(block.getTexture().getSideTextureX() + TextureEngine.addTextCoord, block.getTexture().getSideTextureY() + 0.0f);
-        t.setVertexCoord(1.f +x, 1.f +y - down, 1.f +z);
+        t.setVertexCoord(blockSize + x, blockSize + y - down, blockSize + z);
     }
 
-    public static void renderLeftSide(VerticesBuffer t, float x, float y, float z, Block block)
+    public static void renderLeftSide(VerticesBuffer t, float x, float y, float z, float blockSize, Block block)
     {
         int block_r=255;
         int block_g=255;
@@ -214,13 +250,13 @@ public class BlockRenderer
 
         t.setColori(block_r - 80, block_g - 80, block_b - 80);
         t.setTexCoord(block.getTexture().getSideTextureX() + TextureEngine.addTextCoord, block.getTexture().getSideTextureY() + TextureEngine.addTextCoord);
-        t.setVertexCoord(x, y - down, 1.f +z);
+        t.setVertexCoord(x, y - down, blockSize + z);
         t.setTexCoord(block.getTexture().getSideTextureX() + 0.0f, block.getTexture().getSideTextureY() + TextureEngine.addTextCoord);
         t.setVertexCoord(x, y - down, z);
         t.setTexCoord(block.getTexture().getSideTextureX() + 0.0f, block.getTexture().getSideTextureY() + 0.0f);
-        t.setVertexCoord(x, 1.f +y - down, z);
+        t.setVertexCoord(x, blockSize + y - down, z);
         t.setTexCoord(block.getTexture().getSideTextureX() + TextureEngine.addTextCoord, block.getTexture().getSideTextureY() + 0.0f);
-        t.setVertexCoord(x, 1.f +y - down, 1.f +z);
+        t.setVertexCoord(x, blockSize + y - down, blockSize + z);
     }
 
     public static void renderTile1(VerticesBuffer t, float x, float y, float z, Block block) {

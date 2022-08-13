@@ -1,10 +1,11 @@
 package OpenCraft.World.Block;
 
 import OpenCraft.Rendering.Texture;
-import OpenCraft.World.Drop.Drop;
+import OpenCraft.World.Ambient.Block.Drop;
+import OpenCraft.World.Direction;
 import OpenCraft.World.Item.ItemBlock;
 import OpenCraft.World.Item.Tool;
-import OpenCraft.World.Particle;
+import OpenCraft.World.Ambient.Block.Particle;
 import OpenCraft.math.Vector3i;
 import OpenCraft.phys.AABB;
 import OpenCraft.OpenCraft;
@@ -76,6 +77,10 @@ public class Block
 
     public int getRandomization() { return this.randomization; }
 
+    public static AABB getAABB(Vector3i position) {
+        return getAABB(position.x, position.y, position.z);
+    }
+
     public static AABB getAABB(int x, int y, int z) {
         return new AABB((float)x, (float)y, (float)z, (float)(x + 1), (float)(y + 1), (float)(z + 1));
     }
@@ -110,6 +115,10 @@ public class Block
         return Block.air;
     }
 
+    public void destroy(Vector3i position) {
+        this.destroy(position.x, position.y, position.z);
+    }
+
     public void destroy(int x, int y, int z) {
         int SD = 4;
 
@@ -119,32 +128,18 @@ public class Block
                     float xp = (float)x + ((float)xx + 0.5F) / (float)SD;
                     float yp = (float)y + ((float)yy + 0.5F) / (float)SD;
                     float zp = (float)z + ((float)zz + 0.5F) / (float)SD;
-                    OpenCraft.getParticleEngine().add(new Particle(OpenCraft.getLevel(), xp, yp, zp, xp - (float)x - 0.5F, yp - (float)y - 0.5F, zp - (float)z - 0.5F, texture));
+                    OpenCraft.getParticleEngine().add(
+                            new Particle(
+                                    OpenCraft.getLevel(), xp, yp, zp, xp - (float)x - 0.5F, yp - (float)y - 0.5F, zp - (float)z - 0.5F, texture)
+                    );
                 }
             }
         }
 
     }
 
-    public boolean haveToRenderSide(int layer, int side, float x, float y, float z)
-    {
-        boolean layerOk = true;
-        if (layer == 2) {
-            return hasTranslucent();
-        } else {
-            if (layer >= 0) {
-                layerOk = OpenCraft.getLevel().isLit((int)x, (int)y, (int)z) ^ layer == 1;
-            }
-
-            return !OpenCraft.getLevel().getBlock((int)x, (int)y, (int)z).isVisible() && layerOk;
-        }
-    }
-
     public boolean hasTranslucent() {
         return false;
-    }
-
-    public void neighborChanged(Level level, int x, int y, int z) {
     }
 
     protected void makeRandomization() {
@@ -162,6 +157,10 @@ public class Block
     }
 
     public void setStrength(float strength) {
+        if (strength == 0) {
+            strength = 1;
+        }
+
         this.strength = strength;
     }
 
@@ -169,8 +168,12 @@ public class Block
         this.tool = tool;
     }
 
+    public void createDrop(Vector3i position) {
+        createDrop(position.x, position.y, position.z);
+    }
+
     public void createDrop(int x, int y, int z) {
-//        new Drop(new ItemBlock(this, 1), new Vector3i(x, y, z));
+        new Drop(new ItemBlock(this, 1), new Vector3i(x, y, z));
     }
 
     public int getStackAmount() {
@@ -180,5 +183,13 @@ public class Block
     @Override
     public boolean equals(Object obj) {
         return getIdInt() == ((Block)obj).getIdInt();
+    }
+
+    @Override
+    public String toString() {
+        return "Block{id=" + getId() + "}";
+    }
+
+    public void neighborChanged(Level level, Vector3i blockPos, Direction.Values direction, Block newBlock) {
     }
 }
