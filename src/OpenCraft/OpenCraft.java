@@ -20,6 +20,7 @@ import OpenCraft.gui.screens.PauseMenuScreen;
 import OpenCraft.gui.screens.WorldListScreen;
 import OpenCraft.math.Vector3f;
 import OpenCraft.utils.StackTrace;
+import org.lwjgl.Sys;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
@@ -37,7 +38,7 @@ public class OpenCraft
 {
 
     // Game version
-    private static final String version = "0.7.7";
+    private static final String version = "0.7.8";
 
     // Window
     private static int width = 868;
@@ -185,9 +186,13 @@ public class OpenCraft
                 }
 
                 render();
-                ++frames;
             }
 
+            if (currentScreen != null) {
+                if (currentScreen.equals(pauseMenu)) {
+                    render();
+                }
+            }
 
             while(System.currentTimeMillis() >= lastTime + 1000L) {
                 FPS = frames;
@@ -198,6 +203,7 @@ public class OpenCraft
             }
 
             Display.update();
+            ++frames;
         }
 
         Controls.destroy();
@@ -286,6 +292,10 @@ public class OpenCraft
         levelRenderer.prepareChunks();
     }
 
+    public static int getFPS() {
+        return FPS;
+    }
+
     private void render()
     {
         try {
@@ -319,7 +329,7 @@ public class OpenCraft
                 }
             }));
 
-            particleEngine.render(timer.a, 0);
+            particleEngine.render(timer.a);
             pick();
             glDisable(GL_BLEND);
 
@@ -495,12 +505,22 @@ public class OpenCraft
 
         EntityPlayer entityPlayer = getLevel().getPlayerEntity();
 
+        float xo = entityPlayer.getXo();
+        float yo = entityPlayer.getYo();
+        float zo = entityPlayer.getZo();
+
+        if (inMenu) {
+            xo = entityPlayer.getX();
+            yo = entityPlayer.getY();
+            zo = entityPlayer.getZ();
+        }
+
         GL11.glTranslatef(0.0F, 0.0F, -0.3F);
         GL11.glRotatef(entityPlayer.getRx(), 1.0F, 0.0F, 0.0F);
         GL11.glRotatef(entityPlayer.getRy(), 0.0F, 1.0F, 0.0F);
-        float x = entityPlayer.getXo() + (entityPlayer.getX() - entityPlayer.getXo()) * timer.a;
-        float y = entityPlayer.getYo() + (entityPlayer.getY() - entityPlayer.getYo()) * timer.a - 2 + entityPlayer.getHeightOffset();
-        float z = entityPlayer.getZo() + (entityPlayer.getZ() - entityPlayer.getZo()) * timer.a;
+        float x = xo + (entityPlayer.getX() - xo) * timer.a;
+        float y = yo + (entityPlayer.getY() - yo) * timer.a - 2 + entityPlayer.getHeightOffset();
+        float z = zo + (entityPlayer.getZ() - zo) * timer.a;
 
         GL11.glTranslatef(-x, -y, -z);
     }
@@ -683,6 +703,9 @@ public class OpenCraft
 
     public static void closeCurrentScreen()
     {
+        if (currentScreen != null) {
+            currentScreen.isOpened(false);
+        }
         guiTicks = new HashMap<>();
         setCurrentScreen(null);
         inMenu = false;
@@ -696,6 +719,10 @@ public class OpenCraft
 
     public static void setCurrentScreen(Screen scr)
     {
+        if (currentScreen != null) {
+            currentScreen.isOpened(false);
+        }
+
         if (scr != null)
         {
             int scale = 240;
@@ -723,5 +750,15 @@ public class OpenCraft
 
     public static void changeMenuStatus(boolean b) {
         inMenu = b;
+    }
+
+    public static boolean showHitBoxes() {
+        // todo
+        return false;
+    }
+
+    public static long getSystemTime()
+    {
+        return Sys.getTime() * 1000L / Sys.getTimerResolution();
     }
 }

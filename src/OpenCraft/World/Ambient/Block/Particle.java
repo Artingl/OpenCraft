@@ -45,11 +45,10 @@ public class Particle extends Entity {
     }
 
     public void update() {
-        this.xo = this.x;
-        this.yo = this.y;
-        this.zo = this.z;
+        super.tick();
         if (this.age++ >= this.lifetime) {
             this.remove();
+            this.destroy();
         }
 
         this.yd = (float)((double)this.yd - 0.04D);

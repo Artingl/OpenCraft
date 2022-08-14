@@ -1,5 +1,7 @@
 package OpenCraft.gui;
 
+import OpenCraft.Interfaces.IGuiTick;
+import OpenCraft.Interfaces.ITick;
 import OpenCraft.Rendering.TextureEngine;
 import OpenCraft.Rendering.VerticesBuffer;
 import OpenCraft.OpenCraft;
@@ -15,6 +17,7 @@ import java.util.HashMap;
 
 public class Screen
 {
+    public static int SCREEN_IDS = 0;
 
     private static int background_id;
 
@@ -30,6 +33,9 @@ public class Screen
     protected float width;
     protected float height;
     protected String title;
+    protected boolean opened;
+    private int tickEvent;
+    private final int screenId;
 
     public Screen(int width, int height, String title)
     {
@@ -38,6 +44,8 @@ public class Screen
         this.width = width;
         this.height = height;
         this.title = title;
+        this.opened = true;
+        this.screenId = SCREEN_IDS++;
     }
 
     public void resize(int width, int height)
@@ -187,4 +195,16 @@ public class Screen
 
     }
 
+    public void isOpened(boolean b) {
+        this.opened = b;
+    }
+
+    public int getScreenId() {
+        return this.screenId;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return ((Screen)obj).getScreenId() == this.screenId;
+    }
 }

@@ -1,15 +1,18 @@
 package OpenCraft.World.Entity;
 
+import OpenCraft.Interfaces.IRenderHandler;
+import OpenCraft.Rendering.BlockRenderer;
 import OpenCraft.World.Entity.Models.Model;
 import OpenCraft.World.Item.Item;
 import OpenCraft.phys.AABB;
 import OpenCraft.Interfaces.ITick;
 import OpenCraft.OpenCraft;
 import OpenCraft.World.Level.Level;
+import org.lwjgl.opengl.GL11;
 
 import java.util.List;
 
-public class Entity implements ITick
+public class Entity implements ITick, IRenderHandler
 {
     public static int ENTITIES_ID = 0;
 
@@ -52,6 +55,7 @@ public class Entity implements ITick
     private boolean dead;
     private int entityId;
     private int tickEvent;
+    private int renderEvent;
 
     public Entity(Level level)
     {
@@ -74,7 +78,7 @@ public class Entity implements ITick
         reset(x, y, z);
     }
 
-    public void reset(float x, float y, float z)
+    private void reset(float x, float y, float z)
     {
         this.x = x;
         this.y = y;
@@ -89,6 +93,7 @@ public class Entity implements ITick
         this.maxHearts = 20;
         this.dead = false;
         this.tickEvent = OpenCraft.registerTickEvent(this);
+        this.renderEvent = OpenCraft.registerRenderEvent(this);
     }
 
     public void setModel(Model model)
@@ -111,7 +116,25 @@ public class Entity implements ITick
         this.height = h;
     }
 
-    public void render() { }
+    @Override
+    public void render() {
+        if (OpenCraft.showHitBoxes() && !this.equals(OpenCraft.getLevel().getPlayerEntity())) {
+            float width = this.aabb.x0 - this.aabb.x1;
+            float height = this.aabb.y0 - this.aabb.y1;
+            float depth = this.aabb.z0 - this.aabb.z1;
+
+            GL11.glColor4f(0.5f, 0.5f, 0, 0.3f);
+            GL11.glBegin(GL11.GL_QUADS);
+            BlockRenderer.renderLegacyTop(this.aabb.x0, this.aabb.y0, this.aabb.z0, width, height, depth);
+            BlockRenderer.renderLegacyBottom(this.aabb.x0, this.aabb.y0, this.aabb.z0, width, height, depth);
+            BlockRenderer.renderLegacyFront(this.aabb.x0, this.aabb.y0, this.aabb.z0, width, height, depth);
+            BlockRenderer.renderLegacyBack(this.aabb.x0, this.aabb.y0, this.aabb.z0, width, height, depth);
+            BlockRenderer.renderLegacyRight(this.aabb.x0, this.aabb.y0, this.aabb.z0, width, height, depth);
+            BlockRenderer.renderLegacyLeft(this.aabb.x0, this.aabb.y0, this.aabb.z0, width, height, depth);
+            GL11.glEnd();
+            GL11.glColor4f(1, 1, 1, 1);
+        }
+    }
 
     public void move(float xa, float ya, float za) {
         float xaOrg = xa;
@@ -379,13 +402,6 @@ public class Entity implements ITick
         this.aabb = new AABB(x - w, y - h, z - w, x + w, y + h, z + w);
     }
 
-    public boolean isLit() {
-        int xTile = (int)this.x;
-        int yTile = (int)this.y;
-        int zTile = (int)this.z;
-        return this.level.isLit(xTile, yTile, zTile);
-    }
-
     public int getEntityId() {
         return this.entityId;
     }
@@ -397,6 +413,7 @@ public class Entity implements ITick
 
     public void destroy() {
         OpenCraft.unregisterTickEvent(this.tickEvent);
+        OpenCraft.unregisterRenderEvent(this.renderEvent);
     }
 
     public float getHeightOffset() {
@@ -411,6 +428,6 @@ public class Entity implements ITick
         return false;
     }
 
-    public void pick(Item item) {}
+    public boolean pick(Item item) { return false; }
 
 }

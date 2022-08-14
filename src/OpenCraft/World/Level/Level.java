@@ -204,10 +204,6 @@ public class Level implements IRenderHandler, ITick
         return boxes;
     }
 
-    public boolean isLit(int x, int y, int z) {
-        return true;
-    }
-
     public boolean containsLiquid(AABB box) {
         int x0 = (int)Math.floor(box.x0);
         int x1 = (int)Math.floor((box.x1 + 1.0F));

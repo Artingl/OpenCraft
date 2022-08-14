@@ -147,6 +147,13 @@ public class VerticesBuffer
         this.color(r, g, b);
     }
 
+    public void setColorf(float r, float g, float b)
+    {
+        this.r = r;
+        this.g = g;
+        this.b = b;
+    }
+
     public void color(int c) {
         int r = c >> 16 & 255;
         int g = c >> 8 & 255;

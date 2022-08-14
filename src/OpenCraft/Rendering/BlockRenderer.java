@@ -259,44 +259,47 @@ public class BlockRenderer
         t.setVertexCoord(x, blockSize + y - down, blockSize + z);
     }
 
-    public static void renderTile1(VerticesBuffer t, float x, float y, float z, Block block) {
-        int block_r=255;
-        int block_g=255;
-        int block_b=255;
-
-//        float randomization = (block.getRandomization() / 170f);
-//        x -= randomization;
-//        z -= randomization;
-
-        t.setColori(block_r - 80, block_g - 80, block_b - 80);
-        t.setTexCoord(block.getTexture().getSideTextureX() + TextureEngine.addTextCoord, block.getTexture().getSideTextureY() + TextureEngine.addTextCoord);
-        t.setVertexCoord(x+0.1f, y, z+0.1f);
-        t.setTexCoord(block.getTexture().getSideTextureX() + 0.0f, block.getTexture().getSideTextureY() + TextureEngine.addTextCoord);
-        t.setVertexCoord(x+0.9f, y, z+0.9f);
-        t.setTexCoord(block.getTexture().getSideTextureX() + 0.0f, block.getTexture().getSideTextureY() + 0.0f);
-        t.setVertexCoord(x+0.9f, y+0.9f, z+0.9f);
-        t.setTexCoord(block.getTexture().getSideTextureX() + TextureEngine.addTextCoord, block.getTexture().getSideTextureY() + 0.0f);
-        t.setVertexCoord(x+0.1f, y+0.9f, z+0.1f);
-    }
 
     public static void renderTile0(VerticesBuffer t, float x, float y, float z, Block block) {
+        renderTile0(t, x, y, z, 0, block);
+    }
+
+
+    public static void renderTile1(VerticesBuffer t, float x, float y, float z, Block block) {
+        renderTile1(t, x, y, z, 0, block);
+
+    }
+
+    public static void renderTile1(VerticesBuffer t, float x, float y, float z, float tileSize, Block block) {
         int block_r=255;
         int block_g=255;
         int block_b=255;
 
-//        float randomization = (block.getRandomization() / 170f);
-//        x -= randomization;
-//        z -= randomization;
+        t.setColori(block_r - 80, block_g - 80, block_b - 80);
+        t.setTexCoord(block.getTexture().getSideTextureX() + TextureEngine.addTextCoord, block.getTexture().getSideTextureY() + TextureEngine.addTextCoord);
+        t.setVertexCoord(x+(0.1f + tileSize), y, z+(0.1f + tileSize));
+        t.setTexCoord(block.getTexture().getSideTextureX() + 0.0f, block.getTexture().getSideTextureY() + TextureEngine.addTextCoord);
+        t.setVertexCoord(x+(0.9f - tileSize), y, z+(0.9f - tileSize));
+        t.setTexCoord(block.getTexture().getSideTextureX() + 0.0f, block.getTexture().getSideTextureY() + 0.0f);
+        t.setVertexCoord(x+(0.9f - tileSize), y+(0.9f - tileSize), z+(0.9f - tileSize));
+        t.setTexCoord(block.getTexture().getSideTextureX() + TextureEngine.addTextCoord, block.getTexture().getSideTextureY() + 0.0f);
+        t.setVertexCoord(x+(0.1f + tileSize), y+0.9f, z+(0.1f + tileSize));
+    }
+
+    public static void renderTile0(VerticesBuffer t, float x, float y, float z, float tileSize, Block block) {
+        int block_r=255;
+        int block_g=255;
+        int block_b=255;
 
         t.setColori(block_r - 80, block_g - 80, block_b - 80);
         t.setTexCoord(block.getTexture().getSideTextureX() + TextureEngine.addTextCoord, block.getTexture().getSideTextureY() + TextureEngine.addTextCoord);
-        t.setVertexCoord(x+0.9f, y, z+0.1f);
+        t.setVertexCoord(x+(0.9f - tileSize), y, z+(0.1f + tileSize));
         t.setTexCoord(block.getTexture().getSideTextureX() + 0.0f, block.getTexture().getSideTextureY() + TextureEngine.addTextCoord);
-        t.setVertexCoord(x+0.1f, y, z+0.9f);
+        t.setVertexCoord(x+(0.1f + tileSize), y, z+(0.9f - tileSize));
         t.setTexCoord(block.getTexture().getSideTextureX() + 0.0f, block.getTexture().getSideTextureY() + 0.0f);
-        t.setVertexCoord(x+0.1f, y+0.9f, z+0.9f);
+        t.setVertexCoord(x+(0.1f + tileSize), y+(0.9f - tileSize), z+(0.9f - tileSize));
         t.setTexCoord(block.getTexture().getSideTextureX() + TextureEngine.addTextCoord, block.getTexture().getSideTextureY() + 0.0f);
-        t.setVertexCoord(x+0.9f, y+0.9f, z+0.1f);
+        t.setVertexCoord(x+(0.9f - tileSize), y+(0.9f - tileSize), z+(0.1f + tileSize));
     }
 
     public static void renderFaceNoTexture(EntityPlayer player, VerticesBuffer t, int x, int y, int z, int face) {
@@ -350,100 +353,76 @@ public class BlockRenderer
 
     }
 
-    public static void renderLegacyTop(int x, int y, int z)
+    public static void renderLegacyTop(float x, float y, float z, float width, float height, float depth)
     {
-        GL11.glTranslatef(x, y, z);
-
         glTexCoord2f(0, 0);
-        glVertex3f(1.0f, 1.0f, -1.0f);
+        glVertex3f(x + width, y + height, z - depth);
         glTexCoord2f(1, 0);
-        glVertex3f(-1.0f, 1.0f, -1.0f);
+        glVertex3f(x - width, y + height, z - depth);
         glTexCoord2f(1, 1);
-        glVertex3f(-1.0f, 1.0f, 1.0f);
+        glVertex3f(x - width, y + height, z + depth);
         glTexCoord2f(0, 1);
-        glVertex3f(1.0f, 1.0f, 1.0f);
-
-        GL11.glTranslatef(-x, -y, -z);
+        glVertex3f(x + width, y + height, z + depth);
     }
 
-    public static void renderLegacyBottom(int x, int y, int z)
+    public static void renderLegacyBottom(float x, float y, float z, float width, float height, float depth)
     {
-        GL11.glTranslatef(x, y, z);
-
         glTexCoord2f(0, 0);
-        glVertex3f(1.0f, -1.0f, 1.0f);
+        glVertex3f(x + width, y - height, z + depth);
         glTexCoord2f(1, 0);
-        glVertex3f(-1.0f, -1.0f, 1.0f);
+        glVertex3f(x - width, y - height, z + depth);
         glTexCoord2f(1, 1);
-        glVertex3f(-1.0f, -1.0f, -1.0f);
+        glVertex3f(x - width, y - height, z - depth);
         glTexCoord2f(0, 1);
-        glVertex3f(1.0f, -1.0f, -1.0f);
-
-        GL11.glTranslatef(-x, -y, -z);
+        glVertex3f(x + width, y - height, z - depth);
     }
 
-    public static void renderLegacyFront(int x, int y, int z)
+    public static void renderLegacyFront(float x, float y, float z, float width, float height, float depth)
     {
-        GL11.glTranslatef(x, y, z);
-
         glTexCoord2f(0, 0);
-        glVertex3f(1.0f, 1.0f, 1.0f);
+        glVertex3f(x + width, y + height, z + depth);
         glTexCoord2f(1, 0);
-        glVertex3f(-1.0f, 1.0f, 1.0f);
+        glVertex3f(x - width, y + height, z + depth);
         glTexCoord2f(1, 1);
-        glVertex3f(-1.0f, -1.0f, 1.0f);
+        glVertex3f(x - width, y - height, z + depth);
         glTexCoord2f(0, 1);
-        glVertex3f(1.0f, -1.0f, 1.0f);
-
-        GL11.glTranslatef(-x, -y, -z);
+        glVertex3f(x + width, y - height, z + depth);
     }
 
-    public static void renderLegacyBack(int x, int y, int z)
+    public static void renderLegacyBack(float x, float y, float z, float width, float height, float depth)
     {
-        GL11.glTranslatef(x, y, z);
-
         glTexCoord2f(1, 1);
-        glVertex3f(1.0f, -1.0f, -1.0f);
+        glVertex3f(x + width, y - height, z - depth);
         glTexCoord2f(0, 1);
-        glVertex3f(-1.0f, -1.0f, -1.0f);
+        glVertex3f(x - width, y - height, z - depth);
         glTexCoord2f(0, 0);
-        glVertex3f(-1.0f, 1.0f, -1.0f);
+        glVertex3f(x - width, y + height, z - depth);
         glTexCoord2f(1, 0);
-        glVertex3f(1.0f, 1.0f, -1.0f);
-
-        GL11.glTranslatef(-x, -y, -z);
+        glVertex3f(x + width, y + height, z - depth);
     }
 
-    public static void renderLegacyLeft(int x, int y, int z)
+    public static void renderLegacyLeft(float x, float y, float z, float width, float height, float depth)
     {
-        GL11.glTranslatef(x, y, z);
-
         glTexCoord2f(0, 0);
-        glVertex3f(-1.0f, 1.0f, 1.0f);
+        glVertex3f(x - width, y + height, z + depth);
         glTexCoord2f(1, 0);
-        glVertex3f(-1.0f, 1.0f, -1.0f);
+        glVertex3f(x - width, y + height, z - depth);
         glTexCoord2f(1, 1);
-        glVertex3f(-1.0f, -1.0f, -1.0f);
+        glVertex3f(x - width, y - height, z - depth);
         glTexCoord2f(0, 1);
-        glVertex3f(-1.0f, -1.0f, 1.0f);
-
-        GL11.glTranslatef(-x, -y, -z);
+        glVertex3f(x - width, y - height, z + depth);
     }
 
-    public static void renderLegacyRight(int x, int y, int z)
+    public static void renderLegacyRight(float x, float y, float z, float width, float height, float depth)
     {
-        GL11.glTranslatef(x, y, z);
-
         glTexCoord2f(0, 0);
-        glVertex3f(1.0f, 1.0f, -1.0f);
+        glVertex3f(x + width, y + height, z - depth);
         glTexCoord2f(1, 0);
-        glVertex3f(1.0f, 1.0f, 1.0f);
+        glVertex3f(x + width, y + height, z + depth);
         glTexCoord2f(1, 1);
-        glVertex3f(1.0f, -1.0f, 1.0f);
+        glVertex3f(x + width,  - height, z + depth);
         glTexCoord2f(0, 1);
-        glVertex3f(1.0f, -1.0f, -1.0f);
-
-        GL11.glTranslatef(-x, -y, -z);
+        glVertex3f(x + width, y - height, z - depth);
     }
 
 }

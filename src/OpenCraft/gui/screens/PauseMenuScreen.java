@@ -5,6 +5,7 @@ import OpenCraft.gui.Button;
 import OpenCraft.gui.Screen;
 import OpenCraft.OpenCraft;
 import org.lwjgl.input.Keyboard;
+import org.lwjgl.opengl.GL11;
 
 public class PauseMenuScreen extends Screen
 {
@@ -55,13 +56,8 @@ public class PauseMenuScreen extends Screen
             return;
         }
 
-        drawBackground(VerticesBuffer.instance, screenWidth, screenHeight, 0x808080);
-
-        //VerticesBuffer t = VerticesBuffer.instance;
-        //drawBackground(t, screenWidth, screenHeight, 0x808080);
-
         super.render(screenWidth, screenHeight, scale);
-
+        fill(0, 0, screenWidth, screenHeight, 0x77111111);
     }
 
 }

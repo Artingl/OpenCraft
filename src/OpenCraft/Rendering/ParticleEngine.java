@@ -39,7 +39,7 @@ public class ParticleEngine implements ITick {
 
    }
 
-   public void render(float a, int layer) {
+   public void render(float a) {
       if (this.particles.size() != 0) {
          GL11.glEnable(3553);
          GL11.glBindTexture(3553, TextureEngine.getTerrain());
@@ -58,9 +58,7 @@ public class ParticleEngine implements ITick {
 
          for(int i = 0; i < this.particles.size(); ++i) {
             Particle p = (Particle)this.particles.get(i);
-            if (p.isLit() ^ layer == 1) {
-               p.render(t, a, xa, ya, za, xa2, za2);
-            }
+            p.render(t, a, xa, ya, za, xa2, za2);
          }
 
          t.end();

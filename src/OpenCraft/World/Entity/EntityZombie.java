@@ -65,6 +65,8 @@ public class EntityZombie extends Entity
 
     @Override
     public void render() {
+        super.render();
+
         float a = OpenCraft.getTimer().a;
         GL11.glEnable(3553);
         GL11.glBindTexture(3553, TEXTURE);

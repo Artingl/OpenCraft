@@ -2,6 +2,7 @@ package OpenCraft.World;
 
 import OpenCraft.Controls;
 import OpenCraft.OpenCraft;
+import OpenCraft.World.Ambient.Block.Drop;
 import OpenCraft.World.Block.Block;
 import OpenCraft.World.Entity.EntityPlayer;
 import OpenCraft.World.Entity.Gamemode.Creative;

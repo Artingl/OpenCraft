@@ -89,8 +89,9 @@ public class EntityPlayer extends Entity {
         return true;
     }
 
-    public void pick(Item item) {
+    public boolean pick(Item item) {
         OpenCraft.getPlayerController().appendInventory(item);
+        return true;
     }
 
 }
