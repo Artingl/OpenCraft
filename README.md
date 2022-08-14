@@ -20,15 +20,15 @@ If you found some bug, create an issue. Describe the bug (it will be good if you
 
 - [ ] Singleplayer
 - [ ] Mobs
-- [ ] Gamemodes
+- [X] Gamemodes
 - [ ] Biomes
 - [X] Dimensions
 - [X] Infinity world generation
-- [ ] Mods Engine
+- [X] Mods Engine
 - [ ] Simple Mods API
 - [ ] Multiplayer
-- [ ] Debug system
-- [ ] Languages
+- [X] Debug system
+- [X] Languages
 
 # Screenshots
 ![](images/screenshot.png)

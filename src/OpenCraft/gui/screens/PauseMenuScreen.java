@@ -1,6 +1,7 @@
 package OpenCraft.gui.screens;
 
 import OpenCraft.Rendering.VerticesBuffer;
+import OpenCraft.Resources.Lang;
 import OpenCraft.gui.Button;
 import OpenCraft.gui.Screen;
 import OpenCraft.OpenCraft;
@@ -13,17 +14,17 @@ public class PauseMenuScreen extends Screen
     private boolean escapeClick;
 
     public PauseMenuScreen() {
-        super(OpenCraft.getWidth(), OpenCraft.getHeight(), "Game menu");
+        super(OpenCraft.getWidth(), OpenCraft.getHeight(), "game_menu");
     }
 
     public void init() {
         super.init();
 
-        this.addElement(new Button(1, 0, 0, "Back to game", () -> {
+        this.addElement(new Button(1, 0, 0, Lang.getLanguageString("opencraft:gui.text.back_to_game"), () -> {
             escapeClick = false;
             OpenCraft.closeCurrentScreen();
         }));
-        this.addElement(new Button(0, 0, 0, "Quit to main menu", OpenCraft::quitToMainMenu));
+        this.addElement(new Button(0, 0, 0, Lang.getLanguageString("opencraft:gui.text.quit_world"), OpenCraft::quitToMainMenu));
     }
 
     public void render(int screenWidth, int screenHeight, int scale)
@@ -57,7 +58,7 @@ public class PauseMenuScreen extends Screen
         }
 
         super.render(screenWidth, screenHeight, scale);
-        fill(0, 0, screenWidth, screenHeight, 0x77111111);
+        fill(0, 0, screenWidth, screenHeight, 0x99111111);
     }
 
 }

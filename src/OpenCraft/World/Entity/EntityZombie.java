@@ -11,19 +11,13 @@ import java.io.IOException;
 public class EntityZombie extends Entity
 {
 
-    public static int TEXTURE;
+    public static int TEXTURE = TextureEngine.load("opencraft:entity/zombie.png");
     public static ZombieModel model = new ZombieModel();
 
     public float rot;
     public float timeOffs;
     public float speed;
     public float rotA;
-
-    static {
-        try {
-            TEXTURE = TextureEngine.load(ImageIO.read(new File("resources/entity/zombie.png")));
-        } catch (IOException e) { }
-    }
 
     public EntityZombie(float x, float y, float z)
     {

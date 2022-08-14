@@ -1,10 +1,12 @@
 package OpenCraft.Rendering;
 
+import OpenCraft.Logger.Logger;
 import OpenCraft.World.Entity.EntityPlayer;
 import OpenCraft.World.Level.Level;
 import OpenCraft.World.Ambient.Block.Particle;
-import OpenCraft.Interfaces.ITick;
+import OpenCraft.World.ITick;
 import OpenCraft.OpenCraft;
+import OpenCraft.utils.StackTrace;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
@@ -58,7 +60,13 @@ public class ParticleEngine implements ITick {
 
          for(int i = 0; i < this.particles.size(); ++i) {
             Particle p = (Particle)this.particles.get(i);
-            p.render(t, a, xa, ya, za, xa2, za2);
+            try {
+               p.render(t, a, xa, ya, za, xa2, za2);
+            } catch (Exception e) {
+               Logger.exception("Error occurred while rendering particle", e);
+               p.destroy();
+               this.particles.remove(p);
+            }
          }
 
          t.end();

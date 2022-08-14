@@ -1,11 +1,11 @@
 package OpenCraft.World.Entity;
 
-import OpenCraft.Interfaces.IRenderHandler;
+import OpenCraft.Rendering.IRenderHandler;
 import OpenCraft.Rendering.BlockRenderer;
 import OpenCraft.World.Entity.Models.Model;
 import OpenCraft.World.Item.Item;
 import OpenCraft.phys.AABB;
-import OpenCraft.Interfaces.ITick;
+import OpenCraft.World.ITick;
 import OpenCraft.OpenCraft;
 import OpenCraft.World.Level.Level;
 import org.lwjgl.opengl.GL11;
@@ -15,6 +15,12 @@ import java.util.List;
 public class Entity implements ITick, IRenderHandler
 {
     public static int ENTITIES_ID = 0;
+
+
+    public float prevCameraYaw;
+    public float cameraYaw;
+    public float prevCameraPitch;
+    public float cameraPitch;
 
 
     /* Collision and physics */
@@ -56,6 +62,9 @@ public class Entity implements ITick, IRenderHandler
     private int entityId;
     private int tickEvent;
     private int renderEvent;
+    private int entityLevelId = -1;
+    private float distanceWalked;
+    private float prevDistanceWalked;
 
     public Entity(Level level)
     {
@@ -184,9 +193,17 @@ public class Entity implements ITick, IRenderHandler
             this.zd = 0.0F;
         }
 
+        float xx = this.x;
+        float zz = this.z;
+
         this.x = (this.aabb.x0 + this.aabb.x1) / 2.0F;
         this.y = this.aabb.y0 + this.heightOffset;
         this.z = (this.aabb.z0 + this.aabb.z1) / 2.0F;
+
+        xx = this.x - xx;
+        zz = this.z - zz;
+
+        this.distanceWalked = (float)((double)this.distanceWalked + Math.sqrt(xx * xx + zz * zz) * 0.6D);
     }
 
     public void moveRelative(float xa, float za, float speed) {
@@ -208,6 +225,11 @@ public class Entity implements ITick, IRenderHandler
         this.xo = this.x;
         this.yo = this.y;
         this.zo = this.z;
+
+        this.prevCameraYaw = this.cameraYaw;
+        this.prevCameraPitch = this.cameraPitch;
+
+        this.prevDistanceWalked = this.distanceWalked;
     }
 
     public int getHearts() {
@@ -389,11 +411,7 @@ public class Entity implements ITick, IRenderHandler
         this.ry = ry;
     }
 
-    public void changeLevel(Level level) {
-        this.level = level;
-    }
-
-    protected void setPosition(float x, float y, float z) {
+    public void setPosition(float x, float y, float z) {
         this.x = x;
         this.y = y;
         this.z = z;
@@ -414,6 +432,8 @@ public class Entity implements ITick, IRenderHandler
     public void destroy() {
         OpenCraft.unregisterTickEvent(this.tickEvent);
         OpenCraft.unregisterRenderEvent(this.renderEvent);
+        if (this.entityLevelId != -1)
+            this.level.removeEntity(this.entityLevelId);
     }
 
     public float getHeightOffset() {
@@ -430,4 +450,16 @@ public class Entity implements ITick, IRenderHandler
 
     public boolean pick(Item item) { return false; }
 
+    public void setLevel(Level level, int i) {
+        this.level = level;
+        this.entityLevelId = i;
+    }
+
+    public float getDistanceWalked() {
+        return distanceWalked;
+    }
+
+    public float getPrevDistanceWalked() {
+        return prevDistanceWalked;
+    }
 }

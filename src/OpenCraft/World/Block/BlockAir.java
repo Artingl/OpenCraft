@@ -1,5 +1,7 @@
 package OpenCraft.World.Block;
 
+import OpenCraft.Rendering.Texture;
+
 public class BlockAir extends Block
 {
 
@@ -8,4 +10,5 @@ public class BlockAir extends Block
         super("air", idi);
     }
 
+    public void createDrop(int x, int y, int z)  {}
 }

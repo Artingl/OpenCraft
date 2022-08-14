@@ -16,15 +16,9 @@ import java.util.HashMap;
 public class EditArea extends Element
 {
 
-    public static int[] EDITAREA_TEXTURES;
-
-    static {
-        try {
-            EDITAREA_TEXTURES = new int[]{
-                    TextureEngine.load(ImageIO.read(new File("resources/gui/edit.png")))
-            };
-        } catch (IOException e) {}
-    }
+    public static int[] EDITAREA_TEXTURES = new int[]{
+        TextureEngine.load("opencraft:gui/edit.png")
+    };
 
     private boolean spaceKeyUp = true;
     private boolean backKeyUp = true;

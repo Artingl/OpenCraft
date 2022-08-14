@@ -7,7 +7,7 @@ import org.lwjgl.opengl.GL11;
 
 public class Sky {
 
-    private int clouds = TextureEngine.load("resources/environment/clouds.png");
+    private int clouds = TextureEngine.load("opencraft:environment/clouds.png");
     private int cloudsSize = 1024;
     private float[] cloudPos = {-clouds, 0};
 

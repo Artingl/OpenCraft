@@ -1,6 +1,10 @@
 package OpenCraft.sound;
 
+import OpenCraft.Logger.Logger;
+import OpenCraft.Resources.Resources;
+
 import javax.sound.sampled.*;
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
 
@@ -11,18 +15,13 @@ public class Sound
     {
         new Thread(() -> {
             try {
-                File f = new File(path);
-                AudioInputStream audioIn = AudioSystem.getAudioInputStream(f.toURI().toURL());
+                AudioInputStream audioIn = AudioSystem.getAudioInputStream(new BufferedInputStream(Resources.load(path)));
                 Clip clip = null;
                 clip = AudioSystem.getClip();
                 clip.open(audioIn);
                 clip.start();
-//                while(clip.isActive()){}
-//                clip.stop();
-//                clip = null;
-//                audioIn.close();
             } catch (LineUnavailableException | IOException | UnsupportedAudioFileException e) {
-                System.out.println(e.getMessage());
+                Logger.exception("Error while playing sound", e);
             }
         }).start();
     }

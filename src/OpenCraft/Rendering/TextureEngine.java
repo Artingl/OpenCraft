@@ -1,5 +1,9 @@
 package OpenCraft.Rendering;
 
+import OpenCraft.Logger.Logger;
+import OpenCraft.OpenCraft;
+import OpenCraft.Resources.Resources;
+import OpenCraft.utils.IO;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 
@@ -8,6 +12,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 
@@ -22,38 +27,47 @@ public class TextureEngine
     public static final int maxCountOfBlocks = 128; // Max count of blocks
     public static float addTextCoord = 1.0f / maxCountOfBlocks; // Normalized texcoord of 1 texture
 
-    public static void init() throws IOException {
-        File folder = new File("resources/textures/blocks/");
-        File[] listOfFiles = folder.listFiles();
+    protected static class texValues {
+        public static int x = 0;
+        public static int y = 0;
+        public static int i = 0;
+    };
 
+    public static void init() {
         blocksTextures = new HashMap<>();
         blocksTexturesID = new HashMap<>();
         terrainImage = new BufferedImage(16 * maxCountOfBlocks, 16 * maxCountOfBlocks, BufferedImage.TYPE_INT_ARGB);
+    }
 
-        int x = 0;
-        int y = 0;
+    public static void loadTextures(Class<?> callingClass, String id) throws IOException, URISyntaxException {
+        Logger.info("Loading " + id + " resource textures");
+        String resourcesPath = Resources.convertToPath(id + ":textures/blocks/");
 
-        for (int i = 0; i < listOfFiles.length; i++) {
-            String name = listOfFiles[i].getName();
-            if (listOfFiles[i].isFile() && name.endsWith(".png")) {
-                BufferedImage img = ImageIO.read(new File("resources/textures/blocks/" + name));
-                img = cropImage(img, new Rectangle(16, 16));
-                terrainImage.getGraphics().drawImage(img, x, y, null);
+        IO.foreachFiles(callingClass, resourcesPath, (path, name) -> {
+            if (path.contains(resourcesPath) && path.endsWith(".png")) {
+                try {
+                    Logger.info("Loading " + id + ":textures/blocks/" + name);
 
-                float tx = (x / 16f) * addTextCoord;
-                float ty = (y / 16f) * addTextCoord;
-                TextureEngine.blocksTextures.put(name.split("." + "png")[0], new Float[]{tx, ty});
-                TextureEngine.blocksTexturesID.put(name.split("." + "png")[0], i);
+                    BufferedImage img = ImageIO.read(Resources.load(callingClass, id + ":textures/blocks/" + name));
+                    img = cropImage(img, new Rectangle(16, 16));
+                    terrainImage.getGraphics().drawImage(img, texValues.x, texValues.y, null);
 
-                x += 16;
-                if (x > 16 * maxCountOfBlocks)
-                {
-                    x = 0;
-                    y += 16;
+                    float tx = (texValues.x / 16f) * addTextCoord;
+                    float ty = (texValues.y / 16f) * addTextCoord;
+                    TextureEngine.blocksTextures.put(id + ":" + name.split("." + "png")[0], new Float[]{tx, ty});
+                    TextureEngine.blocksTexturesID.put(id + ":" + name.split("." + "png")[0], texValues.i++);
+
+                    texValues.x += 16;
+                    if (texValues.x > 16 * maxCountOfBlocks) {
+                        texValues.x = 0;
+                        texValues.y += 16;
+                    }
+                } catch (Exception e) {
+                    Logger.exception("Error occurred while loading " + id + ":textures/blocks/" + name + " file", e);
                 }
-
             }
-        }
+        });
+
         terrainId = TextureEngine.load();
     }
 
@@ -67,9 +81,17 @@ public class TextureEngine
         return load(terrainImage);
     }
 
+    public static int load(String path, int mode) {
+        try {
+            return load(ImageIO.read(Resources.load(path)), mode);
+        } catch (Exception e) {}
+
+        return terrainId;
+    }
+
     public static int load(String path) {
         try {
-            return load(ImageIO.read(new File(path)));
+            return load(ImageIO.read(Resources.load(path)));
         } catch (Exception e) {}
 
         return terrainId;

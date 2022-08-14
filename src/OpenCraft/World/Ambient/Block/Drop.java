@@ -1,6 +1,6 @@
 package OpenCraft.World.Ambient.Block;
 
-import OpenCraft.Interfaces.IRenderHandler;
+import OpenCraft.Rendering.IRenderHandler;
 import OpenCraft.OpenCraft;
 import OpenCraft.Rendering.BlockRenderer;
 import OpenCraft.Rendering.TextureEngine;
@@ -13,7 +13,8 @@ import OpenCraft.sound.Sound;
 import OpenCraft.utils.Random;
 import org.lwjgl.opengl.GL11;
 
-import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Drop extends Entity implements IRenderHandler {
 
@@ -61,8 +62,11 @@ public class Drop extends Entity implements IRenderHandler {
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, TextureEngine.getTerrain());
 //        GL11.glRotatef(rotation, 0, 1, 0);
 
-        t.begin();
         Block block = itemBlock.getBlock();
+        if (block == null)
+            return;
+
+        t.begin();
         if (block.isTile()) {
             BlockRenderer.renderTile0(t, x, y + animation, z, 0.3f, block);
             BlockRenderer.renderTile1(t, x, y + animation, z, 0.3f, block);
@@ -80,7 +84,6 @@ public class Drop extends Entity implements IRenderHandler {
 //        GL11.glRotatef(-rotation, 0, 1, 0);
         GL11.glEndList();
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
-
 
         if (this.onGround) {
             this.timer++;
@@ -102,11 +105,13 @@ public class Drop extends Entity implements IRenderHandler {
             this.zd *= 0.7F;
         }
 
-        ArrayList<Entity> entities = OpenCraft.getLevel().getEntities();
+        HashMap<Integer, Entity> entities = OpenCraft.getLevel().getEntities();
 
-        for (Entity entity: entities) {
+        for (Map.Entry<Integer, Entity> entry : entities.entrySet()) {
+            Entity entity = entry.getValue();
+
             if (entity.hasInventory() && entity.aabb.intersects(this.aabb)) {
-                Sound.loadAndPlay("resources/sounds/player/pick.wav");
+                Sound.loadAndPlay("opencraft:sounds/player/pick.wav");
                 if (entity.pick(itemBlock))
                     this.picked();
                 break;

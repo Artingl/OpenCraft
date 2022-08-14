@@ -2,6 +2,7 @@ package OpenCraft.gui;
 
 import OpenCraft.Rendering.TextureEngine;
 import OpenCraft.Rendering.VerticesBuffer;
+import OpenCraft.Resources.Resources;
 import org.lwjgl.opengl.GL11;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -12,13 +13,8 @@ public class Font {
    private int[] charWidths = new int[256];
    private int fontTexture = 0;
 
-   public Font(String name) {
-      BufferedImage img;
-      try {
-         img = ImageIO.read(new File(name));
-      } catch (IOException var16) {
-         throw new RuntimeException(var16);
-      }
+   public Font(String path) throws IOException {
+      BufferedImage img = ImageIO.read(Resources.load(path));
 
       int w = img.getWidth();
       int h = img.getHeight();
@@ -50,11 +46,7 @@ public class Font {
          this.charWidths[i] = x;
       }
 
-      try {
-         this.fontTexture = TextureEngine.load(ImageIO.read(new File(name)));
-      } catch (IOException var16) {
-         throw new RuntimeException(var16);
-      }
+      this.fontTexture = TextureEngine.load(ImageIO.read(Resources.load(path)));
    }
 
    public void drawShadow(String str, int x, int y, int color) {

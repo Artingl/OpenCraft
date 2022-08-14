@@ -1,51 +1,39 @@
 package OpenCraft.gui;
 
-import OpenCraft.Interfaces.IGuiTick;
-import OpenCraft.Interfaces.ITick;
 import OpenCraft.Rendering.TextureEngine;
 import OpenCraft.Rendering.VerticesBuffer;
 import OpenCraft.OpenCraft;
+import OpenCraft.Resources.Lang;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 
-import javax.imageio.ImageIO;
-import java.io.File;
-import java.io.IOException;
 import java.util.HashMap;
+import java.util.Objects;
 
 public class Screen
 {
-    public static int SCREEN_IDS = 0;
-
-    private static int background_id;
-
-    static
-    {
-        try {
-            background_id = TextureEngine.load(ImageIO.read(new File("resources/gui/dirt.png")));
-        } catch (IOException e) {}
-    }
+    private static int background_id = TextureEngine.load("opencraft:gui/dirt.png");
 
     private HashMap<Integer, Element> elements;
 
     protected float width;
     protected float height;
     protected String title;
+    public final String screenId;
     protected boolean opened;
     private int tickEvent;
-    private final int screenId;
 
-    public Screen(int width, int height, String title)
+    public Screen(int width, int height, String screenId)
     {
         elements = new HashMap<>();
 
         this.width = width;
         this.height = height;
-        this.title = title;
+        this.title = Lang.getLanguageString("opencraft:gui.screen." + screenId);
         this.opened = true;
-        this.screenId = SCREEN_IDS++;
+        this.screenId = screenId;
     }
 
     public void resize(int width, int height)
@@ -199,12 +187,8 @@ public class Screen
         this.opened = b;
     }
 
-    public int getScreenId() {
-        return this.screenId;
-    }
-
     @Override
     public boolean equals(Object obj) {
-        return ((Screen)obj).getScreenId() == this.screenId;
+        return Objects.equals(((Screen) obj).screenId, this.screenId);
     }
 }

@@ -25,9 +25,6 @@ package OpenCraft.World;
 
 
 public class TickTimer {
-    private static final long NS_PER_SECOND = 1000000000L;
-    private static final long MAX_NS_PER_UPDATE = 1000000000L;
-    private static final int MAX_TICKS_PER_UPDATE = 100;
     private float ticksPerSecond;
     private long lastTime;
     public int ticks;

@@ -1,6 +1,7 @@
 package OpenCraft.gui.screens;
 
 import OpenCraft.Rendering.VerticesBuffer;
+import OpenCraft.Resources.Lang;
 import OpenCraft.gui.Button;
 import OpenCraft.gui.EditArea;
 import OpenCraft.gui.Screen;
@@ -19,13 +20,13 @@ public class NewWorldConfiguratorScreen extends Screen
     private int createNewWorldBtn;
 
     public NewWorldConfiguratorScreen() {
-        super(OpenCraft.getWidth(), OpenCraft.getHeight(), "Create a new world");
+        super(OpenCraft.getWidth(), OpenCraft.getHeight(), "new_world_configurer");
     }
 
     public void init() {
         super.init();
 
-        levelEditArea = this.addElement(new EditArea(0, 0, 0, "World name", () -> {
+        levelEditArea = this.addElement(new EditArea(0, 0, 0, Lang.getLanguageString("opencraft:gui.text.world_name"), () -> {
             if (new File("saves" + File.separator + ((EditArea) getElements().get(levelEditArea)).getText()).exists())
             {
                 ((Button)getElements().get(createNewWorldBtn)).enabled = false;
@@ -34,9 +35,9 @@ public class NewWorldConfiguratorScreen extends Screen
                 ((Button)getElements().get(createNewWorldBtn)).enabled = true;
             }
         }));
-        seedEditArea = this.addElement(new EditArea(1, 0, 0, "World seed", () -> {}));
-        createNewWorldBtn = this.addElement(new Button(0, 0, 0, "Create a new world", () -> {
-            setLoadingScreen("Loading world...");
+        seedEditArea = this.addElement(new EditArea(1, 0, 0, Lang.getLanguageString("opencraft:gui.text.world_seed"), () -> {}));
+        createNewWorldBtn = this.addElement(new Button(0, 0, 0, Lang.getLanguageString("opencraft:gui.text.new_world_configurer"), () -> {
+            setLoadingScreen(Lang.getLanguageString("opencraft:gui.text.loading_world"));
             OpenCraft.getWorldListScreen().levelName = ((EditArea)getElements().get(levelEditArea)).getText();
             int seed = ((EditArea)getElements().get(seedEditArea)).getText().hashCode();
 

@@ -15,17 +15,10 @@ import static org.lwjgl.opengl.GL11.*;
 public class Button extends Element
 {
 
-    public static int[] BUTTON_TEXTURES;
+    public static int[] BUTTON_TEXTURES = new int[]{
+        TextureEngine.load("opencraft:gui/button.png"), TextureEngine.load("opencraft:gui/button_hover.png"), TextureEngine.load("opencraft:gui/button_disabled.png")
+    };
 
-    static {
-        try {
-            BUTTON_TEXTURES = new int[]{
-                    TextureEngine.load(ImageIO.read(new File("resources/gui/button.png"))),
-                    TextureEngine.load(ImageIO.read(new File("resources/gui/button_hover.png"))),
-                    TextureEngine.load(ImageIO.read(new File("resources/gui/button_disabled.png")))
-            };
-        } catch (IOException e) {}
-    }
 
     public boolean enabled = true;
     public boolean selected = false;
@@ -74,7 +67,7 @@ public class Button extends Element
                 }
                 else if(!Controls.getMouseKey(0) && mouseClicked)
                 {
-                    Sound.loadAndPlay("resources/sounds/gui/click1.wav");
+                    Sound.loadAndPlay("opencraft:sounds/gui/click1.wav");
                     if (onClick != null && mouseHover(mx, my, x, screenHeight - (y + height), width, height) && enabled) onClick.run();
                     mouseClicked = false;
                 }

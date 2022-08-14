@@ -1,13 +1,12 @@
 package OpenCraft.gui;
 
-import OpenCraft.Interfaces.IGuiInterface;
 import OpenCraft.OpenCraft;
 
 public class Window extends Screen implements IGuiInterface {
 
-    public Window(int w, int h, String title)
+    public Window(int w, int h, String window_id)
     {
-        super(w, h, title);
+        super(w, h, window_id);
         OpenCraft.registerGuiInterfaceEvent(this);
     }
 

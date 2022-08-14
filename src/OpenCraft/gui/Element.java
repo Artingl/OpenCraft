@@ -1,6 +1,5 @@
 package OpenCraft.gui;
 
-import OpenCraft.Interfaces.IGuiElement;
 import OpenCraft.OpenCraft;
 import org.lwjgl.opengl.GL11;
 

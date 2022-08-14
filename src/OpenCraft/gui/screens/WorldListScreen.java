@@ -23,7 +23,7 @@ public class WorldListScreen extends Screen
     private int loadWorldBtnId;
 
     public WorldListScreen() {
-        super(OpenCraft.getWidth(), OpenCraft.getHeight(), "Select world");
+        super(OpenCraft.getWidth(), OpenCraft.getHeight(), "world_select");
     }
 
     public void selectWorld(int btn_id, String path)

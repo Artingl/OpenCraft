@@ -5,7 +5,6 @@ import OpenCraft.World.Block.Block;
 import OpenCraft.World.Direction;
 import OpenCraft.World.Level.Level;
 import OpenCraft.math.Vector2i;
-import OpenCraft.math.Vector3i;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -77,7 +76,7 @@ public class Region {
                         local_dos.writeInt(i);                // x
                         local_dos.writeInt(j);                // y
                         local_dos.writeInt(k);                // z
-                        local_dos.writeInt(block.getIdInt()); // block id
+                        local_dos.writeInt(block.getIntId()); // block id
                     }
                 }
             }

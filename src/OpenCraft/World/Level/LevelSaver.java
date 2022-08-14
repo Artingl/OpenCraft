@@ -1,5 +1,6 @@
 package OpenCraft.World.Level;
 
+import OpenCraft.Logger.Logger;
 import OpenCraft.OpenCraft;
 import OpenCraft.World.Block.Block;
 import OpenCraft.World.Chunk.Region;
@@ -52,7 +53,7 @@ public class LevelSaver {
             this.dos.writeInt(OpenCraft.getLevel().getSeed());
             this.dos.flush();
         } catch (Exception e) {
-            System.out.println("Error while loading world: " + StackTrace.getStackTrace(e));
+            Logger.exception("Error while loading world", e);
         }
     }
 
@@ -97,7 +98,7 @@ public class LevelSaver {
             }
 
         } catch (Exception e) {
-            System.out.println("Error while loading world: " + StackTrace.getStackTrace(e));
+            Logger.exception("Error while loading world", e);
         }
     }
 
@@ -126,7 +127,7 @@ public class LevelSaver {
                 local_dos.writeInt(-1);
                 local_dos.close();
             } catch (Exception e) {
-                System.out.println("Error while saving world: " + StackTrace.getStackTrace(e));
+                Logger.exception("Error while saving world", e);
             }
         }
 
@@ -138,7 +139,7 @@ public class LevelSaver {
             this.updatedRegions.clear();
             this.dos.close();
         } catch (Exception e) {
-            System.out.println("Error while saving world: " + StackTrace.getStackTrace(e));
+            Logger.exception("Error while saving world", e);
         }
     }
 

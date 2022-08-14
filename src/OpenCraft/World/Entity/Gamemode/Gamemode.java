@@ -7,5 +7,4 @@ public class Gamemode {
     public int getId() {
         return Gamemode.id;
     }
-
 }

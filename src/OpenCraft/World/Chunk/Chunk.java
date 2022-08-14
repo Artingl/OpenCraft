@@ -25,6 +25,7 @@ public class Chunk
     private ArrayList<Boolean> layersState;
     private ArrayList<Boolean> layersVisible;
     private int chunksList;
+    private boolean initialized = false;
 
     public Chunk(Vector2i chunkListPosition)
     {
@@ -43,9 +44,13 @@ public class Chunk
             layersVisible.add(false);
 
         this.chunksList = GL11.glGenLists(CHUNK_LAYERS);
+        this.initialized = true;
     }
 
     public boolean buildLayer(int layer) {
+        if (!this.initialized)
+            return false;
+
         ++LevelRenderer.CHUNK_UPDATES;
 
         if (this.chunksList != -1)
@@ -132,8 +137,16 @@ public class Chunk
         return (float) Math.sqrt(xd * xd + zd * zd);
     }
 
-    public boolean layerState(int layer) {
+    public boolean getLayerState(int layer) {
+        if (!this.initialized)
+            return false;
         return this.layersState.get(layer);
+    }
+
+    public void setLayerState(int layer, boolean state) {
+        if (!this.initialized)
+            return;
+        this.layersState.set(layer, state);
     }
 
     public boolean getLayersVisible(int layer) {
@@ -151,5 +164,9 @@ public class Chunk
                 y,
                 z + this.chunkListPosition.y * 16
         );
+    }
+
+    public boolean isInitialized() {
+        return this.initialized;
     }
 }

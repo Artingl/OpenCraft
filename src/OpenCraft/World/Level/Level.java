@@ -1,8 +1,8 @@
 package OpenCraft.World.Level;
 
-import OpenCraft.Interfaces.ITick;
-import OpenCraft.Interfaces.IRenderHandler;
-import OpenCraft.Interfaces.LevelRendererListener;
+import OpenCraft.World.ITick;
+import OpenCraft.Rendering.IRenderHandler;
+import OpenCraft.World.LevelListener;
 import OpenCraft.OpenCraft;
 import OpenCraft.World.Ambient.Ambient;
 import OpenCraft.World.Block.Block;
@@ -10,10 +10,12 @@ import OpenCraft.World.Chunk.Chunk;
 import OpenCraft.World.Chunk.Region;
 import OpenCraft.World.Entity.Entity;
 import OpenCraft.World.Entity.EntityPlayer;
+import OpenCraft.math.Vector2i;
 import OpenCraft.math.Vector3f;
 import OpenCraft.math.Vector3i;
 import OpenCraft.phys.AABB;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class Level implements IRenderHandler, ITick
 {
@@ -23,7 +25,7 @@ public class Level implements IRenderHandler, ITick
         WORLD, HELL
     };
 
-    private ArrayList<Entity> entities = new ArrayList<>();
+    private HashMap<Integer, Entity> entities = new HashMap<>();
     private final LevelType levelType;
     private Ambient ambient;
     private LevelGeneration levelGeneration;
@@ -60,10 +62,15 @@ public class Level implements IRenderHandler, ITick
 
     public void addEntity(Entity entity)
     {
-        entities.add(entity);
+        entities.put(entities.size(), entity);
+        entity.setLevel(this, entities.size() - 1);
     }
 
-    public ArrayList<Entity> getEntities()
+    public void removeEntity(int entityLevelId) {
+        entities.remove(entityLevelId);
+    }
+
+    public HashMap<Integer, Entity> getEntities()
     {
         return entities;
     }
@@ -102,6 +109,15 @@ public class Level implements IRenderHandler, ITick
         this.entityPlayerId = -1;
         this.entityPlayer = null;
         this.seed = this.initialSeed;
+    }
+
+
+    public Chunk getChunkByBlockPos(Vector2i position) {
+        return getChunkByBlockPos(position.x, position.y);
+    }
+
+    public Chunk getChunkByBlockPos(int x, int z) {
+        return OpenCraft.getLevelRenderer().getChunkByBlockPos(x, z);
     }
 
     public Block getBlock(int x, int y, int z)
@@ -149,7 +165,7 @@ public class Level implements IRenderHandler, ITick
             for (int j = -1; j < 2; j++) {
                 for (int k = -1; k < 2; k++) {
                     OpenCraft.getLevelRenderer().sendEvent(
-                            LevelRendererListener.Events.CHUNK_UPDATE,
+                            LevelListener.Events.CHUNK_UPDATE,
                             this,
                             OpenCraft.getLevelRenderer().getChunkByBlockPos(x + i, z + j),
                             new Vector3i(x, y + k, z)

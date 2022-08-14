@@ -63,6 +63,10 @@ public class Particle extends Entity {
     }
 
     public void render(VerticesBuffer t, float a, float xa, float ya, float za, float xa2, float za2) {
+        if (tex == null) {
+            return;
+        }
+
         float u0 = tex.getSideTextureX() + (this.uo / 4.0F);
         float u1 = u0 + (this.uo / 4.0F);
         float v0 = tex.getSideTextureY() + (this.vo / 4.0F);

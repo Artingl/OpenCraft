@@ -2,7 +2,6 @@ package OpenCraft.World;
 
 import OpenCraft.Controls;
 import OpenCraft.OpenCraft;
-import OpenCraft.World.Ambient.Block.Drop;
 import OpenCraft.World.Block.Block;
 import OpenCraft.World.Entity.EntityPlayer;
 import OpenCraft.World.Entity.Gamemode.Creative;
@@ -13,6 +12,8 @@ import OpenCraft.World.Item.Tool;
 import OpenCraft.World.Level.Level;
 import OpenCraft.gui.windows.PlayerInventory;
 import org.lwjgl.input.Keyboard;
+import org.lwjgl.input.Mouse;
+
 import java.util.HashMap;
 
 public class PlayerController
@@ -31,6 +32,7 @@ public class PlayerController
     private HashMap<String, Boolean> clickedKeyboard;
 
     private boolean isFlying;
+    private long spaceClickTime = 0;
 
     private final BreakingBlock breakingBlock;
 
@@ -65,9 +67,9 @@ public class PlayerController
         if (Keyboard.isKeyDown(Keyboard.KEY_S))     ++ya;
         if (Keyboard.isKeyDown(Keyboard.KEY_A))     --xa;
         if (Keyboard.isKeyDown(Keyboard.KEY_D))     ++xa;
-        if (Keyboard.isKeyDown(Keyboard.KEY_LSHIFT)) { entityPlayer.setHeightOffset(1.72F); acceleration = 0.1f; }
-        else                                         entityPlayer.setHeightOffset(1.82F);
-        if (Keyboard.isKeyDown(Keyboard.KEY_SPACE)) {
+        if (Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) && !isFlying) { entityPlayer.setHeightOffset(1.72F); acceleration = 0.1f; }
+        else if (!isFlying)                                         entityPlayer.setHeightOffset(1.82F);
+        if (Keyboard.isKeyDown(Keyboard.KEY_SPACE) && !isFlying) {
             if (inWater) {
                 entityPlayer.yd += 0.04F;
             } else if (entityPlayer.onGround) {
@@ -92,18 +94,22 @@ public class PlayerController
                 }
             }
 
-            if (Keyboard.isKeyDown(Keyboard.KEY_F) && !clickedKeyboard.get("f")) {
-                setFlying(!isFlying);
-                if (isFlying)
-                    entityPlayer.yd = 0.42f;
-                clickedKeyboard.put("f", true);
-            } else if (!Keyboard.isKeyDown(Keyboard.KEY_F)) {
-                clickedKeyboard.put("f", false);
+            if (Keyboard.isKeyDown(Keyboard.KEY_SPACE) && !clickedKeyboard.get(" ")) {
+                if (this.spaceClickTime + 400 > System.currentTimeMillis()) {
+                    setFlying(!isFlying);
+                    if (isFlying)
+                        entityPlayer.yd = 0.42f;
+                }
+
+                this.spaceClickTime = System.currentTimeMillis();
+                clickedKeyboard.put(" ", true);
+            } else if (!Keyboard.isKeyDown(Keyboard.KEY_SPACE)) {
+                clickedKeyboard.put(" ", false);
             }
         }
 
         float yo;
-        if (inWater) {
+        if (inWater && !isFlying) {
             yo = entityPlayer.getY();
             entityPlayer.moveRelative(xa, ya, 0.02F);
             entityPlayer.move(entityPlayer.xd, entityPlayer.yd, entityPlayer.zd);
@@ -160,7 +166,10 @@ public class PlayerController
                     this.breakingBlock.blockBreakState += 0.5 / this.breakingBlock.block.getStrength();
                     this.breakingBlock.blockPos = ray[0];
 
-                    if (this.breakingBlock.block.getStrength() == 0 || this.breakingBlock.blockBreakState >= 9 || block.getTool() == Tool.IMMEDIATELY) {
+                    if (this.breakingBlock.block.getStrength() == 0
+                            || this.breakingBlock.blockBreakState >= 9
+                            || block.getTool() == Tool.IMMEDIATELY
+                            || entityPlayer.getGamemode().getId() == Creative.id) {
                         this.breakingBlock.blockBreakState = 0;
 
                         OpenCraft.getLevel().getBlock(ray[0]).destroy(ray[0]);
@@ -184,7 +193,7 @@ public class PlayerController
                 if (getInventoryItem(playerInventory.selected) instanceof ItemBlock) {
                     RayCast.RayResult rayResult = ray[1];
 
-                    if (OpenCraft.getLevel().getBlock(ray[0]).getIdInt() == Block.grass.getIdInt()) {
+                    if (OpenCraft.getLevel().getBlock(ray[0]).getIntId() == Block.grass.getIntId()) {
                         rayResult = ray[0];
                     }
 
@@ -209,6 +218,24 @@ public class PlayerController
         {
             clickedKeyboard.put("c", false);
         }
+    }
+
+    public void rotate()
+    {
+        EntityPlayer entityPlayer = OpenCraft.getLevel().getPlayerEntity();
+
+        entityPlayer.setRy((float)((double)entityPlayer.getRy() + (double)((float) Mouse.getDX()) * 0.15D));
+        entityPlayer.setRx((float)((double)entityPlayer.getRx() - (double)((float) Mouse.getDY()) * 0.15D));
+
+        if (entityPlayer.getRx() > 90) entityPlayer.setRx(90);
+        if (entityPlayer.getRx() < -90) entityPlayer.setRx(-90);
+
+
+        float var1 = (float) Math.sqrt(Mouse.getDX() * Mouse.getDX() + Mouse.getDY() * Mouse.getDY());
+        float var2 = (float)Math.atan(-Mouse.getDY() * 0.20000000298023224D) * 15.0F;
+
+        entityPlayer.cameraYaw += (var1 - entityPlayer.cameraYaw) * 0.4F;
+        entityPlayer.cameraPitch += (var2 - entityPlayer.cameraPitch) * 0.8F;
     }
 
     public void setFlying(boolean i)

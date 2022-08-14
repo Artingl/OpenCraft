@@ -1,7 +1,8 @@
 package OpenCraft.Rendering;
 
-import OpenCraft.Interfaces.ITick;
-import OpenCraft.Interfaces.LevelRendererListener;
+import OpenCraft.Logger.Logger;
+import OpenCraft.World.ITick;
+import OpenCraft.World.LevelListener;
 import OpenCraft.OpenCraft;
 import OpenCraft.World.Chunk.Chunk;
 import OpenCraft.World.Chunk.ChunksSorter;
@@ -12,6 +13,7 @@ import OpenCraft.math.Vector3i;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 public class LevelRenderer implements ITick
 {
@@ -20,21 +22,21 @@ public class LevelRenderer implements ITick
 
     private int chunksUpdate;
     private ArrayList<Chunk> chunks;
-    private ArrayList<LevelRendererListener> listeners;
 
     public LevelRenderer() {
         this.chunks = new ArrayList<>();
-        this.listeners = new ArrayList<>();
-
         OpenCraft.registerTickEvent(this);
     }
 
     public void prepareChunks()
     {
+        Logger.info("Preparing level chunks...");
+
         Level level = OpenCraft.getLevel();
         int renderDistance = OpenCraft.getRenderDistance();
 
         if (chunks.isEmpty()) {
+            int j = 0;
             for (int x = -renderDistance; x < renderDistance; x++) {
                 for (int z = -renderDistance; z < renderDistance; z++) {
                     Chunk chunk = new Chunk(new Vector2i(x >> 4, z >> 4));
@@ -42,15 +44,20 @@ public class LevelRenderer implements ITick
                         chunk.buildLayer(i);
                     chunks.add(chunk);
 
-                    this.publishListenersEvent(LevelRendererListener.Events.CHUNK_UPDATE, level, chunk);
+                    this.publishListenersEvent(LevelListener.Events.CHUNK_UPDATE, level, chunk);
                 }
+
+                Logger.info((((j++) / (renderDistance * 2f)) * 100f) + "%");
             }
 
+            Logger.info("100%");
             System.gc();
         }
         else {
-            System.out.println("TODO: implement LevelRenderer chunks cleaner");
+            Logger.debug("TODO: implement LevelRenderer chunks cleaner");
         }
+
+        this.publishListenersEvent(LevelListener.Events.LEVEL_SWITCH, level, null);
     }
 
     public void render(Frustum frustum) {
@@ -66,7 +73,7 @@ public class LevelRenderer implements ITick
             if (frustum.isVisible(chunk.getAABB())) {
                 for (int layer = 0; layer < Chunk.CHUNK_LAYERS; layer++) {
                     if (frustum.isVisible(chunk.getSimpleAABB(layer))) {
-                        if (!chunk.layerState(layer) && ++updates < 5) {
+                        if (!chunk.getLayerState(layer) && ++updates < 5) {
                             if (!chunk.buildLayer(layer))
                                 updates--;
                         }
@@ -83,12 +90,8 @@ public class LevelRenderer implements ITick
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
     }
 
-    public void registerListener(LevelRendererListener listener) {
-        listeners.add(listener);
-    }
-
     public void destroy() {
-        this.publishListenersEvent(LevelRendererListener.Events.LEVEL_DESTROY, OpenCraft.getLevel(), null);
+        this.publishListenersEvent(LevelListener.Events.LEVEL_DESTROY, OpenCraft.getLevel(), null);
 
         for(Chunk chunk: chunks) {
             chunk.destroy();
@@ -98,8 +101,8 @@ public class LevelRenderer implements ITick
         System.gc();
     }
 
-    public void sendEvent(LevelRendererListener.Events event, Level level, Chunk chunk, Vector3i position) {
-        if (event == LevelRendererListener.Events.CHUNK_UPDATE) {
+    public void sendEvent(LevelListener.Events event, Level level, Chunk chunk, Vector3i position) {
+        if (event == LevelListener.Events.CHUNK_UPDATE) {
             if (chunk != null)
                 chunk.buildLayer(position.y / (256 / Chunk.CHUNK_LAYERS));
         }
@@ -107,21 +110,24 @@ public class LevelRenderer implements ITick
         this.publishListenersEvent(event, level, chunk);
     }
 
-    private void publishListenersEvent(LevelRendererListener.Events event, Level level, Chunk chunk) {
-        for (LevelRendererListener listener : this.listeners) {
-            if (event == LevelRendererListener.Events.CHUNK_UPDATE) {
+    private void publishListenersEvent(LevelListener.Events event, Level level, Chunk chunk) {
+        for (Map.Entry<Integer, LevelListener> entry: OpenCraft.getLevelListeners().entrySet()) {
+            LevelListener listener = entry.getValue();
+
+            if (event == LevelListener.Events.CHUNK_UPDATE) {
                 listener.chunkUpdate(level, chunk);
             }
-            else if (event == LevelRendererListener.Events.LEVEL_DESTROY) {
+            else if (event == LevelListener.Events.LEVEL_DESTROY) {
                 listener.levelDestroy(level);
             }
-            else if (event == LevelRendererListener.Events.LEVEL_SWITCH) {
+            else if (event == LevelListener.Events.LEVEL_SWITCH) {
                 listener.levelSwitch(level);
             }
         }
     }
 
     public Chunk getChunkByBlockPos(int x, int z) {
+        // todo
         for (Chunk chunk: this.chunks) {
             if (chunk == null) {
                 continue;
@@ -140,7 +146,7 @@ public class LevelRenderer implements ITick
         //       when the very first switch is called. after that no memory leak
         //       was found.
 
-        this.publishListenersEvent(LevelRendererListener.Events.LEVEL_SWITCH, OpenCraft.getLevel(), null);
+        this.publishListenersEvent(LevelListener.Events.LEVEL_SWITCH, OpenCraft.getLevel(), null);
 
         for(Chunk chunk: chunks) {
             chunk.destroy();
@@ -162,6 +168,7 @@ public class LevelRenderer implements ITick
         Level level = OpenCraft.getLevel();
         EntityPlayer player = level.getPlayerEntity();
 
+        // search for new chunks
         for (int x = -renderDistance; x < renderDistance; x++) {
             for (int z = -renderDistance; z < renderDistance; z++) {
                 Vector2i chunkPosition = new Vector2i(
@@ -173,7 +180,23 @@ public class LevelRenderer implements ITick
                     Chunk chunk = new Chunk(new Vector2i(chunkPosition.x >> 4, chunkPosition.y >> 4));
                     chunks.add(chunk);
 
-                    this.publishListenersEvent(LevelRendererListener.Events.CHUNK_UPDATE, level, chunk);
+                    // update chunk neighbours
+                    for (int i = -1; i < 2; i++) {
+                        for (int j = -1; j < 2; j++) {
+                            if (i != 0 && j != 0) {
+                                Chunk chunkNeighbour = getChunkByBlockPos(chunkPosition.x + i, chunkPosition.y + j);
+
+                                if (chunkNeighbour != null) {
+                                    if (chunkNeighbour.isInitialized()) {
+                                        for (int k = 0; k < Chunk.CHUNK_LAYERS; k++)
+                                            chunkNeighbour.setLayerState(k, false);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    this.publishListenersEvent(LevelListener.Events.CHUNK_UPDATE, level, chunk);
                     chunksUpdate++;
                 }
             }
@@ -198,7 +221,7 @@ public class LevelRenderer implements ITick
 
         if (chunksUpdate > 4096) {
             // clear memory after some time (in case some garbage is still in memory)
-            System.out.println("Clearing memory");
+            Logger.info("Clearing memory");
             new Thread(System::gc).start();
             chunksUpdate = 0;
         }

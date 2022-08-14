@@ -1,17 +1,16 @@
+import OpenCraft.Logger.Logger;
 import OpenCraft.OpenCraft;
-import org.lwjgl.LWJGLException;
 
 public class Start
 {
-    public static void main(String[] args)
-    {
-        Thread mainThread = new Thread(() -> {
-            try {
-                new OpenCraft();
-            } catch (Exception e) { e.printStackTrace(); }
-        });
-        mainThread.start();
-
+    public static void main(String[] args) throws Exception {
+//        try {
+        new OpenCraft(args);
+//        } catch (Exception e) {
+//            Logger.exception("Critical error while running the game!", e);
+//            Logger.closeOutput();
+//            System.exit(-1);
+//        }
     }
 
 }

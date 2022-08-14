@@ -1,6 +1,7 @@
 package OpenCraft.World.Block;
 
 import OpenCraft.Rendering.Texture;
+import OpenCraft.Rendering.TextureEngine;
 import OpenCraft.World.Ambient.Block.Drop;
 import OpenCraft.World.Direction;
 import OpenCraft.World.Item.ItemBlock;
@@ -15,22 +16,22 @@ public class Block
 {
     public static int BLOCK_COUNT = 0;
 
-    public static Block air = new BlockAir(BLOCK_COUNT++);
-    public static Block stone = new BlockStone(BLOCK_COUNT++);
-    public static Block dirt = new BlockDirt(BLOCK_COUNT++);
-    public static Block grass_block = new BlockGrassBlock(BLOCK_COUNT++);
-    public static Block bedrock = new BlockBedrock(BLOCK_COUNT++);
-    public static Block water = new BlockWater(BLOCK_COUNT++);
-    public static Block lava = new BlockLava(BLOCK_COUNT++);
-    public static Block sand = new BlockSand(BLOCK_COUNT++);
-    public static Block gravel = new BlockGravel(BLOCK_COUNT++);
-    public static Block log_oak = new BlockLogOak(BLOCK_COUNT++);
-    public static Block leaves_oak = new BlockLeavesOak(BLOCK_COUNT++);
-    public static Block glass = new BlockGlass(BLOCK_COUNT++);
-    public static Block sandStone = new BlockSandStone(BLOCK_COUNT++);
-    public static Block hellrock = new BlockHellrock(BLOCK_COUNT++);
-    public static Block grass = new BlockGrass(BLOCK_COUNT++);
-    public static Block rose = new BlockRose(BLOCK_COUNT++);
+    public static Block air = new BlockAir(getNextBlockId());
+    public static Block stone = new BlockStone(getNextBlockId());
+    public static Block dirt = new BlockDirt(getNextBlockId());
+    public static Block grass_block = new BlockGrassBlock(getNextBlockId());
+    public static Block bedrock = new BlockBedrock(getNextBlockId());
+    public static Block water = new BlockWater(getNextBlockId());
+    public static Block lava = new BlockLava(getNextBlockId());
+    public static Block sand = new BlockSand(getNextBlockId());
+    public static Block gravel = new BlockGravel(getNextBlockId());
+    public static Block log_oak = new BlockLogOak(getNextBlockId());
+    public static Block leaves_oak = new BlockLeavesOak(getNextBlockId());
+    public static Block glass = new BlockGlass(getNextBlockId());
+    public static Block sandStone = new BlockSandStone(getNextBlockId());
+    public static Block hellrock = new BlockHellrock(getNextBlockId());
+    public static Block grass = new BlockGrass(getNextBlockId());
+    public static Block rose = new BlockRose(getNextBlockId());
 
     public static Block[] blocks = {
             air, stone, dirt, grass_block, bedrock, water,
@@ -38,8 +39,8 @@ public class Block
     };
 
     private int randomization;
-    private final int idi;
-    private final String id;
+    private final int intId;
+    private final String stringId;
 
     protected Texture texture;
 
@@ -47,12 +48,30 @@ public class Block
 
     private Tool tool;
 
-    public Block(String id, int idi) {
-        this.id = id;
-        this.idi = idi;
+
+    public Block(String stringId, int intId) {
+        this(stringId, intId, true);
+    }
+
+    public Block(String stringId, int intId, boolean createTexture) {
+        this.stringId = stringId;
+        this.intId = intId;
         this.tool = Tool.HAND;
         this.strength = 1;
         this.makeRandomization();
+
+        if (createTexture) {
+            float tx, ty, bx, by, sx, sy;
+
+            tx = TextureEngine.getBlockTextureX(this.getStringId());
+            ty = TextureEngine.getBlockTextureY(this.getStringId());
+            bx = TextureEngine.getBlockTextureX(this.getStringId());
+            by = TextureEngine.getBlockTextureY(this.getStringId());
+            sx = TextureEngine.getBlockTextureX(this.getStringId());
+            sy = TextureEngine.getBlockTextureY(this.getStringId());
+            int id = TextureEngine.getBlockTextureId(this.getStringId());
+            this.texture = new Texture(id, tx, ty, bx, by, sx, sy);
+        }
     }
 
     public void setTexture(Texture texture)
@@ -65,14 +84,14 @@ public class Block
         return this.texture;
     }
 
-    public String getId()
+    public String getStringId()
     {
-        return this.id;
+        return this.stringId;
     }
 
-    public int getIdInt()
+    public int getIntId()
     {
-        return this.idi;
+        return this.intId;
     }
 
     public int getRandomization() { return this.randomization; }
@@ -87,7 +106,7 @@ public class Block
 
     public boolean isVisible()
     {
-        return getIdInt() != Block.air.getIdInt();
+        return getIntId() != Block.air.getIntId();
     }
 
     public boolean isLiquid()
@@ -109,7 +128,7 @@ public class Block
     {
         for (Block block: blocks)
         {
-            if (block.idi == id) return block;
+            if (block.intId == id) return block;
         }
 
         return Block.air;
@@ -173,7 +192,9 @@ public class Block
     }
 
     public void createDrop(int x, int y, int z) {
-        new Drop(new ItemBlock(this, 1), new Vector3i(x, y, z));
+        // todo: when next block is dropped, the last one would disappear
+        OpenCraft.getLevel().addEntity(
+                new Drop(new ItemBlock(this, 1), new Vector3i(x, y, z)));
     }
 
     public int getStackAmount() {
@@ -182,14 +203,18 @@ public class Block
 
     @Override
     public boolean equals(Object obj) {
-        return getIdInt() == ((Block)obj).getIdInt();
+        return getIntId() == ((Block)obj).getIntId();
     }
 
     @Override
     public String toString() {
-        return "Block{id=" + getId() + "}";
+        return "Block{id=" + getStringId() + "}";
     }
 
     public void neighborChanged(Level level, Vector3i blockPos, Direction.Values direction, Block newBlock) {
+    }
+    
+    public static int getNextBlockId() {
+        return Block.BLOCK_COUNT++;
     }
 }

@@ -18,17 +18,17 @@ public class PlayerInventory extends Window
 {
 
     public static int[] INVENTORY_TEXTURES = new int[]{
-            TextureEngine.load("resources/gui/inventory.png"),
-            TextureEngine.load("resources/gui/inventory_selected.png"),
-            TextureEngine.load("resources/gui/heartbg.png"),
-            TextureEngine.load("resources/gui/halfheart.png"),
-            TextureEngine.load("resources/gui/fullheart.png"),
+            TextureEngine.load("opencraft:gui/inventory.png"),
+            TextureEngine.load("opencraft:gui/inventory_selected.png"),
+            TextureEngine.load("opencraft:gui/heartbg.png"),
+            TextureEngine.load("opencraft:gui/halfheart.png"),
+            TextureEngine.load("opencraft:gui/fullheart.png"),
     };
 
     public int selected = 0;
 
     public PlayerInventory() {
-        super(0, 0, "");
+        super(0, 0, "player_hotbar");
     }
 
     @Override

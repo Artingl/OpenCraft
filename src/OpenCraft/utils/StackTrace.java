@@ -6,6 +6,7 @@ import java.io.StringWriter;
 public class StackTrace {
 
     public static String getStackTrace(final Throwable throwable) {
+        // todo
         final StringWriter sw = new StringWriter();
         final PrintWriter pw = new PrintWriter(sw, true);
         throwable.printStackTrace(pw);

@@ -1,0 +1,12 @@
+{
+  "gui.text.singleplayer": "Singleplayer",
+  "gui.text.quit_game": "Quit the game",
+  "gui.text.world_select": "Select world",
+  "gui.text.game_menu": "Game Menu",
+  "gui.text.new_world_configurer": "Create a new world",
+  "gui.text.world_seed": "World seed",
+  "gui.text.world_name": "World name",
+  "gui.text.loading_world": "Loading world...",
+  "gui.text.back_to_game": "Back to game",
+  "gui.text.quit_world": "Quit to main manu"
+}
