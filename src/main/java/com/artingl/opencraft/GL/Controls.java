@@ -1,8 +1,10 @@
 package com.artingl.opencraft.GL;
 
 import com.artingl.opencraft.OpenCraft;
+import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.*;
 
+import java.nio.DoubleBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -109,8 +111,8 @@ public class Controls
     protected static int MouseX;
     protected static int MouseY;
 
-    protected static int MouseDX;
-    protected static int MouseDY;
+    protected static float MouseDX;
+    protected static float MouseDY;
 
     protected static HashMap<Integer, Consumer<Integer>> unicodeCallbacks;
     protected static ArrayList<Boolean> PressedKeyboardKeys;
@@ -135,6 +137,7 @@ public class Controls
     }
 
     public static void destroy() {
+        PressedKeyboardKeysUnicode.clear();
         PressedKeyboardKeys.clear();
         PressedMouseKeys.clear();
     }
@@ -150,29 +153,67 @@ public class Controls
     }
 
     public static void update() {
+        if (isGrabbed && OpenCraft.getDisplay().inFocus()) {
+            MouseDX = getMouseX() - OpenCraft.getWidth() / 2f;
+            MouseDY = getMouseY() - OpenCraft.getHeight()  / 2f;
 
+            setMousePos(OpenCraft.getWidth() / 2f, OpenCraft.getHeight() / 2f);
+        }
+        else {
+            MouseDX = 0;
+            MouseDY = 0;
+        }
     }
 
     public static int getMouseX()
     {
-        return MouseX;
+        DoubleBuffer x = BufferUtils.createDoubleBuffer(1);
+        DoubleBuffer y = BufferUtils.createDoubleBuffer(1);
+        GLFW.glfwGetCursorPos(OpenCraft.getDisplay().getDisplayId(), x, y);
+        return (int) x.rewind().get();
     }
 
     public static int getMouseY()
     {
-        return MouseY;
+        DoubleBuffer x = BufferUtils.createDoubleBuffer(1);
+        DoubleBuffer y = BufferUtils.createDoubleBuffer(1);
+        GLFW.glfwGetCursorPos(OpenCraft.getDisplay().getDisplayId(), x, y);
+        return (int) (OpenCraft.getDisplay().getHeight() - y.rewind().get());
+    }
+
+    public static void setMouseX(float x) {
+        GLFW.glfwSetCursorPos(OpenCraft.getDisplay().getDisplayId(), x, getMouseY());
+    }
+
+    public static void setMouseY(float y) {
+        GLFW.glfwSetCursorPos(OpenCraft.getDisplay().getDisplayId(), getMouseX(), y);
+    }
+
+    public static void setMousePos(float x, float y) {
+        GLFW.glfwSetCursorPos(OpenCraft.getDisplay().getDisplayId(), x, y);
     }
 
     public static float getDX() {
-        return 0;
+        return MouseDX;
     }
 
     public static float getDY() {
-        return 0;
+        return MouseDY;
     }
 
     public static void setMouseGrabbed(boolean b) {
+        if (b && !isGrabbed) {
+            setMousePos(OpenCraft.getWidth() / 2f, OpenCraft.getHeight() / 2f);
+        }
+
         isGrabbed = b;
+
+        if (!isGrabbed || !OpenCraft.getDisplay().inFocus()) {
+            GLFW.glfwSetInputMode(OpenCraft.getDisplay().getDisplayId(), GLFW.GLFW_CURSOR, GLFW.GLFW_CURSOR_NORMAL);
+        }
+        else if (isGrabbed) {
+            GLFW.glfwSetInputMode(OpenCraft.getDisplay().getDisplayId(), GLFW.GLFW_CURSOR, GLFW.GLFW_CURSOR_HIDDEN);
+        }
     }
 
     public static int registerKeyboardHandler(Consumer<Integer> r) {

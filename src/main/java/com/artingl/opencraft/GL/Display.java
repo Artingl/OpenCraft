@@ -1,8 +1,8 @@
 package com.artingl.opencraft.GL;
 
-import org.lwjgl.glfw.GLFW;
-import org.lwjgl.glfw.GLFWVidMode;
-import org.lwjgl.glfw.GLFWWindowSizeCallback;
+import com.artingl.opencraft.OpenCraft;
+import org.lwjgl.BufferUtils;
+import org.lwjgl.glfw.*;
 import org.lwjgl.system.MemoryStack;
 
 import java.nio.IntBuffer;
@@ -19,14 +19,21 @@ public class Display {
     private long display;
     private boolean isFullscreen;
     private boolean isResized;
+    private boolean focus;
+    private GLFWWindowSizeCallbackI sizeCallback;
+    private GLFWWindowFocusCallbackI focusCallback;
 
-    // callbacks
-    private GLFWWindowSizeCallback sizeCallback;
+    // is used for fullscreen function
+    private final IntBuffer lastWindowX = BufferUtils.createIntBuffer(1);
+    private final IntBuffer lastWindowY = BufferUtils.createIntBuffer(1);
+    private final IntBuffer lastWindowW = BufferUtils.createIntBuffer(1);
+    private final IntBuffer lastWindowH = BufferUtils.createIntBuffer(1);
 
     public Display(int width, int height, String title) {
         this.width = width;
         this.height = height;
         this.title = title;
+        this.focus = true;
     }
 
     public void create() {
@@ -66,13 +73,16 @@ public class Display {
     }
 
     private void registerCallbacks() {
-        sizeCallback = new GLFWWindowSizeCallback() {
-            public void invoke(long window, int w, int h) {
-                isResized = true;
+        sizeCallback = (window, w, h) -> {
+            isResized = true;
+            if (w != 0)
                 width = w;
+            if (h != 0)
                 height = h;
-            }
         };
+
+        focusCallback = (window, focused) ->
+                focus = focused;
 
         GLFW.glfwSetKeyCallback(this.display, Controls.getKeyboardCallback());
         GLFW.glfwSetCursorPosCallback(this.display, Controls.getMouseMoveCallback());
@@ -80,6 +90,7 @@ public class Display {
         GLFW.glfwSetCharCallback(this.display, Controls.getUnicodeCharsCallback());
 //        GLFW.glfwSetScrollCallback(this.display, Controls.getMouseScrollCallback());
         GLFW.glfwSetWindowSizeCallback(this.display, sizeCallback);
+        GLFW.glfwSetWindowFocusCallback(this.display, focusCallback);
     }
 
     public void createFrame() {
@@ -94,8 +105,6 @@ public class Display {
         glfwFreeCallbacks(this.display);
         glfwDestroyWindow(this.display);
         glfwTerminate();
-
-        this.sizeCallback.free();
     }
 
     public boolean isClosed() {
@@ -117,11 +126,18 @@ public class Display {
     public void setFullscreen(boolean isFullscreen) {
         isResized = true;
         if (isFullscreen) {
-//            org.lwjgl.glfw.GLFW.glfwGetWindowPos(this.display, windowPosX, windowPosY);
-            GLFW.glfwSetWindowMonitor(this.display, GLFW.glfwGetPrimaryMonitor(), 0, 0, width, height, 0);
+            GLFW.glfwGetWindowPos(this.display, lastWindowX, lastWindowY);
+            GLFW.glfwGetWindowSize(this.display, lastWindowW, lastWindowH);
+            GLFWVidMode mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+            GLFW.glfwSetWindowMonitor(this.display, GLFW.glfwGetPrimaryMonitor(), 0, 0, mode.width(), mode.height(), 0);
         } else {
-            GLFW.glfwSetWindowMonitor(this.display, 0, 0, 0, width, height, 0);
+            GLFW.glfwSetWindowMonitor(this.display, 0, lastWindowX.get(0), lastWindowY.get(0), width, height, 0);
+            this.width = lastWindowW.get(0);
+            this.height = lastWindowH.get(0);
+            GLFW.glfwSetWindowSize(this.display, this.width, this.height);
         }
+
+        this.isFullscreen = isFullscreen;
     }
 
     public boolean isResized() {
@@ -132,5 +148,9 @@ public class Display {
 
     public long getDisplayId() {
         return display;
+    }
+
+    public boolean inFocus() {
+        return focus;
     }
 }

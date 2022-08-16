@@ -41,8 +41,8 @@ public class OpenCraft
     private static final String version = "0.8.1";
 
     // Window
-    private static int width = 868;
-    private static int height = 568;
+    private static final int width = 868;
+    private static final int height = 568;
     private static Display display;
     private static boolean escapeClick;
     private static boolean close = false;
@@ -181,10 +181,11 @@ public class OpenCraft
             if (display.isResized())
             {
                 GL11.glViewport(0, 0, display.getWidth(), display.getHeight());
-                width = display.getWidth(); // Set new width
-                height = display.getHeight(); // Set new height
+                if (currentScreen != null) currentScreen.resize(display.getWidth(), display.getHeight());
+            }
 
-                if (currentScreen != null) currentScreen.resize(width, height);
+            if (Controls.isKeyDown(Controls.Keys.KEY_F11)) {
+                display.setFullscreen(!display.isFullscreen());
             }
 
             timer.advanceTime();
@@ -255,6 +256,8 @@ public class OpenCraft
             display.swapBuffers();
             ++frames;
         }
+
+        Logger.info("Preparing to exit");
 
         Controls.destroy();
         display.destroy();
@@ -422,6 +425,16 @@ public class OpenCraft
         return display.getHeight();
     }
 
+    public static int getDefaultWidth()
+    {
+        return width;
+    }
+
+    public static int getDefaultHeight()
+    {
+        return height;
+    }
+
     public static int getFOV()
     {
         return OpenCraft.FOV;
@@ -543,7 +556,7 @@ public class OpenCraft
         if (guiScale == 1) scale = 540;
         if (guiScale == 2) scale = 440;
         if (guiScale == 3) scale = 340;
-        return width * scale / height;
+        return display.getWidth() * scale / display.getHeight();
     }
 
     public static int getScreenScaledHeight() {
@@ -552,7 +565,7 @@ public class OpenCraft
         if (guiScale == 2) scale = 440;
         if (guiScale == 3) scale = 340;
 
-        return height * scale / height;
+        return display.getHeight() * scale / display.getHeight();
     }
 
     public static void closeCurrentScreen()
