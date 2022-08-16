@@ -30,10 +30,9 @@ public class PlayerController
     private HashMap<String, Boolean> clickedKeyboard;
 
     private boolean isFlying;
-    private long spaceClickTime = 0;
 
     private final BreakingBlock breakingBlock;
-    private int keyboardEvent;
+    private final int keyboardEvent;
 
     public PlayerController() {
         this.playerInventory = new PlayerInventory();
@@ -49,17 +48,31 @@ public class PlayerController
         for(int i = 32; i <= 126; i++) clickedKeyboard.put(String.valueOf((char)i).toUpperCase(), false);
 
         this.keyboardEvent = Controls.registerKeyboardHandler((key) -> {
-            char c = Character.toChars(key)[0];
+            EntityPlayer entityPlayer = OpenCraft.getLevel().getPlayerEntity();
 
-            if (c == '1') playerInventory.selected = 0;
-            if (c == '2') playerInventory.selected = 1;
-            if (c == '3') playerInventory.selected = 2;
-            if (c == '4') playerInventory.selected = 3;
-            if (c == '5') playerInventory.selected = 4;
-            if (c == '6') playerInventory.selected = 5;
-            if (c == '7') playerInventory.selected = 6;
-            if (c == '8') playerInventory.selected = 7;
-            if (c == '9') playerInventory.selected = 8;
+            if (key.mod == Controls.Keys.KEY_SPACE && key.clickType == Controls.ClickType.DOUBLE) {
+                if (entityPlayer.getGamemode().getId() == Creative.id) {
+                    setFlying(!isFlying);
+                    if (isFlying)
+                        entityPlayer.yd = 0.42f;
+                }
+            }
+            else if (key.mod == Controls.Keys.KEY_T) {
+
+            }
+            else {
+                String  c = key.character;
+
+                if (c.equals("1")) playerInventory.selected = 0;
+                if (c.equals("2")) playerInventory.selected = 1;
+                if (c.equals("3")) playerInventory.selected = 2;
+                if (c.equals("4")) playerInventory.selected = 3;
+                if (c.equals("5")) playerInventory.selected = 4;
+                if (c.equals("6")) playerInventory.selected = 5;
+                if (c.equals("7")) playerInventory.selected = 6;
+                if (c.equals("8")) playerInventory.selected = 7;
+                if (c.equals("9")) playerInventory.selected = 8;
+            }
         });
     }
 
@@ -105,19 +118,6 @@ public class PlayerController
                         entityPlayer.yd = 0.42F;
                     }
                 }
-            }
-
-            if (Controls.isKeyDown(Controls.Keys.KEY_SPACE) && !clickedKeyboard.get(" ")) {
-                if (this.spaceClickTime + 400 > System.currentTimeMillis()) {
-                    setFlying(!isFlying);
-                    if (isFlying)
-                        entityPlayer.yd = 0.42f;
-                }
-
-                this.spaceClickTime = System.currentTimeMillis();
-                clickedKeyboard.put(" ", true);
-            } else if (!Controls.isKeyDown(Controls.Keys.KEY_SPACE)) {
-                clickedKeyboard.put(" ", false);
             }
         }
 
@@ -232,13 +232,6 @@ public class PlayerController
 
         if (entityPlayer.getRx() > 90) entityPlayer.setRx(90);
         if (entityPlayer.getRx() < -90) entityPlayer.setRx(-90);
-//
-//
-//        float var1 = (float) Math.sqrt(Mouse.getDX() * Mouse.getDX() + Mouse.getDY() * Mouse.getDY());
-//        float var2 = (float)Math.atan(-Mouse.getDY() * 0.20000000298023224D) * 15.0F;
-//
-//        entityPlayer.cameraYaw += (var1 - entityPlayer.cameraYaw) * 0.4F;
-//        entityPlayer.cameraPitch += (var2 - entityPlayer.cameraPitch) * 0.8F;
     }
 
     public void setFlying(boolean i)

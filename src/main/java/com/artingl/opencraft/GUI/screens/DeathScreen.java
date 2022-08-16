@@ -3,6 +3,7 @@ package com.artingl.opencraft.GUI.screens;
 import com.artingl.opencraft.OpenCraft;
 import com.artingl.opencraft.GUI.Button;
 import com.artingl.opencraft.GUI.Screen;
+import com.artingl.opencraft.Resources.Lang;
 import org.lwjgl.opengl.GL11;
 
 public class DeathScreen extends Screen
@@ -17,11 +18,11 @@ public class DeathScreen extends Screen
     public void init() {
         super.init();
 
-        this.addElement(new Button(1, 0, 0, "Respawn", () -> {
+        this.addElement(new Button(this, 1, 0, 0, Lang.getLanguageString("opencraft:gui.text.respawn"), () -> {
             OpenCraft.getLevel().getPlayerEntity().respawn();
             OpenCraft.closeCurrentScreen();
         }));
-        this.addElement(new Button(0, 0, 0, "Quit to main menu", OpenCraft::quitToMainMenu));
+        this.addElement(new Button(this, 0, 0, 0, Lang.getLanguageString("opencraft:gui.text.quit_world"), OpenCraft::quitToMainMenu));
     }
 
     public void render(int screenWidth, int screenHeight, int scale)

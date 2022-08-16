@@ -38,7 +38,7 @@ public class OpenCraft
     private static String gameDir = "";
 
     // Game version
-    private static final String version = "0.8.1";
+    private static String version = "Dev";
 
     // Window
     private static final int width = 868;
@@ -84,8 +84,13 @@ public class OpenCraft
     private static int guiScale = 3;
 
     public OpenCraft(String[] args) throws Exception {
+        String ver = getClass().getPackage().getImplementationVersion();
+        if (ver != null) {
+            version = ver;
+        }
+
         Logger.init();
-        Logger.info("Hello from OpenCraft");
+        Logger.info("Hello world");
 
         OpenCraft.parseArguments(args);
         JavaUtils.modifyLibraryPath(getGameDirectory() + "natives");
@@ -106,6 +111,7 @@ public class OpenCraft
 
         Logger.setupOutputFile();
 
+        Logger.info("Welcome to OpenCraft " + version + "!");
         Logger.info("Creating display");
 
         display = new Display(width, height, "OpenCraft " + version);
@@ -189,6 +195,7 @@ public class OpenCraft
             }
 
             timer.advanceTime();
+            Controls.update();
 
             Vector3f sky = new Vector3f(0, 0, 0);
 
@@ -267,6 +274,8 @@ public class OpenCraft
     public static void parseArguments(String[] args) {
         String prefix = "";
 
+        gameDir = System.getenv("APPDATA") + File.separator + ".opencraft" + File.separator;
+
         for (String arg: args) {
             if (prefix.isEmpty()) {
                 prefix = arg;
@@ -279,9 +288,12 @@ public class OpenCraft
                 prefix = "";
             }
         }
+
+        // creating game directory if it doesn't exist
+        new File(gameDir).mkdir();
     }
 
-    public static void initScreens() throws IOException {
+    public static void initScreens() {
         mainMenu = new MainMenuScreen();
         worldList = new WorldListScreen();
         pauseMenu = new PauseMenuScreen();
@@ -592,14 +604,11 @@ public class OpenCraft
 
         if (scr != null)
         {
-            int scale = 240;
-            if (guiScale == 1) scale = 540;
-            if (guiScale == 2) scale = 440;
-            if (guiScale == 3) scale = 340;
-
             scr.init();
         }
+
         currentScreen = scr;
+        System.gc();
     }
 
     public static LevelSaver getLevelSaver() {

@@ -17,7 +17,6 @@ public class Button extends Element
 
 
     public boolean enabled = true;
-    public boolean selected = false;
 
     private final int id;
     private long alive = -1;
@@ -25,9 +24,9 @@ public class Button extends Element
     private Runnable onClick;
     private boolean mouseClicked;
 
-    public Button(int id, float x, float y, String text, Runnable onClick)
+    public Button(Screen screen, int id, float x, float y, String text, Runnable onClick)
     {
-        super(x, y, 0, 0);
+        super(screen, x, y, 0, 0);
         this.text = text;
         this.onClick = onClick;
         this.id = id;
@@ -43,6 +42,7 @@ public class Button extends Element
     @Override
     public void render(int screenWidth, int screenHeight, int scale)
     {
+        super.render(screenWidth, screenHeight, scale);
 
         int mx = Controls.getMouseX() * scale / OpenCraft.getHeight();
         int my = Controls.getMouseY() * scale / OpenCraft.getHeight();
@@ -63,8 +63,8 @@ public class Button extends Element
                 }
                 else if(!Controls.getMouseKey(0) && mouseClicked)
                 {
-                    Sound.loadAndPlay("opencraft:sounds/gui/click1.wav");
-                    if (onClick != null && mouseHover(mx, my, x, screenHeight - (y + height), width, height) && enabled) onClick.run();
+                    if (mouseHover(mx, my, x, screenHeight - (y + height), width, height))
+                        clickHandler();
                     mouseClicked = false;
                 }
             }
@@ -86,6 +86,11 @@ public class Button extends Element
 
         GL11.glDisable(GL_BLEND);
 
+    }
+
+    public void clickHandler() {
+        Sound.loadAndPlay("opencraft:sounds/gui/click1.wav");
+        if (onClick != null && enabled) onClick.run();
     }
 
     public String getText() {

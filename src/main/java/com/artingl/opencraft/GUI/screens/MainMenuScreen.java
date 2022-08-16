@@ -26,19 +26,17 @@ public class MainMenuScreen extends Screen
 
     private float panoramaTimer = 0;
 
-    public MainMenuScreen() throws IOException {
+    public MainMenuScreen() {
         super(OpenCraft.getWidth(), OpenCraft.getHeight(), "main_menu");
 
-        logo = TextureEngine.load("opencraft:title/logo.png", GL11.GL_LINEAR);
-
-        this.addElement(new Button(0, 0, 0, Lang.getLanguageString("opencraft:gui.text.singleplayer"), () -> OpenCraft.setCurrentScreen(OpenCraft.getWorldListScreen())));
-        this.addElement(new Button(1, 0, 0, Lang.getLanguageString("opencraft:gui.text.quit_game"), OpenCraft::close));
-
+        this.logo = TextureEngine.load("opencraft:title/logo.png", GL11.GL_LINEAR);
     }
 
-    public void init()
-    {
+    public void init() {
+        super.init();
 
+        this.addElement(new Button(this, 0, 0, 0, Lang.getLanguageString("opencraft:gui.text.singleplayer"), () -> OpenCraft.setCurrentScreen(OpenCraft.getWorldListScreen())));
+        this.addElement(new Button(this, 1, 0, 0, Lang.getLanguageString("opencraft:gui.text.quit_game"), OpenCraft::close));
     }
 
     public void render(int screenWidth, int screenHeight, int scale)
@@ -75,6 +73,7 @@ public class MainMenuScreen extends Screen
         fillTexture(0, 0, l_width, l_height, logo);
         GL11.glTranslatef(-(screenWidth / 2f - (l_width / 2)), -20, 50);
     }
+
     public void drawPanorama(int screenWidth, int screenHeight) {
         GL11.glMatrixMode(GL11.GL_PROJECTION);
         GL11.glLoadIdentity();

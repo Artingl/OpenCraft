@@ -8,5 +8,7 @@
   "gui.text.world_name": "World name",
   "gui.text.loading_world": "Loading world...",
   "gui.text.back_to_game": "Back to game",
-  "gui.text.quit_world": "Quit to main manu"
+  "gui.text.quit_world": "Quit to main menu",
+  "gui.text.respawn": "Respawn",
+  "gui.text.load_world": "Load world"
 }

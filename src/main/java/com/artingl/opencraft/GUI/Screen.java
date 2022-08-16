@@ -1,5 +1,7 @@
 package com.artingl.opencraft.GUI;
 
+import com.artingl.opencraft.GL.Controls;
+import com.artingl.opencraft.Logger.Logger;
 import com.artingl.opencraft.OpenCraft;
 import com.artingl.opencraft.Rendering.TextureEngine;
 import com.artingl.opencraft.Rendering.VerticesBuffer;
@@ -18,8 +20,8 @@ public class Screen
     protected float width;
     protected float height;
     protected String title;
+    private int keyboardEvent = -1;
     public final String screenId;
-    private int tickEvent;
 
     public Screen(int width, int height, String screenId)
     {
@@ -40,6 +42,10 @@ public class Screen
     public void init()
     {
         elements = new HashMap<>();
+
+        if (this.keyboardEvent == -1) {
+            this.registerKeyboardHandler();
+        }
     }
 
     protected void fill(int x0, int y0, int x1, int y1, int col) {
@@ -134,28 +140,58 @@ public class Screen
         font.drawShadow(str, x, y, color);
     }
 
-    protected void updateEvents() {
-        // todo: fix mouse events
-//        while(Mouse.next()) {
-//            if (Mouse.getEventButtonState()) {
-//                int xm = (int) (Mouse.getEventX() * this.width / OpenCraft.getWidth());
-//                int ym = (int) (this.height - Mouse.getEventY() * this.height / OpenCraft.getHeight() - 1);
-//                this.mouseClicked(xm, ym, Mouse.getEventButton());
-//            }
-//        }
-//
-//        while(Keyboard.next()) {
-//            if (Keyboard.getEventKeyState()) {
-//                this.keyPressed(Keyboard.getEventCharacter(), Keyboard.getEventKey());
-//            }
-//        }
+    protected void keyPressed(Controls.KeyInput keyInput) {
+        System.out.println("key");
+        elements.forEach((id, element) -> {
+            if (element != null) element.keyHandler(keyInput);
+        });
 
-    }
+        if (keyInput.mod == Controls.Keys.KEY_TAB) {
+            var values = new Object() {
+                boolean nextHighlight = false;
+                boolean skipEverything = false;
+            };
 
-    protected void keyPressed(char eventCharacter, int eventKey) {
+            elements.forEach((id, element) -> {
+                if (values.skipEverything)
+                    return;
+
+                if (element != null) {
+                    if (values.nextHighlight) {
+                        element.isHighlighting = true;
+                        element.selected = true;
+                        values.skipEverything = true;
+                        return;
+                    }
+
+                    element.selected = false;
+                    if (element.isHighlighting) {
+                        values.nextHighlight = true;
+                        element.isHighlighting = false;
+                    }
+                }
+            });
+
+            if (!values.skipEverything && elements.size() > 0) {
+                elements.get(0).isHighlighting = true;
+                elements.get(0).selected = true;
+            }
+        }
+        else if (keyInput.mod == Controls.Keys.KEY_ENTER) {
+            elements.forEach((id, element) -> {
+                if (element.isHighlighting)
+                {
+                    element.clickHandler();
+                }
+            });
+        }
     }
 
     protected void mouseClicked(int x, int y, int button) {
+    }
+
+    public void registerKeyboardHandler() {
+        this.keyboardEvent = Controls.registerKeyboardHandler(this::keyPressed);
     }
 
     protected int addElement(Element e)
@@ -174,14 +210,20 @@ public class Screen
     {
         OpenCraft.getFont().drawShadow(title, (screenWidth - OpenCraft.getFont().getTextWidth(title)) / 2, 20, 0xFFFFFF);
         elements.forEach((id, element) -> {
-            if (element != null) element.render(screenWidth, screenHeight, scale);
+            if (element != null)
+                element.render(screenWidth, screenHeight, scale);
         });
-
     }
 
     public void destroy() {
+        Controls.unregisterKeyboardHandler(this.keyboardEvent);
+        this.keyboardEvent = -1;
         elements.forEach((id, element) -> {
-            if (element != null) element.destroy();
+            if (element != null) {
+                element.isHighlighting = false;
+                element.selected = false;
+                element.destroy();
+            }
         });
     }
 

@@ -10,10 +10,10 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 
 public class Font {
-   private int[] charWidths = new int[256];
-   private int fontTexture = 0;
+   private final int[] charWidths = new int[655535];
+   private final int fontTexture;
 
-   public Font(String path) throws IOException, ClassNotFoundException {
+   public Font(String path) throws IOException {
       BufferedImage img = ImageIO.read(Resources.load(OpenCraft.class, path));
 
       int w = img.getWidth();

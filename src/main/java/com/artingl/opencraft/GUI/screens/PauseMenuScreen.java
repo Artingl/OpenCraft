@@ -18,11 +18,11 @@ public class PauseMenuScreen extends Screen
     public void init() {
         super.init();
 
-        this.addElement(new Button(1, 0, 0, Lang.getLanguageString("opencraft:gui.text.back_to_game"), () -> {
+        this.addElement(new Button(this, 1, 0, 0, Lang.getLanguageString("opencraft:gui.text.back_to_game"), () -> {
             escapeClick = false;
             OpenCraft.closeCurrentScreen();
         }));
-        this.addElement(new Button(0, 0, 0, Lang.getLanguageString("opencraft:gui.text.quit_world"), OpenCraft::quitToMainMenu));
+        this.addElement(new Button(this, 0, 0, 0, Lang.getLanguageString("opencraft:gui.text.quit_world"), OpenCraft::quitToMainMenu));
     }
 
     public void render(int screenWidth, int screenHeight, int scale)

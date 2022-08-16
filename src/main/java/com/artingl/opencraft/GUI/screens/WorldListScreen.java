@@ -1,6 +1,7 @@
 package com.artingl.opencraft.GUI.screens;
 
 import com.artingl.opencraft.GL.Controls;
+import com.artingl.opencraft.Resources.Lang;
 import com.artingl.opencraft.World.Level.LevelSaver;
 import com.artingl.opencraft.GUI.Button;
 import com.artingl.opencraft.GUI.Screen;
@@ -46,8 +47,8 @@ public class WorldListScreen extends Screen
     public void init() {
         super.init();
 
-        this.addElement(new Button(0, 0, 0, "Create a new world", () -> OpenCraft.setCurrentScreen(OpenCraft.getNewWorldConfigurator())));
-        loadWorldBtnId = this.addElement(new Button(1, 0, 0, "Load world", () -> {
+        this.addElement(new Button(this, 0, 0, 0, Lang.getLanguageString("opencraft:gui.text.new_world_configurer"), () -> OpenCraft.setCurrentScreen(OpenCraft.getNewWorldConfigurator())));
+        loadWorldBtnId = this.addElement(new Button(this, 1, 0, 0, Lang.getLanguageString("opencraft:gui.text.load_world"), () -> {
             setLoadingScreen("Loading world...");
             OpenCraft.startNewGame(true, -1);
         }));
@@ -76,7 +77,7 @@ public class WorldListScreen extends Screen
                             int seed = dis.readInt();
 
                             final int id = this.getElements().size();
-                            this.addElement(new Button(3, 0, 0, worldName, () -> selectWorld(id, file.getName())));
+                            this.addElement(new Button(this, 3, 0, 0, worldName, () -> selectWorld(id, file.getName())));
                         }
 
                         dis.close();

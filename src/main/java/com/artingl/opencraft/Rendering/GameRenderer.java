@@ -29,7 +29,6 @@ public class GameRenderer {
 
             if (!OpenCraft.isInMenu()) {
                 OpenCraft.getPlayerController().rotate();
-                Controls.update();
                 Controls.setMouseGrabbed(true);
             }
 

@@ -41,7 +41,7 @@ public class Controls
                KEY_P = GLFW.GLFW_KEY_P,
                KEY_LBRACKET = GLFW.GLFW_KEY_LEFT_BRACKET,
                KEY_RBRACKET = GLFW.GLFW_KEY_RIGHT_BRACKET,
-               KEY_RETURN = GLFW.GLFW_KEY_ENTER,
+               KEY_ENTER = GLFW.GLFW_KEY_ENTER,
                KEY_LCONTROL = GLFW.GLFW_KEY_LEFT_CONTROL,
                KEY_A = GLFW.GLFW_KEY_A,
                KEY_S = GLFW.GLFW_KEY_S,
@@ -106,6 +106,34 @@ public class Controls
                KEY_DELETE = GLFW.GLFW_KEY_DELETE;
     }
 
+    public enum ClickType {
+        SINGLE, DOUBLE
+    };
+
+    private static class KeyState {
+        public long keyTimer;
+        public long sinceLastClick;
+        public boolean click = false;
+        public int keyClicks;
+
+        public KeyState() {
+        }
+
+    }
+
+    public static class KeyInput {
+        public String character;
+        public int mod;
+
+        public ClickType clickType;
+
+        public KeyInput(String c, int m, ClickType clickType) {
+            this.character = c;
+            this.mod = m;
+            this.clickType = clickType;
+        }
+    };
+
     protected static boolean isGrabbed;
 
     protected static int MouseX;
@@ -114,10 +142,11 @@ public class Controls
     protected static float MouseDX;
     protected static float MouseDY;
 
-    protected static HashMap<Integer, Consumer<Integer>> unicodeCallbacks;
-    protected static ArrayList<Boolean> PressedKeyboardKeys;
-    protected static ArrayList<Boolean> PressedKeyboardKeysUnicode;
-    protected static ArrayList<Boolean> PressedMouseKeys;
+    protected static HashMap<Integer, Consumer<KeyInput>> unicodeCallbacks;
+    protected static HashMap<Integer, KeyState> pressedKeyboardKeysState;
+    protected static ArrayList<Boolean> pressedKeyboardKeys;
+    protected static ArrayList<Boolean> pressedKeyboardKeysUnicode;
+    protected static ArrayList<Boolean> pressedMouseKeys;
 
     protected static GLFWScrollCallbackI scrollCallback;
     protected static GLFWCursorPosCallbackI cursorPosCallback;
@@ -128,28 +157,31 @@ public class Controls
     public static void init() {
         isGrabbed = false;
         unicodeCallbacks = new HashMap<>();
-        PressedKeyboardKeysUnicode = new ArrayList<>();
-        PressedKeyboardKeys = new ArrayList<>();
-        PressedMouseKeys = new ArrayList<>();
-        for (int i = 0; i < 65535; i++) PressedKeyboardKeysUnicode.add(false);
-        for (int i = 0; i < 1024; i++) PressedKeyboardKeys.add(false);
-        for (int i = 0; i < 128; i++) PressedMouseKeys.add(false);
+        pressedKeyboardKeysState = new HashMap<>();
+        pressedKeyboardKeysUnicode = new ArrayList<>();
+        pressedKeyboardKeys = new ArrayList<>();
+        pressedMouseKeys = new ArrayList<>();
+        for (int i = 0; i < 1024; i++) pressedKeyboardKeysState.put(i, new KeyState());
+        for (int i = 0; i < 65535; i++) pressedKeyboardKeysUnicode.add(false);
+        for (int i = 0; i < 1024; i++) pressedKeyboardKeys.add(false);
+        for (int i = 0; i < 128; i++) pressedMouseKeys.add(false);
     }
 
     public static void destroy() {
-        PressedKeyboardKeysUnicode.clear();
-        PressedKeyboardKeys.clear();
-        PressedMouseKeys.clear();
+        pressedKeyboardKeysUnicode.clear();
+        pressedKeyboardKeys.clear();
+        pressedMouseKeys.clear();
+        pressedKeyboardKeysState.clear();
     }
 
     public static boolean isKeyDown(int id)
     {
-        return PressedKeyboardKeys.get(id);
+        return pressedKeyboardKeys.get(id);
     }
 
     public static boolean getMouseKey(int id)
     {
-        return PressedMouseKeys.get(id);
+        return pressedMouseKeys.get(id);
     }
 
     public static void update() {
@@ -162,6 +194,35 @@ public class Controls
         else {
             MouseDX = 0;
             MouseDY = 0;
+        }
+
+        int i = 0;
+        for (Map.Entry<Integer, KeyState> entry: new HashMap<>(pressedKeyboardKeysState).entrySet()) {
+            KeyState keyState = entry.getValue();
+
+            if (pressedKeyboardKeys.get(i) && (keyState.keyTimer + (keyState.keyClicks < 2 ? 500 : 20) < System.currentTimeMillis()))
+            {
+                ClickType clickType = ClickType.SINGLE;
+                if (!keyState.click) {
+                    clickType = (keyState.sinceLastClick + 200 > System.currentTimeMillis()) ? ClickType.DOUBLE : ClickType.SINGLE;
+                    keyState.sinceLastClick = System.currentTimeMillis();
+                }
+
+                for (Map.Entry<Integer, Consumer<KeyInput>> entry_input: new HashMap<>(unicodeCallbacks).entrySet()) {
+                    entry_input.getValue().accept(new KeyInput("", i, clickType));
+                }
+
+                keyState.keyTimer = System.currentTimeMillis();
+                keyState.keyClicks++;
+                keyState.click = true;
+            }
+            else if (!pressedKeyboardKeys.get(i)) {
+                keyState.keyTimer = 0;
+                keyState.keyClicks = 0;
+                keyState.click = false;
+            }
+
+            i++;
         }
     }
 
@@ -216,7 +277,7 @@ public class Controls
         }
     }
 
-    public static int registerKeyboardHandler(Consumer<Integer> r) {
+    public static int registerKeyboardHandler(Consumer<KeyInput> r) {
         unicodeCallbacks.put(unicodeCallbacks.size(), r);
         return unicodeCallbacks.size() -1;
     }
@@ -243,7 +304,7 @@ public class Controls
     public static GLFWMouseButtonCallbackI getMouseButtonsCallback() {
         if (mouseButtonCallback == null) {
             mouseButtonCallback = (window, button, action, mods) ->
-                    PressedMouseKeys.set(button, action == 1);
+                    pressedMouseKeys.set(button, action == 1);
         }
 
         return mouseButtonCallback;
@@ -252,7 +313,7 @@ public class Controls
     public static GLFWKeyCallbackI getKeyboardCallback() {
         if (keyCallback == null) {
             keyCallback = (window, key, scancode, action, mods) -> {
-                PressedKeyboardKeys.set(key, action == 1 || action == 2);
+                pressedKeyboardKeys.set(key, action == 1 || action == 2);
             };
         }
 
@@ -261,12 +322,9 @@ public class Controls
 
     public static GLFWCharCallbackI getUnicodeCharsCallback() {
         if (charCallback == null) {
-            charCallback = new GLFWCharCallback() {
-                @Override
-                public void invoke(long window, int codepoint) {
-                    for (Map.Entry<Integer, Consumer<Integer>> entry: unicodeCallbacks.entrySet()) {
-                        entry.getValue().accept(codepoint);
-                    }
+            charCallback = (window, codepoint) -> {
+                for (Map.Entry<Integer, Consumer<KeyInput>> entry: unicodeCallbacks.entrySet()) {
+                    entry.getValue().accept(new KeyInput(String.valueOf(Character.toChars(codepoint)[0]), -1, ClickType.SINGLE));
                 }
             };
         }
