@@ -1,5 +1,6 @@
 package com.artingl.opencraft.GL;
 
+import com.artingl.opencraft.GUI.Screen;
 import com.artingl.opencraft.OpenCraft;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.*;
@@ -123,16 +124,25 @@ public class Controls
 
     public static class KeyInput {
         public String character;
-        public int mod;
-
+        public int keyCode;
         public ClickType clickType;
 
         public KeyInput(String c, int m, ClickType clickType) {
             this.character = c;
-            this.mod = m;
+            this.keyCode = m;
             this.clickType = clickType;
         }
-    };
+    }
+
+    private static class UnicodeCallback {
+        public Consumer<KeyInput> consumer;
+        public Object obj;
+
+        public UnicodeCallback(Consumer<KeyInput> consumer, Object obj) {
+            this.consumer = consumer;
+            this.obj = obj;
+        }
+    }
 
     protected static boolean isGrabbed;
 
@@ -142,7 +152,7 @@ public class Controls
     protected static float MouseDX;
     protected static float MouseDY;
 
-    protected static HashMap<Integer, Consumer<KeyInput>> unicodeCallbacks;
+    protected static HashMap<Integer, UnicodeCallback> unicodeCallbacks;
     protected static HashMap<Integer, KeyState> pressedKeyboardKeysState;
     protected static ArrayList<Boolean> pressedKeyboardKeys;
     protected static ArrayList<Boolean> pressedKeyboardKeysUnicode;
@@ -186,10 +196,10 @@ public class Controls
 
     public static void update() {
         if (isGrabbed && OpenCraft.getDisplay().inFocus()) {
-            MouseDX = getMouseX() - OpenCraft.getWidth() / 2f;
-            MouseDY = getMouseY() - OpenCraft.getHeight()  / 2f;
+            MouseDX = getMouseX() - (int) (OpenCraft.getWidth() / 2f);
+            MouseDY = ((int) (OpenCraft.getHeight() / 2f)) - getRealMouseY();
 
-            setMousePos(OpenCraft.getWidth() / 2f, OpenCraft.getHeight() / 2f);
+            setMousePos((int) (OpenCraft.getWidth() / 2f), (int) (OpenCraft.getHeight() / 2f));
         }
         else {
             MouseDX = 0;
@@ -208,8 +218,12 @@ public class Controls
                     keyState.sinceLastClick = System.currentTimeMillis();
                 }
 
-                for (Map.Entry<Integer, Consumer<KeyInput>> entry_input: new HashMap<>(unicodeCallbacks).entrySet()) {
-                    entry_input.getValue().accept(new KeyInput("", i, clickType));
+                for (Map.Entry<Integer, UnicodeCallback> entry_input: new HashMap<>(unicodeCallbacks).entrySet()) {
+                    if (OpenCraft.isGuiOpened()) {
+                        if (entry_input.getValue().obj instanceof Screen)
+                            entry_input.getValue().consumer.accept(new KeyInput("", i, clickType));
+                    }
+                    else entry_input.getValue().consumer.accept(new KeyInput("", i, clickType));
                 }
 
                 keyState.keyTimer = System.currentTimeMillis();
@@ -242,6 +256,14 @@ public class Controls
         return (int) (OpenCraft.getDisplay().getHeight() - y.rewind().get());
     }
 
+    public static int getRealMouseY()
+    {
+        DoubleBuffer x = BufferUtils.createDoubleBuffer(1);
+        DoubleBuffer y = BufferUtils.createDoubleBuffer(1);
+        GLFW.glfwGetCursorPos(OpenCraft.getDisplay().getDisplayId(), x, y);
+        return (int) y.rewind().get();
+    }
+
     public static void setMouseX(float x) {
         GLFW.glfwSetCursorPos(OpenCraft.getDisplay().getDisplayId(), x, getMouseY());
     }
@@ -251,6 +273,10 @@ public class Controls
     }
 
     public static void setMousePos(float x, float y) {
+        GLFW.glfwSetCursorPos(OpenCraft.getDisplay().getDisplayId(), x, y);
+    }
+
+    public static void setMousePos(int x, int y) {
         GLFW.glfwSetCursorPos(OpenCraft.getDisplay().getDisplayId(), x, y);
     }
 
@@ -264,7 +290,7 @@ public class Controls
 
     public static void setMouseGrabbed(boolean b) {
         if (b && !isGrabbed) {
-            setMousePos(OpenCraft.getWidth() / 2f, OpenCraft.getHeight() / 2f);
+            setMousePos((int) (OpenCraft.getWidth() / 2f), (int) (OpenCraft.getHeight() / 2f));
         }
 
         isGrabbed = b;
@@ -277,8 +303,8 @@ public class Controls
         }
     }
 
-    public static int registerKeyboardHandler(Consumer<KeyInput> r) {
-        unicodeCallbacks.put(unicodeCallbacks.size(), r);
+    public static int registerKeyboardHandler(Object self, Consumer<KeyInput> r) {
+        unicodeCallbacks.put(unicodeCallbacks.size(), new UnicodeCallback(r, self));
         return unicodeCallbacks.size() -1;
     }
 
@@ -323,8 +349,12 @@ public class Controls
     public static GLFWCharCallbackI getUnicodeCharsCallback() {
         if (charCallback == null) {
             charCallback = (window, codepoint) -> {
-                for (Map.Entry<Integer, Consumer<KeyInput>> entry: unicodeCallbacks.entrySet()) {
-                    entry.getValue().accept(new KeyInput(String.valueOf(Character.toChars(codepoint)[0]), -1, ClickType.SINGLE));
+                for (Map.Entry<Integer, UnicodeCallback> entry: unicodeCallbacks.entrySet()) {
+                    if (OpenCraft.isGuiOpened()) {
+                        if (entry.getValue().obj instanceof Screen)
+                            entry.getValue().consumer.accept(new KeyInput(String.valueOf(Character.toChars(codepoint)[0]), -1, ClickType.SINGLE));
+                    }
+                    else entry.getValue().consumer.accept(new KeyInput(String.valueOf(Character.toChars(codepoint)[0]), -1, ClickType.SINGLE));
                 }
             };
         }

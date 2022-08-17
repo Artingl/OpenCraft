@@ -11,10 +11,12 @@ import com.artingl.opencraft.GUI.Window;
 import com.artingl.opencraft.OpenCraft;
 import org.lwjgl.opengl.GL11;
 
+import java.util.ArrayList;
+
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL11.GL_BLEND;
 
-public class PlayerInventory extends Window
+public class PlayerGUI extends Window
 {
 
     public static int[] INVENTORY_TEXTURES = new int[]{
@@ -26,8 +28,9 @@ public class PlayerInventory extends Window
     };
 
     public int selected = 0;
+    public long[] chatLineTimeout = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
-    public PlayerInventory() {
+    public PlayerGUI() {
         super(0, 0, "player_hotbar");
     }
 
@@ -83,6 +86,19 @@ public class PlayerInventory extends Window
             if (playerController.getInventoryItem(i) == null) continue;
             BlockRenderer.renderBlockIcon(t, 9, 9, screenWidth / 2f - width / 2f + ((sel_width - 2) * i) + 11, screenHeight - 12, ((ItemBlock)playerController.getInventoryItem(i)).getBlock());
             OpenCraft.getFont().drawShadow(playerController.getInventoryItem(i).getAmount()+"", (int) (screenWidth / 2f - width / 2f + ((sel_width - 2) * i) + 11), screenHeight - 12, 0xFFFFFF);
+        }
+
+        ArrayList<String> chat = OpenCraft.getLevel().getPlayerEntity().getChatHistory();
+        int y = 0;
+        int start_val = (Math.min(chat.size() - 1, 10));
+        for (int i = start_val; i >= 0; i--) {
+            String line = chat.get(i);
+            int ix = 2;
+            int iy = screenHeight - 40 - (y * OpenCraft.getFont().getCharHeight())+2;
+
+            fill(0, iy-2, (int)(screenWidth / 2f - (10 * (3 - OpenCraft.getGuiScale()) * 5))+ix, OpenCraft.getFont().getCharHeight()+iy+(i == start_val ? 2 : -2), 0x55000000);
+            OpenCraft.getFont().drawShadow(line, ix, iy, 0xFFFFFF);
+            ++y;
         }
 
         super.render(screenWidth, screenHeight, scale);

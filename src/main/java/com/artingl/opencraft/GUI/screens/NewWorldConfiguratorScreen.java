@@ -14,7 +14,6 @@ public class NewWorldConfiguratorScreen extends Screen
 {
 
     public String levelName;
-    private boolean escapeClick;
     private int levelEditArea;
     private int seedEditArea;
     private int createNewWorldBtn;
@@ -84,17 +83,6 @@ public class NewWorldConfiguratorScreen extends Screen
             }
         });
 
-        if (Controls.isKeyDown(Controls.Keys.KEY_ESCAPE))
-        {
-            escapeClick = true;
-        }
-        else if (escapeClick)
-        {
-            OpenCraft.setCurrentScreen(OpenCraft.getWorldListScreen());
-            escapeClick = false;
-            return;
-        }
-
         VerticesBuffer t = VerticesBuffer.instance;
 
         //GL11.glClear(16640);
@@ -103,4 +91,12 @@ public class NewWorldConfiguratorScreen extends Screen
         super.render(screenWidth, screenHeight, scale);
     }
 
+    @Override
+    protected void keyPressed(Controls.KeyInput keyInput) {
+        super.keyPressed(keyInput);
+
+        if (keyInput.keyCode == Controls.Keys.KEY_ESCAPE) {
+            OpenCraft.setCurrentScreen(OpenCraft.getWorldListScreen());
+        }
+    }
 }

@@ -9,8 +9,6 @@ import com.artingl.opencraft.OpenCraft;
 public class PauseMenuScreen extends Screen
 {
 
-    private boolean escapeClick;
-
     public PauseMenuScreen() {
         super(OpenCraft.getWidth(), OpenCraft.getHeight(), "game_menu");
     }
@@ -18,10 +16,7 @@ public class PauseMenuScreen extends Screen
     public void init() {
         super.init();
 
-        this.addElement(new Button(this, 1, 0, 0, Lang.getLanguageString("opencraft:gui.text.back_to_game"), () -> {
-            escapeClick = false;
-            OpenCraft.closeCurrentScreen();
-        }));
+        this.addElement(new Button(this, 1, 0, 0, Lang.getLanguageString("opencraft:gui.text.back_to_game"), OpenCraft::closeCurrentScreen));
         this.addElement(new Button(this, 0, 0, 0, Lang.getLanguageString("opencraft:gui.text.quit_world"), OpenCraft::quitToMainMenu));
     }
 
@@ -44,19 +39,17 @@ public class PauseMenuScreen extends Screen
             }
         });
 
-        if (Controls.isKeyDown(Controls.Keys.KEY_ESCAPE))
-        {
-            escapeClick = true;
-        }
-        else if (escapeClick)
-        {
-            escapeClick = false;
-            OpenCraft.closeCurrentScreen();
-            return;
-        }
-
         super.render(screenWidth, screenHeight, scale);
         fill(0, 0, screenWidth, screenHeight, 0x99111111);
+    }
+
+    @Override
+    protected void keyPressed(Controls.KeyInput keyInput) {
+        super.keyPressed(keyInput);
+
+        if (keyInput.keyCode == Controls.Keys.KEY_ESCAPE) {
+            OpenCraft.closeCurrentScreen();
+        }
     }
 
 }

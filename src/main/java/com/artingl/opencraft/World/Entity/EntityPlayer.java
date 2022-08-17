@@ -1,15 +1,17 @@
 package com.artingl.opencraft.World.Entity;
 
+import com.artingl.opencraft.GUI.Screen;
 import com.artingl.opencraft.OpenCraft;
 import com.artingl.opencraft.Rendering.TextureEngine;
 import com.artingl.opencraft.World.Entity.Gamemode.Creative;
 import com.artingl.opencraft.World.Entity.Gamemode.Gamemode;
-import com.artingl.opencraft.World.Entity.Gamemode.Survival;
 import com.artingl.opencraft.World.Entity.Models.PlayerModel;
 import com.artingl.opencraft.World.Item.Item;
 import com.artingl.opencraft.World.PlayerController;
 import com.artingl.opencraft.GUI.screens.DeathScreen;
 import com.artingl.opencraft.Sound.Sound;
+
+import java.util.ArrayList;
 
 public class EntityPlayer extends Entity {
 
@@ -18,13 +20,15 @@ public class EntityPlayer extends Entity {
 
     private PlayerController controller;
     private Gamemode gamemode;
+    private ArrayList<String> chatHistory;
 
     public EntityPlayer(PlayerController controller) {
         setModel(model);
 
         this.heightOffset = 1.82F;
         this.controller = controller;
-        this.gamemode = Survival.instance;
+        this.gamemode = Creative.instance;
+        this.chatHistory = new ArrayList<>();
     }
 
     public void tick() {
@@ -40,6 +44,18 @@ public class EntityPlayer extends Entity {
 
     public void destroy() {
         super.destroy();
+        this.chatHistory.clear();
+    }
+
+    public void tellInChat(String msg) {
+        chatHistory.add(msg);
+
+        if (chatHistory.size() > 100)
+            chatHistory.subList(chatHistory.size()-100, chatHistory.size());
+    }
+
+    public ArrayList<String> getChatHistory() {
+        return chatHistory;
     }
 
     public Gamemode getGamemode() {
@@ -78,4 +94,19 @@ public class EntityPlayer extends Entity {
         return true;
     }
 
+    public void closeScreen() {
+        OpenCraft.closePlayerScreen();
+    }
+
+    public void setScreen(Screen playerScreen) {
+        OpenCraft.setPlayerScreen(playerScreen);
+    }
+
+    public Screen getScreen() {
+        return OpenCraft.getPlayerScreen();
+    }
+
+    public boolean canControl() {
+        return getScreen() == null;
+    }
 }

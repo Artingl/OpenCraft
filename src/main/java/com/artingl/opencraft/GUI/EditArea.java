@@ -12,12 +12,10 @@ public class EditArea extends Element
         TextureEngine.load("opencraft:gui/edit.png")
     };
 
-    private long backKeyTimer;
-    private int backKeyClicks;
-    private final int id;
-    private String text;
-    private final String hint;
-    private final Runnable onEdit;
+    protected final int id;
+    protected String text;
+    protected final String hint;
+    protected final Runnable onEdit;
 
     public EditArea(Screen screen, int id, float x, float y, String text, Runnable onEdit)
     {
@@ -26,12 +24,11 @@ public class EditArea extends Element
         this.text = "";
         this.id = id;
         this.onEdit = onEdit;
-        this.backKeyTimer = 0;
     }
 
     public void keyHandler(Controls.KeyInput keyInput) {
         if (selected) {
-            if (keyInput.mod == Controls.Keys.KEY_BACKSPACE) {
+            if (keyInput.keyCode == Controls.Keys.KEY_BACKSPACE && this.text.length() - 1 >= 0) {
                 this.text = this.text.substring(0, this.text.length() - 1);
             }
             else {
@@ -104,7 +101,6 @@ public class EditArea extends Element
         GL11.glPopMatrix();
         GL11.glLoadIdentity();
         GL11.glTranslatef(0, 0,-200);
-
     }
 
     public String getText() {
@@ -120,5 +116,9 @@ public class EditArea extends Element
     }
 
     public void destroy() {
+    }
+
+    protected void parentRender(int screenWidth, int screenHeight, int scale) {
+        super.render(screenWidth, screenHeight, scale);
     }
 }

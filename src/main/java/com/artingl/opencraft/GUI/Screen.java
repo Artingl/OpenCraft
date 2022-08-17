@@ -1,7 +1,6 @@
 package com.artingl.opencraft.GUI;
 
 import com.artingl.opencraft.GL.Controls;
-import com.artingl.opencraft.Logger.Logger;
 import com.artingl.opencraft.OpenCraft;
 import com.artingl.opencraft.Rendering.TextureEngine;
 import com.artingl.opencraft.Rendering.VerticesBuffer;
@@ -141,12 +140,11 @@ public class Screen
     }
 
     protected void keyPressed(Controls.KeyInput keyInput) {
-        System.out.println("key");
         elements.forEach((id, element) -> {
             if (element != null) element.keyHandler(keyInput);
         });
 
-        if (keyInput.mod == Controls.Keys.KEY_TAB) {
+        if (keyInput.keyCode == Controls.Keys.KEY_TAB) {
             var values = new Object() {
                 boolean nextHighlight = false;
                 boolean skipEverything = false;
@@ -177,7 +175,7 @@ public class Screen
                 elements.get(0).selected = true;
             }
         }
-        else if (keyInput.mod == Controls.Keys.KEY_ENTER) {
+        else if (keyInput.keyCode == Controls.Keys.KEY_ENTER) {
             elements.forEach((id, element) -> {
                 if (element.isHighlighting)
                 {
@@ -191,7 +189,7 @@ public class Screen
     }
 
     public void registerKeyboardHandler() {
-        this.keyboardEvent = Controls.registerKeyboardHandler(this::keyPressed);
+        this.keyboardEvent = Controls.registerKeyboardHandler(this, this::keyPressed);
     }
 
     protected int addElement(Element e)

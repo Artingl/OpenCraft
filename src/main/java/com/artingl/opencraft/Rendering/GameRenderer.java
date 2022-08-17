@@ -29,7 +29,7 @@ public class GameRenderer {
 
             if (!OpenCraft.isInMenu()) {
                 OpenCraft.getPlayerController().rotate();
-                Controls.setMouseGrabbed(true);
+                Controls.setMouseGrabbed(OpenCraft.getPlayerScreen() == null);
             }
 
             GL11.glClear(16640);
@@ -100,12 +100,17 @@ public class GameRenderer {
                 OpenCraft.getCurrentScreen().render(screenWidth, screenHeight, scale);
             }
 
-            if (OpenCraft.isInMenu())
+            if (OpenCraft.getPlayerScreen() != null) {
+                OpenCraft.getPlayerScreen().render(screenWidth, screenHeight, scale);
+            }
+
+            if (OpenCraft.isInMenu() || OpenCraft.getPlayerScreen() != null)
             {
                 for(int i = 0; i < OpenCraft.getTimer().ticks; ++i) {
                     int finalScale = scale;
                     new HashMap<>(OpenCraft.getGuiTickInterfaceMap()).forEach(((id, tick) -> {
                         if (tick != null) tick.tick(screenWidth, screenHeight, finalScale);
+                        GL11.glLoadIdentity();
                         GL11.glTranslatef(0.0F, 0.0F, -200.0F);
                     }));
                 }
@@ -131,7 +136,7 @@ public class GameRenderer {
                     biome = level.getGenerator().getBiome().getWorldBiome((int)player.getX(), (int)player.getZ()).name();
                 }
 
-                font.drawShadow("com/artingl/opencraft " + OpenCraft.getVersion(), 2, 2, 0xFFFFFF);
+                font.drawShadow("Opencraft " + OpenCraft.getVersion(), 2, 2, 0xFFFFFF);
                 font.drawShadow("X Y Z: " + entityPlayer.getX() + " " +  + entityPlayer.getY() + " " +  + entityPlayer.getZ(), 2, 2 + (++line * 10), 0xFFFFFF);
                 font.drawShadow("FPS: " + OpenCraft.getFPS() +
                                  ", Chunks updated: " + OpenCraft.getChunksUpdatedCount() +
@@ -229,7 +234,7 @@ public class GameRenderer {
         Camera.perspective(
                 getFOV(),
                 (float)OpenCraft.getWidth() / (float)OpenCraft.getHeight(),
-                0.05F, (16 * OpenCraft.getRenderDistance()) * 2.0F
+                0.05F, (16 * OpenCraft.getRenderDistance()) * 2.0F + 48
         );
         GL11.glMatrixMode(GL11.GL_MODELVIEW);
         GL11.glLoadIdentity();

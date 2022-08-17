@@ -6,6 +6,7 @@ import com.artingl.opencraft.Logger.Logger;
 import com.artingl.opencraft.Rendering.*;
 import com.artingl.opencraft.Resources.Lang;
 import com.artingl.opencraft.Resources.Resources;
+import com.artingl.opencraft.Utils.Random;
 import com.artingl.opencraft.World.Entity.EntityPlayer;
 import com.artingl.opencraft.World.ITick;
 import com.artingl.opencraft.World.Level.Level;
@@ -25,7 +26,6 @@ import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -66,7 +66,7 @@ public class OpenCraft
     private static final HashMap<Integer, LevelListener> levelListeners = new HashMap<>();
     private static final ArrayList<Runnable> glContext = new ArrayList<>();
     private static final ArrayList<ModEntry> modsList = new ArrayList<>();
-    private static final int renderDistance = 3; // Render distance
+    private static final int renderDistance = 4; // Render distance
     private static boolean inMenu = true;
     private static boolean renderWhenInMenu = false;
     private static int chunksUpdate = 0;
@@ -81,7 +81,9 @@ public class OpenCraft
     private static WorldListScreen worldList;
     private static MainMenuScreen mainMenu;
     private static Font font;
-    private static int guiScale = 3;
+    private static int guiScale = 2;
+    private static Screen playerScreen;
+    private static String playerName;
 
     public OpenCraft(String[] args) throws Exception {
         String ver = getClass().getPackage().getImplementationVersion();
@@ -220,17 +222,6 @@ public class OpenCraft
                 Controls.setMouseGrabbed(false);
             }
             else {
-                if (Controls.isKeyDown(Controls.Keys.KEY_ESCAPE))
-                {
-                    escapeClick = true;
-                }
-                else if (escapeClick && !isWorldDestroyed && !getLevel().getPlayerEntity().isDead())
-                {
-                    escapeClick = false;
-                    inMenu = true;
-                    setCurrentScreen(pauseMenu);
-                }
-
                 for(int i = 0; i < timer.ticks; ++i) {
                     if (!isWorldDestroyed) {
                         new HashMap<>(ticks).forEach(((id, tick) -> {
@@ -275,6 +266,7 @@ public class OpenCraft
         String prefix = "";
 
         gameDir = System.getenv("APPDATA") + File.separator + ".opencraft" + File.separator;
+        playerName = "Player" + Random.inRange(100, 999);
 
         for (String arg: args) {
             if (prefix.isEmpty()) {
@@ -283,6 +275,9 @@ public class OpenCraft
             else {
                 if (prefix.equals("--game-dir")) {
                     gameDir = arg;
+                }
+                else if (prefix.equals("--player-name")) {
+                    playerName = arg;
                 }
 
                 prefix = "";
@@ -364,6 +359,7 @@ public class OpenCraft
         else       levelSaver.load();
 
         EntityPlayer entityPlayer = new EntityPlayer(playerController);
+        entityPlayer.setNameTag(playerName);
 
         world.setPlayerEntity(entityPlayer);
         world.getGenerator().setPlayerSpawnPoint();
@@ -493,6 +489,11 @@ public class OpenCraft
     public static MainMenuScreen getMainMenuScreen()
     {
         return mainMenu;
+    }
+
+    public static PauseMenuScreen getPauseMenuScreen()
+    {
+        return pauseMenu;
     }
 
     public static NewWorldConfiguratorScreen getNewWorldConfigurator()
@@ -681,5 +682,29 @@ public class OpenCraft
 
     public static String getGameDirectory() {
         return gameDir;
+    }
+
+    public static void inMenu(boolean b) {
+        inMenu = b;
+    }
+
+    public static void closePlayerScreen() {
+        if (OpenCraft.playerScreen != null) {
+            OpenCraft.playerScreen.destroy();
+        }
+        OpenCraft.playerScreen = null;
+    }
+
+    public static void setPlayerScreen(Screen playerScreen) {
+        OpenCraft.playerScreen = playerScreen;
+        playerScreen.init();
+    }
+
+    public static Screen getPlayerScreen() {
+        return playerScreen;
+    }
+
+    public static boolean isGuiOpened() {
+        return currentScreen != null || playerScreen != null;
     }
 }

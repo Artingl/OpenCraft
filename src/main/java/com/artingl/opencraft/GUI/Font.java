@@ -116,4 +116,8 @@ public class Font {
 
       return len;
    }
+
+   public int getCharHeight() {
+      return 10;
+   }
 }

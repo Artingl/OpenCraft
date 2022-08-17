@@ -10,5 +10,6 @@
   "gui.text.back_to_game": "Back to game",
   "gui.text.quit_world": "Quit to main menu",
   "gui.text.respawn": "Respawn",
-  "gui.text.load_world": "Load world"
+  "gui.text.load_world": "Load world",
+  "gui.text.enter_in_chat": "Enter command or message here"
 }

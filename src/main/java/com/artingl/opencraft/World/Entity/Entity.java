@@ -65,6 +65,7 @@ public class Entity implements ITick, IRenderHandler
     private int entityLevelId = -1;
     private float distanceWalked;
     private float prevDistanceWalked;
+    private String nameTag;
 
     public Entity(Level level)
     {
@@ -461,5 +462,13 @@ public class Entity implements ITick, IRenderHandler
 
     public float getPrevDistanceWalked() {
         return prevDistanceWalked;
+    }
+
+    public String getNameTag() {
+        return nameTag;
+    }
+
+    public void setNameTag(String nameTag) {
+        this.nameTag = nameTag;
     }
 }

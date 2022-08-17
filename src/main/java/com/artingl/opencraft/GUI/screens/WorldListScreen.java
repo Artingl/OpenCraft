@@ -19,7 +19,6 @@ public class WorldListScreen extends Screen
 {
 
     public String levelName;
-    private boolean escapeClick;
     private int worldBtnPosition;
     private int loadWorldBtnId;
 
@@ -114,17 +113,6 @@ public class WorldListScreen extends Screen
             }
         });
 
-        if (Controls.isKeyDown(Controls.Keys.KEY_ESCAPE))
-        {
-            escapeClick = true;
-        }
-        else if (escapeClick)
-        {
-            OpenCraft.setCurrentScreen(OpenCraft.getMainMenuScreen());
-            escapeClick = false;
-            return;
-        }
-
         VerticesBuffer t = VerticesBuffer.instance;
 
         //GL11.glClear(16640);
@@ -137,6 +125,15 @@ public class WorldListScreen extends Screen
         GL11.glTranslatef(0, 0,-200);
 
         super.render(screenWidth, screenHeight, scale);
+    }
+
+    @Override
+    protected void keyPressed(Controls.KeyInput keyInput) {
+        super.keyPressed(keyInput);
+
+        if (keyInput.keyCode == Controls.Keys.KEY_ESCAPE) {
+            OpenCraft.setCurrentScreen(OpenCraft.getMainMenuScreen());
+        }
     }
 
 }

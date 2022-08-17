@@ -1,7 +1,8 @@
 package com.artingl.opencraft.World;
 
 import com.artingl.opencraft.GL.Controls;
-import com.artingl.opencraft.GUI.windows.PlayerInventory;
+import com.artingl.opencraft.GUI.screens.ChatScreen;
+import com.artingl.opencraft.GUI.windows.PlayerGUI;
 import com.artingl.opencraft.OpenCraft;
 import com.artingl.opencraft.World.Block.Block;
 import com.artingl.opencraft.World.Entity.EntityPlayer;
@@ -10,7 +11,6 @@ import com.artingl.opencraft.World.Entity.Gamemode.Survival;
 import com.artingl.opencraft.World.Item.Item;
 import com.artingl.opencraft.World.Item.ItemBlock;
 import com.artingl.opencraft.World.Item.Tool;
-import com.artingl.opencraft.World.Level.Level;
 
 import java.util.HashMap;
 
@@ -24,7 +24,7 @@ public class PlayerController
     }
 
     private ItemBlock[] inventory;
-    private PlayerInventory playerInventory;
+    private PlayerGUI playerGUI;
 
     private HashMap<Integer, Boolean> clickedMouse;
     private HashMap<String, Boolean> clickedKeyboard;
@@ -34,8 +34,9 @@ public class PlayerController
     private final BreakingBlock breakingBlock;
     private final int keyboardEvent;
 
+
     public PlayerController() {
-        this.playerInventory = new PlayerInventory();
+        this.playerGUI = new PlayerGUI();
         this.clickedMouse = new HashMap<>();
         this.clickedKeyboard = new HashMap<>();
         this.inventory = new ItemBlock[36];
@@ -47,33 +48,7 @@ public class PlayerController
         for(int i = 32; i <= 126; i++) clickedKeyboard.put(String.valueOf((char)i).toLowerCase(), false);
         for(int i = 32; i <= 126; i++) clickedKeyboard.put(String.valueOf((char)i).toUpperCase(), false);
 
-        this.keyboardEvent = Controls.registerKeyboardHandler((key) -> {
-            EntityPlayer entityPlayer = OpenCraft.getLevel().getPlayerEntity();
-
-            if (key.mod == Controls.Keys.KEY_SPACE && key.clickType == Controls.ClickType.DOUBLE) {
-                if (entityPlayer.getGamemode().getId() == Creative.id) {
-                    setFlying(!isFlying);
-                    if (isFlying)
-                        entityPlayer.yd = 0.42f;
-                }
-            }
-            else if (key.mod == Controls.Keys.KEY_T) {
-
-            }
-            else {
-                String  c = key.character;
-
-                if (c.equals("1")) playerInventory.selected = 0;
-                if (c.equals("2")) playerInventory.selected = 1;
-                if (c.equals("3")) playerInventory.selected = 2;
-                if (c.equals("4")) playerInventory.selected = 3;
-                if (c.equals("5")) playerInventory.selected = 4;
-                if (c.equals("6")) playerInventory.selected = 5;
-                if (c.equals("7")) playerInventory.selected = 6;
-                if (c.equals("8")) playerInventory.selected = 7;
-                if (c.equals("9")) playerInventory.selected = 8;
-            }
-        });
+        this.keyboardEvent = Controls.registerKeyboardHandler(this, this::keyEvent);
     }
 
     public void tick() {
@@ -83,40 +58,104 @@ public class PlayerController
             isFlying = false;
         }
 
-        float xa = 0.0F;
-        float ya = 0.0F;
+        float xa = 0;
+        float ya = 0;
         float acceleration = 1;
-
         boolean inWater = entityPlayer.inWater();
 
-        if (Controls.isKeyDown(Controls.Keys.KEY_W))     --ya;
-        if (Controls.isKeyDown(Controls.Keys.KEY_S))     ++ya;
-        if (Controls.isKeyDown(Controls.Keys.KEY_A))     --xa;
-        if (Controls.isKeyDown(Controls.Keys.KEY_D))     ++xa;
-        if (Controls.isKeyDown(Controls.Keys.KEY_LSHIFT) && !isFlying) { entityPlayer.setHeightOffset(1.72F); acceleration = 0.1f; }
-        else if (!isFlying)                                         entityPlayer.setHeightOffset(1.82F);
-        if (Controls.isKeyDown(Controls.Keys.KEY_SPACE) && !isFlying) {
-            if (inWater) {
-                entityPlayer.yd += 0.04F;
-            } else if (entityPlayer.onGround) {
-                entityPlayer.yd = 0.42F;
+        if (entityPlayer.canControl()) {
+            if (Controls.isKeyDown(Controls.Keys.KEY_W)) --ya;
+            if (Controls.isKeyDown(Controls.Keys.KEY_S)) ++ya;
+            if (Controls.isKeyDown(Controls.Keys.KEY_A)) --xa;
+            if (Controls.isKeyDown(Controls.Keys.KEY_D)) ++xa;
+            if (Controls.isKeyDown(Controls.Keys.KEY_LSHIFT) && !isFlying) {
+                entityPlayer.setHeightOffset(1.72F);
+                acceleration = 0.1f;
+            } else if (!isFlying) entityPlayer.setHeightOffset(1.82F);
+            if (Controls.isKeyDown(Controls.Keys.KEY_SPACE) && !isFlying) {
+                if (inWater) {
+                    entityPlayer.yd += 0.04F;
+                } else if (entityPlayer.onGround) {
+                    entityPlayer.yd = 0.42F;
+                }
+            }
+
+            if (entityPlayer.getGamemode().getId() == Creative.id) {
+                if (isFlying) {
+                    if (Controls.isKeyDown(Controls.Keys.KEY_SPACE)) {
+                        entityPlayer.yd = 0.42F;
+                    } else if (Controls.isKeyDown(Controls.Keys.KEY_LSHIFT)) {
+                        entityPlayer.yd = -0.42F;
+                    } else entityPlayer.yd = 0;
+                } else {
+                    if (Controls.isKeyDown(Controls.Keys.KEY_SPACE)) {
+                        if (inWater) {
+                            entityPlayer.yd += 0.04F;
+                        } else if (entityPlayer.onGround) {
+                            entityPlayer.yd = 0.42F;
+                        }
+                    }
+                }
+            }
+
+            RayCast.RayResult[] ray = RayCast.rayCastToBlock(6, entityPlayer.getRx(), entityPlayer.getRy(), entityPlayer.getX(), entityPlayer.getY(), entityPlayer.getZ());
+            if (ray[0].state)
+            {
+                if (Controls.getMouseKey(0) && this.breakingBlock.block != null && this.breakingBlock.blockPos.equals(ray[0]))
+                {
+                    Block block = this.breakingBlock.block;
+
+                    if (block.getTool() != Tool.UNBREAKABLE && !block.isLiquid()) {
+                        this.breakingBlock.blockBreakState += 0.5 / this.breakingBlock.block.getStrength();
+                        this.breakingBlock.blockPos = ray[0];
+
+                        if (this.breakingBlock.block.getStrength() == 0
+                                || this.breakingBlock.blockBreakState >= 9
+                                || block.getTool() == Tool.IMMEDIATELY
+                                || entityPlayer.getGamemode().getId() == Creative.id) {
+                            this.breakingBlock.blockBreakState = 0;
+
+                            OpenCraft.getLevel().getBlock(ray[0]).destroy(ray[0]);
+                            OpenCraft.getLevel().getBlock(ray[0]).createDrop(ray[0]);
+                            OpenCraft.getLevel().removeBlock(ray[0]);
+                        }
+                    }
+                    else {
+                        this.breakingBlock.blockBreakState = 0;
+                    }
+                }
+                else {
+                    this.breakingBlock.blockBreakState = 0;
+                    this.breakingBlock.blockPos = ray[0];
+                    this.breakingBlock.block = OpenCraft.getLevel().getBlock(ray[0]);
+                }
+
+                if (Controls.getMouseKey(1) && !clickedMouse.get(1) && !entityPlayer.aabb.intersects(Block.getAABB(ray[1]))
+                        && getInventoryItem(playerGUI.selected) != null)
+                {
+                    if (getInventoryItem(playerGUI.selected) instanceof ItemBlock) {
+                        RayCast.RayResult rayResult = ray[1];
+
+                        if (OpenCraft.getLevel().getBlock(ray[0]).getIntId() == Block.grass.getIntId()) {
+                            rayResult = ray[0];
+                        }
+
+                        OpenCraft.getLevel().setBlock(rayResult, ((ItemBlock)getInventoryItem(playerGUI.selected)).getBlock());
+                        decreaseSlot(playerGUI.selected);
+                    }
+
+                    clickedMouse.put(1, true);
+                }
+                else if(!Controls.getMouseKey(1))
+                {
+                    clickedMouse.put(1, false);
+                }
             }
         }
-
-        if (entityPlayer.getGamemode().getId() == Creative.id) {
-            if (isFlying) {
-                if (Controls.isKeyDown(Controls.Keys.KEY_SPACE)) {
-                    entityPlayer.yd = 0.42F;
-                } else if (Controls.isKeyDown(Controls.Keys.KEY_LSHIFT)) {
-                    entityPlayer.yd = -0.42F;
-                } else entityPlayer.yd = 0;
-            } else {
-                if (Controls.isKeyDown(Controls.Keys.KEY_SPACE)) {
-                    if (inWater) {
-                        entityPlayer.yd += 0.04F;
-                    } else if (entityPlayer.onGround) {
-                        entityPlayer.yd = 0.42F;
-                    }
+        else {
+            if (entityPlayer.getGamemode().getId() == Creative.id) {
+                if (isFlying) {
+                    entityPlayer.yd = 0;
                 }
             }
         }
@@ -157,69 +196,44 @@ public class PlayerController
             }
         }
 
-        RayCast.RayResult[] ray = RayCast.rayCastToBlock(6, entityPlayer.getRx(), entityPlayer.getRy(), entityPlayer.getX(), entityPlayer.getY(), entityPlayer.getZ());
+    }
 
-        if (ray[0].state)
-        {
-            if (Controls.getMouseKey(0) && this.breakingBlock.block != null && this.breakingBlock.blockPos.equals(ray[0]))
-            {
-                Block block = this.breakingBlock.block;
+    public void keyEvent(Controls.KeyInput keyInput) {
+        EntityPlayer entityPlayer = OpenCraft.getLevel().getPlayerEntity();
 
-                if (block.getTool() != Tool.UNBREAKABLE && !block.isLiquid()) {
-                    this.breakingBlock.blockBreakState += 0.5 / this.breakingBlock.block.getStrength();
-                    this.breakingBlock.blockPos = ray[0];
-
-                    if (this.breakingBlock.block.getStrength() == 0
-                            || this.breakingBlock.blockBreakState >= 9
-                            || block.getTool() == Tool.IMMEDIATELY
-                            || entityPlayer.getGamemode().getId() == Creative.id) {
-                        this.breakingBlock.blockBreakState = 0;
-
-                        OpenCraft.getLevel().getBlock(ray[0]).destroy(ray[0]);
-                        OpenCraft.getLevel().getBlock(ray[0]).createDrop(ray[0]);
-                        OpenCraft.getLevel().removeBlock(ray[0]);
-                    }
-                }
-                else {
-                    this.breakingBlock.blockBreakState = 0;
-                }
-            }
-            else {
-                this.breakingBlock.blockBreakState = 0;
-                this.breakingBlock.blockPos = ray[0];
-                this.breakingBlock.block = OpenCraft.getLevel().getBlock(ray[0]);
-            }
-
-            if (Controls.getMouseKey(1) && !clickedMouse.get(1) && !entityPlayer.aabb.intersects(Block.getAABB(ray[1]))
-                    && getInventoryItem(playerInventory.selected) != null)
-            {
-                if (getInventoryItem(playerInventory.selected) instanceof ItemBlock) {
-                    RayCast.RayResult rayResult = ray[1];
-
-                    if (OpenCraft.getLevel().getBlock(ray[0]).getIntId() == Block.grass.getIntId()) {
-                        rayResult = ray[0];
-                    }
-
-                    OpenCraft.getLevel().setBlock(rayResult, ((ItemBlock)getInventoryItem(playerInventory.selected)).getBlock());
-                    decreaseSlot(playerInventory.selected);
-                }
-
-                clickedMouse.put(1, true);
-            }
-            else if(!Controls.getMouseKey(1))
-            {
-                clickedMouse.put(1, false);
+        if (keyInput.keyCode == Controls.Keys.KEY_SPACE && keyInput.clickType == Controls.ClickType.DOUBLE) {
+            if (entityPlayer.getGamemode().getId() == Creative.id) {
+                setFlying(!isFlying);
+                if (isFlying)
+                    entityPlayer.yd = 0.42f;
             }
         }
-
-        // todo: remove it in the future (is used to be able to change current dimension)
-        if (Controls.isKeyDown(Controls.Keys.KEY_C) && !clickedKeyboard.get("c")) {
-            OpenCraft.switchWorld(OpenCraft.getLevelType() == Level.LevelType.WORLD ? Level.LevelType.HELL : Level.LevelType.WORLD);
-            clickedKeyboard.put("c", true);
+        else if (keyInput.keyCode == Controls.Keys.KEY_T) {
+            if (entityPlayer.getScreen() == null)
+                entityPlayer.setScreen(new ChatScreen(entityPlayer, OpenCraft.getLevel(), ""));
         }
-        else if(!Controls.isKeyDown(Controls.Keys.KEY_C))
-        {
-            clickedKeyboard.put("c", false);
+        else if (keyInput.keyCode == Controls.Keys.KEY_SLASH) {
+            if (entityPlayer.getScreen() == null)
+                entityPlayer.setScreen(new ChatScreen(entityPlayer, OpenCraft.getLevel(), "/"));
+        }
+        else if (keyInput.keyCode == Controls.Keys.KEY_ESCAPE) {
+            if (!OpenCraft.isWorldDestroyed() && !OpenCraft.getLevel().getPlayerEntity().isDead()) {
+                OpenCraft.setCurrentScreen(OpenCraft.getPauseMenuScreen());
+                OpenCraft.inMenu(true);
+            }
+        }
+        else {
+            String  c = keyInput.character;
+
+            if (c.equals("1")) playerGUI.selected = 0;
+            if (c.equals("2")) playerGUI.selected = 1;
+            if (c.equals("3")) playerGUI.selected = 2;
+            if (c.equals("4")) playerGUI.selected = 3;
+            if (c.equals("5")) playerGUI.selected = 4;
+            if (c.equals("6")) playerGUI.selected = 5;
+            if (c.equals("7")) playerGUI.selected = 6;
+            if (c.equals("8")) playerGUI.selected = 7;
+            if (c.equals("9")) playerGUI.selected = 8;
         }
     }
 
@@ -252,8 +266,8 @@ public class PlayerController
 
     public Item getCurrentItem()
     {
-        if (inventory[playerInventory.selected] == null) return null;
-        return inventory[playerInventory.selected];
+        if (inventory[playerGUI.selected] == null) return null;
+        return inventory[playerGUI.selected];
     }
 
     public void appendInventory(Item item) {
@@ -294,7 +308,7 @@ public class PlayerController
         this.clickedMouse.clear();
         this.clickedKeyboard.clear();
 
-        this.playerInventory = null;
+        this.playerGUI = null;
         this.inventory = null;
         this.clickedKeyboard = null;
         this.clickedMouse = null;
