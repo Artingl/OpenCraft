@@ -1,14 +1,14 @@
 package com.artingl.opencraft.Rendering;
 
 import com.artingl.opencraft.Logger.Logger;
-import com.artingl.opencraft.OpenCraft;
+import com.artingl.opencraft.Math.Vector2i;
+import com.artingl.opencraft.Opencraft;
 import com.artingl.opencraft.Resources.Resources;
 import com.artingl.opencraft.Utils.Utils;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 
 import javax.imageio.ImageIO;
-import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
@@ -17,13 +17,11 @@ import java.util.HashMap;
 public class TextureEngine
 {
 
-    private static HashMap<String /* file name */ , Float[] /* texture position */> blocksTextures; // Blocks textures
-    private static HashMap<String /* file name */ , Integer /* texture position */> blocksTexturesID; // Blocks textures id
-    private static BufferedImage terrainImage; // Terrain image
+    private static HashMap<String, Float[]> blocksTextures; // Blocks textures
+    private static HashMap<String, Integer> blocksTexturesID; // Blocks textures id
+    private static BufferedImage atlasImage; // Terrain image
     private static int terrainId; // Terrain texture id
-
     public static final int maxCountOfBlocks = 128; // Max count of blocks
-    public static float addTextCoord = 1.0f / maxCountOfBlocks; // Normalized texcoord of 1 texture
 
     protected static class texValues {
         public static int x = 0;
@@ -34,24 +32,26 @@ public class TextureEngine
     public static void init() {
         blocksTextures = new HashMap<>();
         blocksTexturesID = new HashMap<>();
-        terrainImage = new BufferedImage(16 * maxCountOfBlocks, 16 * maxCountOfBlocks, BufferedImage.TYPE_INT_ARGB);
+        atlasImage =  new BufferedImage(16 * maxCountOfBlocks, 16 * maxCountOfBlocks, BufferedImage.TYPE_INT_ARGB);
     }
 
     public static void loadTextures(Class<?> callingClass, String id) throws URISyntaxException {
-        Logger.info("Loading " + id + " textures");
+        Logger.debug("Loading " + id + " textures");
         String resourcesPath = Resources.convertToPath(id + ":textures/blocks/");
 
         Utils.foreachFiles(callingClass, resourcesPath, (path, name) -> {
             if (path.contains(resourcesPath) && path.endsWith(".png")) {
                 try {
-                    Logger.info("Loading " + id + ":textures/blocks/" + name + " texture");
+                    Logger.debug("Loading " + id + ":textures/blocks/" + name + " texture");
+
+                    Opencraft.drawLoadingScreen(Utils.capitalizeString(id) + " Textures: Loading " + Utils.removeFileExtension(name));
 
                     BufferedImage img = ImageIO.read(Resources.load(callingClass, id + ":textures/blocks/" + name));
-                    img = cropImage(img, new Rectangle(16, 16));
-                    terrainImage.getGraphics().drawImage(img, texValues.x, texValues.y, null);
+                    img = cropImage(img, new Vector2i(0, 0), new Vector2i(16, 16));
+                    atlasImage.getGraphics().drawImage(img, texValues.x, texValues.y, null);
 
-                    float tx = (texValues.x / 16f) * addTextCoord;
-                    float ty = (texValues.y / 16f) * addTextCoord;
+                    float tx = (texValues.x / 16f) * getTextureAtlasSize();
+                    float ty = (texValues.y / 16f) * getTextureAtlasSize();
                     TextureEngine.blocksTextures.put(id + ":" + name.split("." + "png")[0], new Float[]{tx, ty});
                     TextureEngine.blocksTexturesID.put(id + ":" + name.split("." + "png")[0], texValues.i++);
 
@@ -69,19 +69,23 @@ public class TextureEngine
         terrainId = TextureEngine.load();
     }
 
-    private static BufferedImage cropImage(BufferedImage src, Rectangle rect) {
-        BufferedImage dest = src.getSubimage(0, 0, rect.width, rect.height);
+    public static float getTextureAtlasSize() {
+        return 1.0f / maxCountOfBlocks;
+    }
+
+    public static BufferedImage cropImage(BufferedImage src, Vector2i pos, Vector2i rect) {
+        BufferedImage dest = src.getSubimage(pos.x, pos.y, rect.x, rect.y);
         return dest;
     }
 
     public static int load()
     {
-        return load(terrainImage);
+        return load(atlasImage);
     }
 
     public static int load(String path, int mode) {
         try {
-            return load(ImageIO.read(Resources.load(OpenCraft.class, path)), mode);
+            return load(ImageIO.read(Resources.load(Opencraft.class, path)), mode);
         } catch (Exception e) {}
 
         return terrainId;
@@ -89,7 +93,7 @@ public class TextureEngine
 
     public static int load(String path) {
         try {
-            return load(ImageIO.read(Resources.load(OpenCraft.class, path)));
+            return load(ImageIO.read(Resources.load(Opencraft.class, path)));
         } catch (Exception e) {}
 
         return terrainId;

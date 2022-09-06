@@ -3,9 +3,9 @@ package com.artingl.opencraft.World.Block;
 public class BlockLeavesOak extends Block
 {
 
-    public BlockLeavesOak(int idi)
+    public BlockLeavesOak()
     {
-        super("opencraft:leaves_oak", idi);
+        super("opencraft:leaves_oak");
 
     }
 

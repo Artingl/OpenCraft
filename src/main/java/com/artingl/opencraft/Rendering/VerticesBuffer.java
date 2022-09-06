@@ -22,7 +22,16 @@ public class VerticesBuffer
     private int len = 3;
     private int p = 0;
     private boolean noColor = false;
-    public static VerticesBuffer instance = new VerticesBuffer();
+
+    private final static VerticesBuffer instance = new VerticesBuffer();
+
+    public static VerticesBuffer getGlobalInstance() {
+        return instance;
+    }
+
+    public static VerticesBuffer getInstance() {
+        return new VerticesBuffer();
+    }
 
     private VerticesBuffer() {
     }

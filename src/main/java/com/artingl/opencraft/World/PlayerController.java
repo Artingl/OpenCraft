@@ -1,10 +1,14 @@
 package com.artingl.opencraft.World;
 
 import com.artingl.opencraft.GL.Controls;
-import com.artingl.opencraft.GUI.screens.ChatScreen;
-import com.artingl.opencraft.GUI.windows.PlayerGUI;
-import com.artingl.opencraft.OpenCraft;
+import com.artingl.opencraft.GUI.GUI;
+import com.artingl.opencraft.GUI.Screens.ChatScreen;
+import com.artingl.opencraft.GUI.Windows.PlayerGUI;
+import com.artingl.opencraft.Math.Vector2f;
+import com.artingl.opencraft.Math.Vector3f;
+import com.artingl.opencraft.Opencraft;
 import com.artingl.opencraft.World.Block.Block;
+import com.artingl.opencraft.World.Block.BlockRegistry;
 import com.artingl.opencraft.World.Entity.EntityPlayer;
 import com.artingl.opencraft.World.Entity.Gamemode.Creative;
 import com.artingl.opencraft.World.Entity.Gamemode.Survival;
@@ -16,6 +20,7 @@ import java.util.HashMap;
 
 public class PlayerController
 {
+
     private class BreakingBlock {
         public float blockBreakState;
         public RayCast.RayResult blockPos;
@@ -29,10 +34,12 @@ public class PlayerController
     private HashMap<Integer, Boolean> clickedMouse;
     private HashMap<String, Boolean> clickedKeyboard;
 
-    private boolean isFlying;
+    private boolean isFlying = true;
 
     private final BreakingBlock breakingBlock;
     private final int keyboardEvent;
+
+    private int cameraOrient = 3;
 
 
     public PlayerController() {
@@ -42,7 +49,7 @@ public class PlayerController
         this.inventory = new ItemBlock[36];
         this.breakingBlock = new BreakingBlock();
 
-        this.inventory[0] = new ItemBlock(Block.stone, 64);
+        this.inventory[0] = new ItemBlock(BlockRegistry.Blocks.stone, 64);
 
         for (int i = 0; i < 20; i++) clickedMouse.put(i, false);
         for(int i = 32; i <= 126; i++) clickedKeyboard.put(String.valueOf((char)i).toLowerCase(), false);
@@ -52,7 +59,11 @@ public class PlayerController
     }
 
     public void tick() {
-        EntityPlayer entityPlayer = OpenCraft.getLevel().getPlayerEntity();
+        EntityPlayer entityPlayer = Opencraft.getPlayerEntity();
+
+        Vector3f pos = entityPlayer.getPosition();
+        Vector3f vel = entityPlayer.getVelocity();
+        Vector2f rotation = entityPlayer.getRotation();
 
         if (entityPlayer.getGamemode().getId() == Survival.id) {
             isFlying = false;
@@ -61,7 +72,7 @@ public class PlayerController
         float xa = 0;
         float ya = 0;
         float acceleration = 1;
-        boolean inWater = entityPlayer.inWater();
+        boolean inWater = entityPlayer.isInWater();
 
         if (entityPlayer.canControl()) {
             if (Controls.isKeyDown(Controls.Keys.KEY_W)) --ya;
@@ -74,31 +85,31 @@ public class PlayerController
             } else if (!isFlying) entityPlayer.setHeightOffset(1.82F);
             if (Controls.isKeyDown(Controls.Keys.KEY_SPACE) && !isFlying) {
                 if (inWater) {
-                    entityPlayer.yd += 0.04F;
-                } else if (entityPlayer.onGround) {
-                    entityPlayer.yd = 0.42F;
+                    vel.y += 0.04F;
+                } else if (entityPlayer.isOnGround()) {
+                    vel.y = 0.42F;
                 }
             }
 
             if (entityPlayer.getGamemode().getId() == Creative.id) {
                 if (isFlying) {
                     if (Controls.isKeyDown(Controls.Keys.KEY_SPACE)) {
-                        entityPlayer.yd = 0.42F;
+                        vel.y = 0.42F;
                     } else if (Controls.isKeyDown(Controls.Keys.KEY_LSHIFT)) {
-                        entityPlayer.yd = -0.42F;
-                    } else entityPlayer.yd = 0;
+                        vel.y = -0.42F;
+                    } else vel.y = 0;
                 } else {
                     if (Controls.isKeyDown(Controls.Keys.KEY_SPACE)) {
                         if (inWater) {
-                            entityPlayer.yd += 0.04F;
-                        } else if (entityPlayer.onGround) {
-                            entityPlayer.yd = 0.42F;
+                            vel.y += 0.04F;
+                        } else if (entityPlayer.isOnGround()) {
+                            vel.y = 0.42F;
                         }
                     }
                 }
             }
 
-            RayCast.RayResult[] ray = RayCast.rayCastToBlock(6, entityPlayer.getRx(), entityPlayer.getRy(), entityPlayer.getX(), entityPlayer.getY(), entityPlayer.getZ());
+            RayCast.RayResult[] ray = RayCast.rayCastToBlock(6, rotation.x, rotation.y, pos.x, pos.y, pos.z);
             if (ray[0].state)
             {
                 if (Controls.getMouseKey(0) && this.breakingBlock.block != null && this.breakingBlock.blockPos.equals(ray[0]))
@@ -115,9 +126,9 @@ public class PlayerController
                                 || entityPlayer.getGamemode().getId() == Creative.id) {
                             this.breakingBlock.blockBreakState = 0;
 
-                            OpenCraft.getLevel().getBlock(ray[0]).destroy(ray[0]);
-                            OpenCraft.getLevel().getBlock(ray[0]).createDrop(ray[0]);
-                            OpenCraft.getLevel().removeBlock(ray[0]);
+                            Opencraft.getLevel().getBlock(ray[0]).destroy(ray[0]);
+                            Opencraft.getLevel().getBlock(ray[0]).createDrop(ray[0]);
+                            Opencraft.getLevel().removeBlock(ray[0]);
                         }
                     }
                     else {
@@ -127,20 +138,20 @@ public class PlayerController
                 else {
                     this.breakingBlock.blockBreakState = 0;
                     this.breakingBlock.blockPos = ray[0];
-                    this.breakingBlock.block = OpenCraft.getLevel().getBlock(ray[0]);
+                    this.breakingBlock.block = Opencraft.getLevel().getBlock(ray[0]);
                 }
 
-                if (Controls.getMouseKey(1) && !clickedMouse.get(1) && !entityPlayer.aabb.intersects(Block.getAABB(ray[1]))
+                if (Controls.getMouseKey(1) && !clickedMouse.get(1) && !entityPlayer.getAABB().intersects(Block.getAABB(ray[1]))
                         && getInventoryItem(playerGUI.selected) != null)
                 {
                     if (getInventoryItem(playerGUI.selected) instanceof ItemBlock) {
                         RayCast.RayResult rayResult = ray[1];
 
-                        if (OpenCraft.getLevel().getBlock(ray[0]).getIntId() == Block.grass.getIntId()) {
+                        if (Opencraft.getLevel().getBlock(ray[0]).equals(BlockRegistry.Blocks.grass)) {
                             rayResult = ray[0];
                         }
 
-                        OpenCraft.getLevel().setBlock(rayResult, ((ItemBlock)getInventoryItem(playerGUI.selected)).getBlock());
+                        Opencraft.getLevel().setBlock(rayResult, ((ItemBlock)getInventoryItem(playerGUI.selected)).getBlock());
                         decreaseSlot(playerGUI.selected);
                     }
 
@@ -155,71 +166,73 @@ public class PlayerController
         else {
             if (entityPlayer.getGamemode().getId() == Creative.id) {
                 if (isFlying) {
-                    entityPlayer.yd = 0;
+                    vel.y = 0;
                 }
             }
         }
 
+        entityPlayer.setVelocity(vel);
+
         float yo;
         if (inWater && !isFlying) {
-            yo = entityPlayer.getY();
+            yo = entityPlayer.getPosition().y;
             entityPlayer.moveRelative(xa, ya, 0.02F);
-            entityPlayer.move(entityPlayer.xd, entityPlayer.yd, entityPlayer.zd);
-            entityPlayer.xd *= 0.8F * acceleration;
-            entityPlayer.yd *= 0.8F;
-            entityPlayer.zd *= 0.8F * acceleration;
-            entityPlayer.yd = (float) ((double) entityPlayer.yd - 0.02D);
-            if (entityPlayer.horizontalCollision && entityPlayer.isFree(entityPlayer.xd, entityPlayer.yd + 0.6F - entityPlayer.getY() + yo, entityPlayer.zd)) {
-                entityPlayer.yd = 0.3F;
+            entityPlayer.move(entityPlayer.getVelocity().x, entityPlayer.getVelocity().y, entityPlayer.getVelocity().z);
+            entityPlayer.getVelocity().x *= 0.8F * acceleration;
+            entityPlayer.getVelocity().y *= 0.8F;
+            entityPlayer.getVelocity().z *= 0.8F * acceleration;
+            entityPlayer.getVelocity().y = (float) ((double) entityPlayer.getVelocity().y - 0.02D);
+            if (entityPlayer.hasHorizontalCollision() && entityPlayer.isFree(entityPlayer.getVelocity().x, entityPlayer.getVelocity().y + 0.6F - yo + yo, entityPlayer.getVelocity().z)) {
+                entityPlayer.getVelocity().y = 0.3F;
             }
         } else if (isFlying)  {
             entityPlayer.moveRelative(xa, ya, 0.1F);
-            entityPlayer.move(entityPlayer.xd, entityPlayer.yd, entityPlayer.zd);
-            entityPlayer.xd *= 0.91F * acceleration;
-            entityPlayer.yd *= 0.98F;
-            entityPlayer.zd *= 0.91F * acceleration;
-            entityPlayer.yd = (float)((double)entityPlayer.yd - 0.08D);
+            entityPlayer.move(entityPlayer.getVelocity().x, entityPlayer.getVelocity().y, entityPlayer.getVelocity().z);
+            entityPlayer.getVelocity().x *= 0.91F * acceleration;
+            entityPlayer.getVelocity().y *= 0.98F;
+            entityPlayer.getVelocity().z *= 0.91F * acceleration;
+            entityPlayer.getVelocity().y = (float)((double)entityPlayer.getVelocity().y - 0.08D);
 
-            if (entityPlayer.onGround) {
+            if (entityPlayer.isOnGround()) {
                 setFlying(false);
             }
         } else {
-            entityPlayer.moveRelative(xa, ya, entityPlayer.onGround ? 0.1F : 0.02F);
-            entityPlayer.move(entityPlayer.xd, entityPlayer.yd, entityPlayer.zd);
-            entityPlayer.xd *= 0.91F * acceleration;
-            entityPlayer.yd *= 0.98F;
-            entityPlayer.zd *= 0.91F * acceleration;
-            entityPlayer.yd = (float)((double)entityPlayer.yd - 0.08D);
-            if (entityPlayer.onGround) {
-                entityPlayer.xd *= 0.6F;
-                entityPlayer.zd *= 0.6F;
+            entityPlayer.moveRelative(xa, ya, entityPlayer.isOnGround() ? 0.1F : 0.02F);
+            entityPlayer.move(entityPlayer.getVelocity().x, entityPlayer.getVelocity().y, entityPlayer.getVelocity().z);
+            entityPlayer.getVelocity().x *= 0.91F * acceleration;
+            entityPlayer.getVelocity().y *= 0.98F;
+            entityPlayer.getVelocity().z *= 0.91F * acceleration;
+            entityPlayer.getVelocity().y = (float)((double)entityPlayer.getVelocity().y - 0.08D);
+            if (entityPlayer.isOnGround()) {
+                entityPlayer.getVelocity().x *= 0.6F;
+                entityPlayer.getVelocity().z *= 0.6F;
             }
         }
 
     }
 
     public void keyEvent(Controls.KeyInput keyInput) {
-        EntityPlayer entityPlayer = OpenCraft.getLevel().getPlayerEntity();
+        EntityPlayer entityPlayer = Opencraft.getPlayerEntity();
 
         if (keyInput.keyCode == Controls.Keys.KEY_SPACE && keyInput.clickType == Controls.ClickType.DOUBLE) {
             if (entityPlayer.getGamemode().getId() == Creative.id) {
                 setFlying(!isFlying);
                 if (isFlying)
-                    entityPlayer.yd = 0.42f;
+                    entityPlayer.getVelocity().y = 0.42f;
             }
         }
         else if (keyInput.keyCode == Controls.Keys.KEY_T) {
             if (entityPlayer.getScreen() == null)
-                entityPlayer.setScreen(new ChatScreen(entityPlayer, OpenCraft.getLevel(), ""));
+                entityPlayer.setScreen(new ChatScreen(entityPlayer, Opencraft.getLevel(), ""));
         }
         else if (keyInput.keyCode == Controls.Keys.KEY_SLASH) {
             if (entityPlayer.getScreen() == null)
-                entityPlayer.setScreen(new ChatScreen(entityPlayer, OpenCraft.getLevel(), "/"));
+                entityPlayer.setScreen(new ChatScreen(entityPlayer, Opencraft.getLevel(), "/"));
         }
         else if (keyInput.keyCode == Controls.Keys.KEY_ESCAPE) {
-            if (!OpenCraft.isWorldDestroyed() && !OpenCraft.getLevel().getPlayerEntity().isDead()) {
-                OpenCraft.setCurrentScreen(OpenCraft.getPauseMenuScreen());
-                OpenCraft.inMenu(true);
+            if (Opencraft.isWorldLoaded() && !Opencraft.getPlayerEntity().isDead()) {
+                Opencraft.setCurrentScreen(GUI.pauseMenu);
+                Opencraft.inMenu(true);
             }
         }
         else {
@@ -239,13 +252,33 @@ public class PlayerController
 
     public void rotate()
     {
-        EntityPlayer entityPlayer = OpenCraft.getLevel().getPlayerEntity();
+        EntityPlayer entityPlayer = Opencraft.getPlayerEntity();
 
-        entityPlayer.setRy((float)((double)entityPlayer.getRy() + (double)((float) Controls.getDX()) * 0.15D));
-        entityPlayer.setRx((float)((double)entityPlayer.getRx() - (double)((float) Controls.getDY()) * 0.15D));
+        Vector2f cameraRotation = entityPlayer.getCameraRotation();
+        Vector2f rotation = entityPlayer.getRotation();
+        Vector3f motion = entityPlayer.getMotion();
 
-        if (entityPlayer.getRx() > 90) entityPlayer.setRx(90);
-        if (entityPlayer.getRx() < -90) entityPlayer.setRx(-90);
+        float camRotY = (float) Math.sqrt(motion.x * motion.x + motion.z * motion.z);
+        float camRotX = (float) Math.atan(-motion.y * 0.20000000298023224D) * 15.0F;
+
+        if (!isFlying() && entityPlayer.isOnGround()) {
+            cameraRotation.y += (camRotY - cameraRotation.y) * 0.4F;
+            cameraRotation.x += (camRotX - cameraRotation.x) * 0.8F;
+        }
+
+        rotation.y = (float)((double)rotation.y + (double) Controls.getDX() * 0.15D);
+        rotation.x = (float)((double)rotation.x - (double) Controls.getDY() * 0.15D);
+
+        motion.x = (float) (-Math.sin(rotation.y / 180.0F * (float)Math.PI) * Math.cos(rotation.x / 180.0F * (float)Math.PI) * 0.15F);
+        motion.z = (float) (Math.cos(rotation.y / 180.0F * (float)Math.PI) * Math.cos(rotation.x / 180.0F * (float)Math.PI) * 0.15F);
+        motion.y = (float) (-Math.sin(rotation.x / 180.0F * (float)Math.PI) * 0.15F + 0.1F);
+
+        if (rotation.x > 90) rotation.x = 90;
+        if (rotation.x < -90) rotation.x = -90;
+
+        entityPlayer.setMotion(motion);
+        entityPlayer.setCameraRotation(cameraRotation);
+        entityPlayer.setRotation(rotation);
     }
 
     public void setFlying(boolean i)
@@ -271,6 +304,8 @@ public class PlayerController
     }
 
     public void appendInventory(Item item) {
+        Opencraft.getSoundEngine().loadAndPlay("opencraft", "player/pick");
+
         if (item instanceof ItemBlock) {
             appendInventory((ItemBlock) item);
             return;
@@ -318,5 +353,9 @@ public class PlayerController
 
     public float getBlockBreakState() {
         return this.breakingBlock.blockBreakState;
+    }
+
+    public int getCameraOrient() {
+        return cameraOrient;
     }
 }

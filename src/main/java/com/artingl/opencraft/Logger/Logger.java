@@ -1,6 +1,6 @@
 package com.artingl.opencraft.Logger;
 
-import com.artingl.opencraft.OpenCraft;
+import com.artingl.opencraft.Opencraft;
 import com.artingl.opencraft.Utils.StackTrace;
 
 import java.io.FileOutputStream;
@@ -46,7 +46,7 @@ public class Logger {
 
     public static void setupOutputFile() throws IOException {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM-dd-yyyy hh-mma z");
-        outputFile = new FileOutputStream(OpenCraft.getGameDirectory() + "logs/" + formatter.format(ZonedDateTime.now()) + ".txt");
+        outputFile = new FileOutputStream(Opencraft.getGameDirectory() + "logs/" + formatter.format(ZonedDateTime.now()) + ".txt");
         outputFile.flush();
     }
     public static void debug(String msg) {

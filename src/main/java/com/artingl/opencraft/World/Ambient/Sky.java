@@ -10,7 +10,7 @@ public class Sky {
     private int cloudsSize = 1024;
     private float[] cloudPos = {-clouds, 0};
 
-    private VerticesBuffer t = VerticesBuffer.instance;
+    private VerticesBuffer t = VerticesBuffer.getGlobalInstance();
 
     public void update() {
         // draw clouds

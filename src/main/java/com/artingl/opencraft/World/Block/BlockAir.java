@@ -3,9 +3,9 @@ package com.artingl.opencraft.World.Block;
 public class BlockAir extends Block
 {
 
-    public BlockAir(int idi)
+    public BlockAir()
     {
-        super("air", idi);
+        super("air");
     }
 
     public void createDrop(int x, int y, int z)  {}

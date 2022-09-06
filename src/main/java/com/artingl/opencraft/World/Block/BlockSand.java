@@ -3,9 +3,9 @@ package com.artingl.opencraft.World.Block;
 public class BlockSand extends Block
 {
 
-    public BlockSand(int idi)
+    public BlockSand()
     {
-        super("opencraft:sand", idi);
+        super("opencraft:sand");
 
     }
 

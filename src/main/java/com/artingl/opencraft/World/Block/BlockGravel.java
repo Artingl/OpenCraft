@@ -3,9 +3,9 @@ package com.artingl.opencraft.World.Block;
 public class BlockGravel extends Block
 {
 
-    public BlockGravel(int idi)
+    public BlockGravel()
     {
-        super("opencraft:gravel", idi);
+        super("opencraft:gravel");
 
     }
 

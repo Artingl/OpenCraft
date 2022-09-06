@@ -21,7 +21,7 @@ public class PlayerModel extends Model {
    }
 
    @Override
-   public void render(float time) {
+   public void render() {
       this.head.render();
       this.body.render();
       this.arm0.render();

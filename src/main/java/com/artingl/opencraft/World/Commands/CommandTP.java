@@ -1,12 +1,7 @@
 package com.artingl.opencraft.World.Commands;
 
 import com.artingl.opencraft.World.Entity.EntityPlayer;
-import com.artingl.opencraft.World.Entity.Gamemode.Creative;
-import com.artingl.opencraft.World.Entity.Gamemode.Survival;
-import com.artingl.opencraft.World.Level.Level;
-
-import java.lang.reflect.Array;
-import java.util.Arrays;
+import com.artingl.opencraft.World.Level.ClientLevel;
 
 public class CommandTP extends Command {
 
@@ -14,7 +9,7 @@ public class CommandTP extends Command {
         super("tp");
     }
 
-    public void execute(String[] args, EntityPlayer as, Level level) {
+    public void execute(String[] args, EntityPlayer as, ClientLevel level) {
         if (args.length < 2) {
             as.tellInChat("/tp requires at least 3 arguments");
             return;

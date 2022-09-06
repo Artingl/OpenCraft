@@ -3,9 +3,9 @@ package com.artingl.opencraft.World.Block;
 public class BlockHellrock extends Block
 {
 
-    public BlockHellrock(int idi)
+    public BlockHellrock()
     {
-        super("opencraft:hellrock", idi);
+        super("opencraft:hellrock");
 
     }
 

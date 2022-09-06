@@ -3,9 +3,9 @@ package com.artingl.opencraft.World.Block;
 public class BlockWater extends Block
 {
 
-    public BlockWater(int idi)
+    public BlockWater()
     {
-        super("opencraft:water", idi);
+        super("opencraft:water");
 
     }
 

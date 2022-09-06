@@ -10,7 +10,7 @@ public class Model
     public Box leg0;
     public Box leg1;
 
-    public void render(float time) { }
+    public void render() { }
 
     public void destroy() {
 

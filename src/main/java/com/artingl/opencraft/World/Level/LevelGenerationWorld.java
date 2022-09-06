@@ -1,20 +1,13 @@
 package com.artingl.opencraft.World.Level;
-
-import com.artingl.opencraft.World.Block.Block;
+import com.artingl.opencraft.World.Block.BlockRegistry;
 import com.artingl.opencraft.World.Chunk.Region;
-
-import java.util.ArrayList;
 
 public class LevelGenerationWorld extends LevelGeneration
 {
 
-    private float heightLevel = 12;
-    private ArrayList<Float> heightLevels;
-
-    public LevelGenerationWorld(Level level)
+    public LevelGenerationWorld(ClientLevel.Generation generation)
     {
-        super(level);
-        this.heightLevels = new ArrayList<>();
+        super(generation);
     }
 
     @Override
@@ -23,33 +16,33 @@ public class LevelGenerationWorld extends LevelGeneration
         int y = getHeightValue(world_x, world_z);
         boolean wasSand = false;
 
-        region.setBlock(Block.bedrock, region_x, 0, region_z);
+        region.setBlock(BlockRegistry.Blocks.bedrock, region_x, 0, region_z);
 
-        for (int i = 0; i < level.getRandomNumber(0, 3); i++) {
-            region.setBlock(Block.bedrock, region_x, i, region_z);
+        for (int i = 0; i < level.generation.randomInteger(0, 3); i++) {
+            region.setBlock(BlockRegistry.Blocks.bedrock, region_x, i, region_z);
         }
 
-        if (y < Level.WATER_LEVEL - 1)
+        if (y < ClientLevel.WATER_LEVEL - 1)
         {
-            region.setBlock(Block.sand, region_x, y, region_z);
+            region.setBlock(BlockRegistry.Blocks.sand, region_x, y, region_z);
             wasSand = true;
         }
         else
         {
-            region.setBlock(Block.grass_block, region_x, y, region_z);
+            region.setBlock(BlockRegistry.Blocks.grass_block, region_x, y, region_z);
 
-            if (level.getRandomNumber(10, 20) == level.getRandomNumber(10, 20)) {
-                region.setBlock(Block.grass, region_x, y+1, region_z);
+            if (level.generation.randomInteger(10, 20) == level.generation.randomInteger(10, 20)) {
+                region.setBlock(BlockRegistry.Blocks.grass, region_x, y+1, region_z);
             }
 
-            if (level.getRandomNumber(10, 25) == level.getRandomNumber(10, 25)) {
-                region.setBlock(Block.rose, region_x, y+1, region_z);
+            if (level.generation.randomInteger(10, 25) == level.generation.randomInteger(10, 25)) {
+                region.setBlock(BlockRegistry.Blocks.rose, region_x, y+1, region_z);
             }
         }
 
-        if (!wasSand && level.getRandomNumber(20, 1500) == level.getRandomNumber(20, 1500))
+        if (!wasSand && level.generation.randomInteger(20, 1500) == level.generation.randomInteger(20, 1500))
         {
-            int treeHeight = level.getRandomNumber(5, 7);
+            int treeHeight = level.generation.randomInteger(5, 7);
             generateTree(region, treeHeight, region_x, y + 1, region_z);
         }
 
@@ -57,33 +50,33 @@ public class LevelGenerationWorld extends LevelGeneration
         {
             if (!wasSand)
             {
-                if (i > y - level.getRandomNumber(5, 10))
+                if (i > y - level.generation.randomInteger(5, 10))
                 {
-                    region.setBlock(Block.dirt, region_x, i, region_z);
+                    region.setBlock(BlockRegistry.Blocks.dirt, region_x, i, region_z);
                 }
                 else
                 {
-                    region.setBlock(Block.stone, region_x, i, region_z);
+                    region.setBlock(BlockRegistry.Blocks.stone, region_x, i, region_z);
                 }
             }
             else
             {
-                if (i > y - level.getRandomNumber(5, 10))
+                if (i > y - level.generation.randomInteger(5, 10))
                 {
-                    region.setBlock(Block.sandStone, region_x, i, region_z);
+                    region.setBlock(BlockRegistry.Blocks.sandStone, region_x, i, region_z);
                 }
                 else
                 {
-                    region.setBlock(Block.stone, region_x, i, region_z);
+                    region.setBlock(BlockRegistry.Blocks.stone, region_x, i, region_z);
                 }
             }
 
         }
-        if (y < Level.WATER_LEVEL - 3)
+        if (y < ClientLevel.WATER_LEVEL - 3)
         {
-            for (int i = y; i < Level.WATER_LEVEL - 3; i++)
+            for (int i = y; i < ClientLevel.WATER_LEVEL - 3; i++)
             {
-                region.setBlock(Block.water, region_x, i + 1, region_z);
+                region.setBlock(BlockRegistry.Blocks.water, region_x, i + 1, region_z);
             }
         }
     }
@@ -96,7 +89,7 @@ public class LevelGenerationWorld extends LevelGeneration
             {
                 for (int k = y + treeHeight - 2; k < y + treeHeight; k++)
                 {
-                    region.setBlock(Block.leaves_oak, i, k, j);
+                    region.setBlock(BlockRegistry.Blocks.leaves_oak, i, k, j);
                 }
             }
         }
@@ -106,7 +99,7 @@ public class LevelGenerationWorld extends LevelGeneration
             {
                 for (int k = -1; k < 2; k++)
                 {
-                    region.setBlock(Block.leaves_oak, x + j, y + i, z + k);
+                    region.setBlock(BlockRegistry.Blocks.leaves_oak, x + j, y + i, z + k);
                 }
             }
         }
@@ -119,7 +112,7 @@ public class LevelGenerationWorld extends LevelGeneration
                 {
                     if (cl % 2 != 0)
                     {
-                        region.setBlock(Block.leaves_oak, x + j, y + i, z + k);
+                        region.setBlock(BlockRegistry.Blocks.leaves_oak, x + j, y + i, z + k);
                     }
                     cl++;
                 }
@@ -127,40 +120,15 @@ public class LevelGenerationWorld extends LevelGeneration
         }
         for (int i = y; i < y + treeHeight; i++)
         {
-            region.setBlock(Block.log_oak, x, i, z);
+            region.setBlock(BlockRegistry.Blocks.log_oak, x, i, z);
         }
 
-        region.setBlock(Block.leaves_oak, x, y + treeHeight + 1, z);
+        region.setBlock(BlockRegistry.Blocks.leaves_oak, x, y + treeHeight + 1, z);
     }
 
     @Override
     public void destroy() {
         super.destroy();
-        this.heightLevels.clear();
-    }
-
-    private void setBiomeHeightValue(float val) {
-        if (heightLevel < val) {
-            heightLevel += 0.01f;
-        }
-        if (heightLevel > val) {
-            heightLevel -= 0.01f;
-        }
-
-        this.heightLevels.add(heightLevel);
-        if (this.heightLevels.size() > 125) {
-            this.heightLevels.subList(0, this.heightLevels.size() - 125).clear();
-        }
-    }
-
-    private float getBiomeHeightLevel() {
-        float val = 0;
-
-        for (Float aFloat : this.heightLevels) {
-            val += aFloat;
-        }
-
-        return val / this.heightLevels.size();
     }
 
 }

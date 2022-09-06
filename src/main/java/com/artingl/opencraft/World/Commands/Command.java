@@ -1,19 +1,20 @@
 package com.artingl.opencraft.World.Commands;
 
 import com.artingl.opencraft.World.Entity.EntityPlayer;
-import com.artingl.opencraft.World.Level.Level;
+import com.artingl.opencraft.World.Level.ClientLevel;
 
 public class Command {
 
     public static CommandGamemode commandGamemode = new CommandGamemode();
     public static CommandDimension commandDimension = new CommandDimension();
     public static CommandTP commandTP = new CommandTP();
+    public static CommandGive commandGive = new CommandGive();
 
     public static Command[] commands = new Command[]{
-            commandGamemode, commandDimension, commandTP
+            commandGamemode, commandDimension, commandTP, commandGive
     };
 
-    public static void execute(String commandString, EntityPlayer as, Level level) {
+    public static void execute(String commandString, EntityPlayer as, ClientLevel level) {
         boolean found = false;
         String[] args = new String[commandString.split(" ").length-1];
         for (int i = 1; i < args.length+1; i++)
@@ -40,7 +41,7 @@ public class Command {
         this.commandName = commandName;
     }
 
-    public void execute(String[] args, EntityPlayer as, Level level) {
+    public void execute(String[] args, EntityPlayer as, ClientLevel level) {
     }
 
 }

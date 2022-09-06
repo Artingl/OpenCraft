@@ -1,6 +1,7 @@
 package com.artingl.opencraft.Utils;
 
-import com.artingl.opencraft.OpenCraft;
+import com.artingl.opencraft.Logger.Logger;
+import com.artingl.opencraft.Opencraft;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,7 +17,7 @@ import java.util.zip.ZipFile;
 public class Utils {
 
     public static void foreachFiles(Class<?> c, String resource, BiConsumer<String, String> callback) throws URISyntaxException {
-        String jarLocation = OpenCraft.getJarLocation(c);
+        String jarLocation = Opencraft.getJarLocation(c);
         if (jarLocation.endsWith(".jar")) {
             // game is running inside jar file
             try (ZipFile zipFile = new ZipFile(jarLocation)) {
@@ -61,4 +62,29 @@ public class Utils {
             }
     }
 
+    public static Thread createThread(Runnable runnable) {
+        Thread th = new Thread(() -> {
+            runnable.run();
+            Thread.currentThread().interrupt();
+        });
+
+        th.setDaemon(true);
+        th.start();
+
+        return th;
+    }
+
+    public static String removeFileExtension(String path) {
+        return path.replaceFirst("[.][^.]+$", "");
+    }
+
+    public static void sleep(long time) {
+        try { Thread.sleep(time); } catch (Exception e) {
+            Logger.exception("Unable to call Thread::sleep", e);
+        }
+    }
+
+    public static String capitalizeString(String id) {
+        return id.substring(0, 1).toUpperCase() + id.substring(1).toLowerCase();
+    }
 }

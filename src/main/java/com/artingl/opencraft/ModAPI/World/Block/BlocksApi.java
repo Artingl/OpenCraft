@@ -2,6 +2,7 @@ package com.artingl.opencraft.ModAPI.World.Block;
 
 import com.artingl.opencraft.ModAPI.ModEntry;
 import com.artingl.opencraft.World.Block.Block;
+import com.artingl.opencraft.World.Block.BlockRegistry;
 
 public class BlocksApi {
 
@@ -16,7 +17,7 @@ public class BlocksApi {
     }
 
     public Block createBlock(BlockProperties properties) {
-        return new ModBlock(properties);
+        return BlockRegistry.registerBlock(new ModBlock(properties));
     }
 
 }

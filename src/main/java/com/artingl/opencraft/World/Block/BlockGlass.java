@@ -3,9 +3,9 @@ package com.artingl.opencraft.World.Block;
 public class BlockGlass extends Block
 {
 
-    public BlockGlass(int idi)
+    public BlockGlass()
     {
-        super("opencraft:glass", idi);
+        super("opencraft:glass");
 
     }
 

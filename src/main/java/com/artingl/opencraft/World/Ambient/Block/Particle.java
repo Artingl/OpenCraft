@@ -1,10 +1,11 @@
 package com.artingl.opencraft.World.Ambient.Block;
 
+import com.artingl.opencraft.Math.Vector3f;
 import com.artingl.opencraft.World.Entity.Entity;
 import com.artingl.opencraft.Rendering.Texture;
 import com.artingl.opencraft.Rendering.TextureEngine;
 import com.artingl.opencraft.Rendering.VerticesBuffer;
-import com.artingl.opencraft.World.Level.Level;
+import com.artingl.opencraft.World.Level.ClientLevel;
 
 public class Particle extends Entity {
     private float xd;
@@ -17,11 +18,11 @@ public class Particle extends Entity {
     private float uo;
     private float vo;
 
-    public Particle(Level level, float x, float y, float z, float xa, float ya, float za, Texture tex) {
+    public Particle(ClientLevel level, float x, float y, float z, float xa, float ya, float za, Texture tex) {
         super(level);
         this.tex = tex;
         this.setSize(0.2F, 0.2F);
-        this.heightOffset = this.height / 2.0F;
+        this.setHeightOffset(this.getSize().y / 2.0F);
         this.setPosition(x, y, z);
         this.xd = xa + (float)(Math.random() * 2.0D - 1.0D) * 0.4F;
         this.yd = ya + (float)(Math.random() * 2.0D - 1.0D) * 0.4F;
@@ -31,8 +32,8 @@ public class Particle extends Entity {
         this.xd = this.xd / dd * speed * 0.4F;
         this.yd = this.yd / dd * speed * 0.4F + 0.1F;
         this.zd = this.zd / dd * speed * 0.4F;
-        this.uo = (float)(TextureEngine.addTextCoord / ((float)(0.1 + Math.random()) * 4.0F));
-        this.vo = (float)(TextureEngine.addTextCoord / ((float)(0.1 + Math.random()) * 4.0F));
+        this.uo = (float)(TextureEngine.getTextureAtlasSize() / ((float)(0.1 + Math.random()) * 4.0F));
+        this.vo = (float)(TextureEngine.getTextureAtlasSize() / ((float)(0.1 + Math.random()) * 4.0F));
         this.size = (float)(Math.random() * 0.5D + 0.5D);
         this.lifetime = (int)(4.0D / (Math.random() * 0.9D + 0.1D));
         this.age = 0;
@@ -56,7 +57,7 @@ public class Particle extends Entity {
         this.xd *= 0.98F;
         this.yd *= 0.98F;
         this.zd *= 0.98F;
-        if (this.onGround) {
+        if (this.isOnGround()) {
             this.xd *= 0.7F;
             this.zd *= 0.7F;
         }
@@ -67,14 +68,17 @@ public class Particle extends Entity {
             return;
         }
 
+        Vector3f prevPos = this.getPrevPosition();
+        Vector3f pos = this.getPosition();
+
         float u0 = tex.getSideTextureX() + (this.uo / 4.0F);
         float u1 = u0 + (this.uo / 4.0F);
         float v0 = tex.getSideTextureY() + (this.vo / 4.0F);
         float v1 = v0 + (this.uo / 4.0F);
         float r = 0.1F * this.size;
-        float x = this.xo + (this.x - this.xo) * a;
-        float y = this.yo + (this.y - this.yo) * a;
-        float z = this.zo + (this.z - this.zo) * a;
+        float x = prevPos.x + (pos.x - prevPos.x) * a;
+        float y = prevPos.y + (pos.y - prevPos.y) * a;
+        float z = prevPos.z + (pos.z - prevPos.z) * a;
         t.vertexUV(x - xa * r - xa2 * r, y - ya * r, z - za * r - za2 * r, u0, v1);
         t.vertexUV(x - xa * r + xa2 * r, y + ya * r, z - za * r + za2 * r, u0, v0);
         t.vertexUV(x + xa * r + xa2 * r, y + ya * r, z + za * r + za2 * r, u1, v0);

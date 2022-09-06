@@ -1,6 +1,6 @@
 package com.artingl.opencraft.World.Chunk;
 
-import com.artingl.opencraft.OpenCraft;
+import com.artingl.opencraft.Opencraft;
 import com.artingl.opencraft.Rendering.BlockRenderer;
 import com.artingl.opencraft.Rendering.LevelRenderer;
 import com.artingl.opencraft.Rendering.VerticesBuffer;
@@ -10,41 +10,48 @@ import com.artingl.opencraft.Math.Vector2i;
 import com.artingl.opencraft.Math.Vector3i;
 import com.artingl.opencraft.Phys.AABB;
 import com.artingl.opencraft.Phys.SimpleAABB;
+import com.artingl.opencraft.World.Level.ClientLevel;
+import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 
+import java.nio.IntBuffer;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class Chunk
 {
-    public static int CHUNK_LAYERS = 64;
+    public static final int CHUNK_LAYERS = 64;
 
-    private VerticesBuffer verticesBuffer = VerticesBuffer.instance;
+    private VerticesBuffer verticesBuffer = VerticesBuffer.getGlobalInstance();
     private Vector2i chunkListPosition;
-    private Region chunkRegion;
+    private final Region chunkRegion;
     private AABB aabb;
     private ArrayList<Boolean> layersState;
     private ArrayList<Boolean> layersVisible;
-    private int chunksList;
-    private boolean initialized = false;
+    private int chunkList;
+    private boolean initialized;
 
     public Chunk(Vector2i chunkListPosition)
     {
         this.chunkListPosition = chunkListPosition;
         this.layersState = new ArrayList<>();
         this.layersVisible = new ArrayList<>();
-        this.chunkRegion = new Region(this);
         this.aabb = new AABB(
                 chunkListPosition.x * 16, 0, chunkListPosition.y * 16,
-                chunkListPosition.x * 16 + 16, 256, chunkListPosition.y * 16 + 16);
+                chunkListPosition.x * 16 + 16, ClientLevel.MAX_HEIGHT, chunkListPosition.y * 16 + 16);
+        this.chunkRegion = new Region(this);
+        this.chunkList = GL11.glGenLists(CHUNK_LAYERS);
 
-        for (int i = 0; i < CHUNK_LAYERS; i++)
+        for (int i = 0; i < CHUNK_LAYERS; i++) {
             layersState.add(false);
-
-        for (int i = 0; i < CHUNK_LAYERS; i++)
             layersVisible.add(false);
+        }
 
-        this.chunksList = GL11.glGenLists(CHUNK_LAYERS);
-        this.initialized = true;
+        Opencraft.getThreadsManager().execute(() -> {
+            this.chunkRegion.generate();
+            this.initialized = true;
+        });
     }
 
     public boolean buildLayer(int layer) {
@@ -53,19 +60,17 @@ public class Chunk
 
         ++LevelRenderer.CHUNK_UPDATES;
 
-        if (this.chunksList != -1)
-            GL11.glDeleteLists(this.chunksList + layer, 1);
-
         layersState.set(layer, false);
+        layersVisible.set(layer, false);
 
         boolean isVisible = false;
 
-        GL11.glNewList(this.chunksList + layer, GL11.GL_COMPILE);
-        verticesBuffer.begin();
+        GL11.glNewList(this.chunkList + layer, GL11.GL_COMPILE);
 
         Vector3i currentBlockPosition = new Vector3i(0, 0, 0);
+        verticesBuffer.clear();
 
-        for (int y = layer * (256 / CHUNK_LAYERS); y < layer * (256 / CHUNK_LAYERS) + (256 / CHUNK_LAYERS); ++y) {
+        for (int y = layer * (ClientLevel.MAX_HEIGHT / CHUNK_LAYERS); y < layer * (ClientLevel.MAX_HEIGHT / CHUNK_LAYERS) + (ClientLevel.MAX_HEIGHT / CHUNK_LAYERS); ++y) {
             currentBlockPosition.y = y;
             for (int x = chunkListPosition.x * 16; x < chunkListPosition.x * 16 + 16; ++x) {
                 currentBlockPosition.x = x - chunkListPosition.x * 16;
@@ -83,8 +88,8 @@ public class Chunk
 
         layersVisible.set(layer, isVisible);
         layersState.set(layer, true);
-        verticesBuffer.end();
 
+        verticesBuffer.end();
         verticesBuffer.clear();
         GL11.glEndList();
 
@@ -100,7 +105,10 @@ public class Chunk
     }
 
     public void render(int i) {
-        GL11.glCallList(this.chunksList + i);
+        if (!this.initialized)
+            return;
+
+        GL11.glCallList(this.chunkList + i);
     }
 
     public AABB getAABB() {
@@ -109,50 +117,31 @@ public class Chunk
 
     public SimpleAABB getSimpleAABB(int layer) {
         return new SimpleAABB(
-                this.chunkListPosition.x * 16, layer * (256f / CHUNK_LAYERS), this.chunkListPosition.y * 16,
-                this.chunkListPosition.x * 16 + 16, layer * (256f / CHUNK_LAYERS) + (256f / CHUNK_LAYERS), this.chunkListPosition.y * 16 + 16);
+                this.chunkListPosition.x * 16, layer * ((float) ClientLevel.MAX_HEIGHT / CHUNK_LAYERS), this.chunkListPosition.y * 16,
+                this.chunkListPosition.x * 16 + 16, layer * ((float) ClientLevel.MAX_HEIGHT / CHUNK_LAYERS) + ((float) ClientLevel.MAX_HEIGHT / CHUNK_LAYERS), this.chunkListPosition.y * 16 + 16);
     }
 
     public void destroy() {
-        OpenCraft.runInGLContext(() -> {
-            if (this.chunksList != -1)
-                GL11.glDeleteLists(this.chunksList, CHUNK_LAYERS);
+        if (!this.initialized)
+            return;
+
+        this.initialized = false;
+
+        Opencraft.runInGLContext(() -> {
+            if (this.chunkList != -1)
+                GL11.glDeleteLists(this.chunkList, CHUNK_LAYERS);
         });
 
         this.chunkRegion.destroy();
         this.layersState.clear();
         this.layersVisible.clear();
-        this.verticesBuffer.clear();
-
-        this.verticesBuffer = null;
-        this.chunkListPosition = null;
-        this.chunkRegion = null;
-        this.aabb = null;
-        this.layersState = null;
     }
 
     public float distanceToEntity(Entity entity) {
-        float xd = ((int)entity.getX() >> 4) - chunkListPosition.x;
-        float zd = ((int)entity.getZ() >> 4) - chunkListPosition.y;
+        float xd = ((int)entity.getPosition().x >> 4) - chunkListPosition.x;
+        float zd = ((int)entity.getPosition().z >> 4) - chunkListPosition.y;
         return (float) Math.sqrt(xd * xd + zd * zd);
     }
-
-    public boolean getLayerState(int layer) {
-        if (!this.initialized)
-            return false;
-        return this.layersState.get(layer);
-    }
-
-    public void setLayerState(int layer, boolean state) {
-        if (!this.initialized)
-            return;
-        this.layersState.set(layer, state);
-    }
-
-    public boolean getLayersVisible(int layer) {
-        return this.layersVisible.get(layer);
-    }
-
 
     public Vector3i translateToRealCoords(Vector3i position) {
         return translateToRealCoords(position.x, position.y, position.z);
@@ -168,5 +157,17 @@ public class Chunk
 
     public boolean isInitialized() {
         return this.initialized;
+    }
+
+    public boolean getLayerState(int layer) {
+        return layersState.get(layer);
+    }
+
+    public boolean getLayersVisible(int layer) {
+        return layersVisible.get(layer);
+    }
+
+    public void setLayerState(int k) {
+        layersState.set(k, false);
     }
 }

@@ -5,7 +5,7 @@ public class BlockDestroy extends Block
 
     public BlockDestroy(int stage)
     {
-        super("opencraft:destroy_stage_" + stage, -1);
+        super("opencraft:destroy_stage_" + stage);
     }
 
 }

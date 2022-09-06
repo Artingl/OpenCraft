@@ -3,9 +3,9 @@ package com.artingl.opencraft.World.Block;
 public class BlockLava extends Block
 {
 
-    public BlockLava(int idi)
+    public BlockLava()
     {
-        super("opencraft:lava", idi);
+        super("opencraft:lava");
 
     }
 

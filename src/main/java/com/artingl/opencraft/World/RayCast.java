@@ -1,6 +1,6 @@
 package com.artingl.opencraft.World;
 
-import com.artingl.opencraft.OpenCraft;
+import com.artingl.opencraft.Opencraft;
 import com.artingl.opencraft.World.Block.Block;
 import com.artingl.opencraft.Math.Vector3i;
 
@@ -35,7 +35,7 @@ public class RayCast
 
         for (int i = 0; i < dist * 150; i++)
         {
-            Block block = OpenCraft.getLevel().getBlock((int)(x), (int)(y), (int)(z));
+            Block block = Opencraft.getLevel().getBlock((int)(x), (int)(y), (int)(z));
 
             if (block != null)
             {

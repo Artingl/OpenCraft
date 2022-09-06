@@ -21,11 +21,7 @@ public class ZombieModel extends Model {
    }
 
    @Override
-   public void render(float time) {
-      this.leg0.xRot = (float)Math.sin((double)time * 0.6662D);
-      this.leg1.xRot = (float)Math.sin((double)time * 0.6662D + 3.141592653589793D);
-      this.arm0.xRot = (float)Math.sin((double)time * 0.6662D);
-      this.arm1.xRot = (float)Math.sin((double)time * 0.6662D + 3.141592653589793D);
+   public void render() {
       this.head.render();
       this.body.render();
       this.arm0.render();

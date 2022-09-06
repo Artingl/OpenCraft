@@ -5,9 +5,9 @@ import com.artingl.opencraft.World.Item.Tool;
 public class BlockStone extends Block
 {
 
-    public BlockStone(int idi)
+    public BlockStone()
     {
-        super("opencraft:stone", idi);
+        super("opencraft:stone");
 
         this.setStrength(2);
         this.setDefaultTool(Tool.PICKAXE);

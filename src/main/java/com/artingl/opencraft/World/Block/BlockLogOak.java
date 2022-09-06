@@ -6,9 +6,9 @@ import com.artingl.opencraft.Rendering.TextureEngine;
 public class BlockLogOak extends Block
 {
 
-    public BlockLogOak(int idi)
+    public BlockLogOak()
     {
-        super("opencraft:log_oak", idi, false);
+        super("opencraft:log_oak", false);
 
         float tx, ty, bx, by, sx, sy;
         tx = 0; ty = 0; bx = 0; by = 0; sx = 0; sy = 0;

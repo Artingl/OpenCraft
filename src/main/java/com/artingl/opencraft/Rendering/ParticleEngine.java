@@ -1,21 +1,22 @@
 package com.artingl.opencraft.Rendering;
 
 import com.artingl.opencraft.Logger.Logger;
+import com.artingl.opencraft.Math.Vector2f;
 import com.artingl.opencraft.World.Entity.EntityPlayer;
-import com.artingl.opencraft.World.Level.Level;
+import com.artingl.opencraft.World.Level.ClientLevel;
 import com.artingl.opencraft.World.Ambient.Block.Particle;
-import com.artingl.opencraft.World.ITick;
-import com.artingl.opencraft.OpenCraft;
+import com.artingl.opencraft.World.Tick;
+import com.artingl.opencraft.Opencraft;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ParticleEngine implements ITick {
+public class ParticleEngine implements Tick {
    private List<Particle> particles = new ArrayList();
 
    public ParticleEngine() {
-      OpenCraft.registerTickEvent(this);
+      Opencraft.registerTickEvent(this);
    }
 
    public void add(Particle p) {
@@ -33,7 +34,7 @@ public class ParticleEngine implements ITick {
       for(int i = 0; i < this.particles.size(); ++i) {
          Particle p = (Particle)this.particles.get(i);
          p.update();
-         if (p.removed) {
+         if (p.isRemoved()) {
             this.particles.remove(i--);
          }
       }
@@ -45,15 +46,17 @@ public class ParticleEngine implements ITick {
          GL11.glEnable(3553);
          GL11.glBindTexture(3553, TextureEngine.getTerrain());
 
-         Level level = OpenCraft.getLevel();
-         EntityPlayer player = level.getPlayerEntity();
+         ClientLevel level = Opencraft.getLevel();
+         EntityPlayer player = Opencraft.getPlayerEntity();
 
-         float xa = -((float)Math.cos((double)player.getRy() * 3.141592653589793D / 180.0D));
-         float za = -((float)Math.sin((double)player.getRy() * 3.141592653589793D / 180.0D));
-         float xa2 = -za * (float)Math.sin((double)player.getRx() * 3.141592653589793D / 180.0D);
-         float za2 = xa * (float)Math.sin((double)player.getRx() * 3.141592653589793D / 180.0D);
-         float ya = (float)Math.cos((double)player.getRx() * 3.141592653589793D / 180.0D);
-         VerticesBuffer t = VerticesBuffer.instance;
+         Vector2f rotation = player.getRotation();
+
+         float xa = -((float)Math.cos((double)rotation.y * 3.141592653589793D / 180.0D));
+         float za = -((float)Math.sin((double)rotation.y * 3.141592653589793D / 180.0D));
+         float xa2 = -za * (float)Math.sin((double)rotation.x * 3.141592653589793D / 180.0D);
+         float za2 = xa * (float)Math.sin((double)rotation.x * 3.141592653589793D / 180.0D);
+         float ya = (float)Math.cos((double)rotation.x * 3.141592653589793D / 180.0D);
+         VerticesBuffer t = VerticesBuffer.getGlobalInstance();
          GL11.glColor4f(0.8F, 0.8F, 0.8F, 1.0F);
          t.begin();
 

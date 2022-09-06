@@ -1,8 +1,10 @@
 package com.artingl.opencraft.GL;
 
-import com.artingl.opencraft.OpenCraft;
+import com.artingl.opencraft.Opencraft;
+import com.artingl.opencraft.Resources.Options.OptionsRegistry;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.*;
+import org.lwjgl.opengl.GL11;
 import org.lwjgl.system.MemoryStack;
 
 import java.nio.IntBuffer;
@@ -41,6 +43,7 @@ public class Display {
             throw new IllegalStateException("Cannot initialize GLFW");
 
         glfwDefaultWindowHints();
+        glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_FALSE);
 
         this.display = glfwCreateWindow(this.width, this.height, this.title, 0, 0);
         if (this.display == 0L) {
@@ -98,7 +101,10 @@ public class Display {
     }
 
     public void swapBuffers() {
+//        System.out.println("aa");
         glfwSwapBuffers(this.display);
+//        System.out.println("dd");
+        GL11.glFlush();
     }
 
     public void destroy() {
