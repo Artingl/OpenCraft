@@ -3,7 +3,7 @@ package com.artingl.opencraft.GUI.Elements;
 import com.artingl.opencraft.GL.Controls;
 import com.artingl.opencraft.GUI.Screens.Screen;
 import com.artingl.opencraft.Opencraft;
-import com.artingl.opencraft.Rendering.VerticesBuffer;
+import com.artingl.opencraft.Rendering.Game.VerticesBuffer;
 import org.lwjgl.opengl.GL11;
 
 public class Element

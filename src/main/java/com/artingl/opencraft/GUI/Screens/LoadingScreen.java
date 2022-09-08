@@ -4,7 +4,7 @@ import com.artingl.opencraft.GUI.Elements.Button;
 import com.artingl.opencraft.GUI.Elements.Element;
 import com.artingl.opencraft.GUI.GUI;
 import com.artingl.opencraft.Opencraft;
-import com.artingl.opencraft.Rendering.VerticesBuffer;
+import com.artingl.opencraft.Rendering.Game.VerticesBuffer;
 import com.artingl.opencraft.Resources.Lang.Lang;
 
 public class LoadingScreen extends Screen
@@ -22,7 +22,7 @@ public class LoadingScreen extends Screen
     public void init() {
         super.init();
 
-        this.addElement(new Button(this, 0, 0, 0, Lang.getLanguageString("opencraft:gui.text.close"), () -> {
+        this.addElement(new Button(this, 0, 0, 0, Lang.getTranslatedString("opencraft:gui.text.close"), () -> {
             Opencraft.setCurrentScreen(GUI.mainMenu);
         }));
     }

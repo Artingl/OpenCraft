@@ -12,16 +12,17 @@ public class DeathScreen extends Screen
     public DeathScreen() {
         super(Opencraft.getWidth(), Opencraft.getHeight(), "death_screen");
         this.renderGameInBackground = true;
+        this.showTittle = false;
     }
 
     public void init() {
         super.init();
 
-        this.addElement(new Button(this, 1, 0, 0, Lang.getLanguageString("opencraft:gui.text.respawn"), () -> {
+        this.addElement(new Button(this, 1, 0, 0, Lang.getTranslatedString("opencraft:gui.text.respawn"), () -> {
             Opencraft.getPlayerEntity().respawn();
             Opencraft.closeCurrentScreen();
         }));
-        this.addElement(new Button(this, 0, 0, 0, Lang.getLanguageString("opencraft:gui.text.quit_world"), Opencraft::quitToMainMenu));
+        this.addElement(new Button(this, 0, 0, 0, Lang.getTranslatedString("opencraft:gui.text.quit_world"), Opencraft::quitToMainMenu));
     }
 
 

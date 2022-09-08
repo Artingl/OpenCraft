@@ -1,19 +1,14 @@
 package com.artingl.opencraft.ModAPI.World.Block;
 
+import com.artingl.opencraft.ModAPI.API;
 import com.artingl.opencraft.ModAPI.ModEntry;
 import com.artingl.opencraft.World.Block.Block;
 import com.artingl.opencraft.World.Block.BlockRegistry;
 
-public class BlocksApi {
+public class BlocksApi extends API {
 
-    private final ModEntry mod;
-
-    protected BlocksApi(ModEntry mod) {
-        this.mod = mod;
-    }
-
-    public static BlocksApi create(ModEntry entry) {
-        return new BlocksApi(entry);
+    public BlocksApi(ModEntry mod) {
+        super(mod);
     }
 
     public Block createBlock(BlockProperties properties) {

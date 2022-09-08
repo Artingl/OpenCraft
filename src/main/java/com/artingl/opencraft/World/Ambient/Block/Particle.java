@@ -2,9 +2,9 @@ package com.artingl.opencraft.World.Ambient.Block;
 
 import com.artingl.opencraft.Math.Vector3f;
 import com.artingl.opencraft.World.Entity.Entity;
-import com.artingl.opencraft.Rendering.Texture;
-import com.artingl.opencraft.Rendering.TextureEngine;
-import com.artingl.opencraft.Rendering.VerticesBuffer;
+import com.artingl.opencraft.Rendering.Game.Texture;
+import com.artingl.opencraft.Rendering.Game.TextureEngine;
+import com.artingl.opencraft.Rendering.Game.VerticesBuffer;
 import com.artingl.opencraft.World.Level.ClientLevel;
 
 public class Particle extends Entity {

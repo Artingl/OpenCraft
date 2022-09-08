@@ -1,6 +1,6 @@
 package com.artingl.opencraft.World.Entity.Models;
 
-import com.artingl.opencraft.Rendering.Polygon;
+import com.artingl.opencraft.Rendering.World.Polygon;
 import com.artingl.opencraft.Math.Vertex;
 import org.lwjgl.opengl.GL11;
 

@@ -4,9 +4,9 @@ import com.artingl.opencraft.GUI.Elements.Button;
 import com.artingl.opencraft.GUI.Elements.Element;
 import com.artingl.opencraft.GUI.GUI;
 import com.artingl.opencraft.Opencraft;
-import com.artingl.opencraft.Rendering.BlockRenderer;
+import com.artingl.opencraft.Rendering.World.BlockRenderer;
 import com.artingl.opencraft.GL.Camera;
-import com.artingl.opencraft.Rendering.TextureEngine;
+import com.artingl.opencraft.Rendering.Game.TextureEngine;
 import com.artingl.opencraft.Resources.Lang.Lang;
 import org.lwjgl.opengl.GL11;
 
@@ -35,10 +35,10 @@ public class MainMenuScreen extends Screen
     public void init() {
         super.init();
 
-        this.addElement(new Button(this, 0, 0, 0, Lang.getLanguageString("opencraft:gui.text.singleplayer"), () -> Opencraft.setCurrentScreen(GUI.worldList)));
-        this.addElement(new Button(this, 1, 0, 0, Lang.getLanguageString("opencraft:gui.text.multiplayer"), () -> Opencraft.setCurrentScreen(GUI.serversList)));
-        this.addElement(new Button(this, 2, 0, 0, Lang.getLanguageString("opencraft:gui.text.settings"), () -> Opencraft.setCurrentScreen(GUI.settingsScreen)));
-        this.addElement(new Button(this, 3, 0, 0, Lang.getLanguageString("opencraft:gui.text.quit_game"), Opencraft::close));
+        this.addElement(new Button(this, 0, 0, 0, Lang.getTranslatedString("opencraft:gui.text.singleplayer"), () -> Opencraft.setCurrentScreen(GUI.worldList)));
+        this.addElement(new Button(this, 1, 0, 0, Lang.getTranslatedString("opencraft:gui.text.multiplayer"), () -> Opencraft.setCurrentScreen(GUI.serversList)));
+        this.addElement(new Button(this, 2, 0, 0, Lang.getTranslatedString("opencraft:gui.text.settings"), () -> Opencraft.setCurrentScreen(GUI.settingsScreen)));
+        this.addElement(new Button(this, 3, 0, 0, Lang.getTranslatedString("opencraft:gui.text.quit_game"), Opencraft::close));
 
         getElements().get(2).setWidth(90);
         getElements().get(3).setWidth(90);

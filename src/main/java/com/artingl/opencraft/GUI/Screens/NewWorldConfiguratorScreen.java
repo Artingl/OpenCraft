@@ -3,7 +3,7 @@ package com.artingl.opencraft.GUI.Screens;
 import com.artingl.opencraft.GL.Controls;
 import com.artingl.opencraft.GUI.Elements.Element;
 import com.artingl.opencraft.GUI.GUI;
-import com.artingl.opencraft.Rendering.VerticesBuffer;
+import com.artingl.opencraft.Rendering.Game.VerticesBuffer;
 import com.artingl.opencraft.Resources.Lang.Lang;
 import com.artingl.opencraft.GUI.Elements.Button;
 import com.artingl.opencraft.GUI.Elements.EditArea;
@@ -16,7 +16,6 @@ public class NewWorldConfiguratorScreen extends Screen
 {
 
     public String levelName;
-    private int worldTypeCounter;
 
     public NewWorldConfiguratorScreen() {
         super(Opencraft.getWidth(), Opencraft.getHeight(), "new_world_configurer");
@@ -25,7 +24,7 @@ public class NewWorldConfiguratorScreen extends Screen
     public void init() {
         super.init();
 
-        this.addElement(new EditArea(this, 0, 0, 0, Lang.getLanguageString("opencraft:gui.text.world_name"), () -> {
+        this.addElement(new EditArea(this, 0, 0, 0, Lang.getTranslatedString("opencraft:gui.text.world_name"), () -> {
             if (new File("saves" + File.separator + ((EditArea) getElements().get(0)).getText()).exists())
             {
                 ((Button)getElements().get(3)).enabled = false;
@@ -34,17 +33,9 @@ public class NewWorldConfiguratorScreen extends Screen
                 ((Button)getElements().get(3)).enabled = true;
             }
         }));
-        this.addElement(new EditArea(this, 1, 0, 0, Lang.getLanguageString("opencraft:gui.text.world_seed"), () -> {}));
-        this.addElement(new Button(this, 2, 0, 0, Lang.getLanguageString("opencraft:gui.text.world_type"), () -> {
-            worldTypeCounter++;
-            if (worldTypeCounter > 3)
-                worldTypeCounter = 0;
-
-            ((Button)getElements().get(2)).setText(Lang.getLanguageString("opencraft:gui.text.world_type") + ": "
-                    + (worldTypeCounter == 0 ? "World" : worldTypeCounter == 1 ? "Hell" : worldTypeCounter == 2 ? "Extreme biomes" : "Super flat"));
-        }));
-        this.addElement(new Button(this, 3, 0, 0, Lang.getLanguageString("opencraft:gui.text.new_world_configurer"), () -> {
-            GUI.loadingScreen.setLoadingText(Lang.getLanguageString("opencraft:gui.text.loading_world"));
+        this.addElement(new EditArea(this, 1, 0, 0, Lang.getTranslatedString("opencraft:gui.text.world_seed"), () -> {}));
+        this.addElement(new Button(this, 3, 0, 0, Lang.getTranslatedString("opencraft:gui.text.new_world_configurer"), () -> {
+            GUI.loadingScreen.setLoadingText(Lang.getTranslatedString("opencraft:gui.text.loading_world"));
             GUI.worldList.levelName = ((EditArea)getElements().get(0)).getText();
             int seed = ((EditArea)getElements().get(1)).getText().hashCode();
 
@@ -52,21 +43,16 @@ public class NewWorldConfiguratorScreen extends Screen
                 // todo: make it random
                 seed = 3556498;
             }
-            Opencraft.startNewGame(0, seed,
-                    worldTypeCounter == 0 ? LevelType.WORLD : worldTypeCounter == 1 ? LevelType.HELL : worldTypeCounter == 2 ? LevelType.EXTREME_BIOMES : LevelType.SUPER_FLAT);
+            Opencraft.startNewGame(0, seed);
         }));
 
         if (new File("saves" + File.separator + ((EditArea) getElements().get(0)).getText()).exists())
         {
             ((Button)getElements().get(3)).enabled = false;
         }
-        else {
-            ((Button)getElements().get(3)).enabled = true;
-        }
 
         ((EditArea)getElements().get(0)).setText("New World");
-        ((Button)getElements().get(2)).setText(Lang.getLanguageString("opencraft:gui.text.world_type") + ": World");
-        ((Button)getElements().get(3)).enabled = true;
+        ((Button)getElements().get(2)).setText(Lang.getTranslatedString("opencraft:gui.text.world_type") + ": World");
     }
 
     @Override

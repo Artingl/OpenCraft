@@ -4,7 +4,7 @@ import com.artingl.opencraft.GUI.Screens.Screen;
 import com.artingl.opencraft.Math.Vector2f;
 import com.artingl.opencraft.Math.Vector3f;
 import com.artingl.opencraft.Opencraft;
-import com.artingl.opencraft.Rendering.TextureEngine;
+import com.artingl.opencraft.Rendering.Game.TextureEngine;
 import com.artingl.opencraft.World.Entity.Gamemode.Creative;
 import com.artingl.opencraft.World.Entity.Gamemode.Gamemode;
 import com.artingl.opencraft.World.Entity.Models.PlayerModel;

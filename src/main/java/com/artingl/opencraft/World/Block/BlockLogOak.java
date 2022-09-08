@@ -1,7 +1,7 @@
 package com.artingl.opencraft.World.Block;
 
-import com.artingl.opencraft.Rendering.Texture;
-import com.artingl.opencraft.Rendering.TextureEngine;
+import com.artingl.opencraft.Rendering.Game.Texture;
+import com.artingl.opencraft.Rendering.Game.TextureEngine;
 
 public class BlockLogOak extends Block
 {

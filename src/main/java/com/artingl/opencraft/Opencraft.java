@@ -7,8 +7,11 @@ import com.artingl.opencraft.Logger.Logger;
 import com.artingl.opencraft.Multiplayer.Client;
 import com.artingl.opencraft.Multiplayer.InternalServer;
 import com.artingl.opencraft.Multiplayer.Server;
+import com.artingl.opencraft.Rendering.Game.GameRenderer;
+import com.artingl.opencraft.Rendering.Game.TextureEngine;
+import com.artingl.opencraft.Rendering.World.LevelRenderer;
+import com.artingl.opencraft.Rendering.World.ParticleEngine;
 import com.artingl.opencraft.Resources.Options.OptionsListener;
-import com.artingl.opencraft.Utils.Utils;
 import com.artingl.opencraft.World.Level.LevelType;
 import com.artingl.opencraft.Rendering.*;
 import com.artingl.opencraft.Resources.Lang.Lang;
@@ -22,7 +25,7 @@ import com.artingl.opencraft.World.Entity.EntityPlayer;
 import com.artingl.opencraft.World.EntityData.Nametag;
 import com.artingl.opencraft.World.Tick;
 import com.artingl.opencraft.World.Level.ClientLevel;
-import com.artingl.opencraft.World.LevelListener;
+import com.artingl.opencraft.World.Level.LevelListener;
 import com.artingl.opencraft.World.PlayerController;
 import com.artingl.opencraft.World.TickTimer;
 import com.artingl.opencraft.GUI.Font.Font;
@@ -31,6 +34,7 @@ import com.artingl.opencraft.GUI.Screens.Screen;
 import com.artingl.opencraft.Math.Vector3f;
 import com.artingl.opencraft.ModAPI.ModEntry;
 import com.artingl.opencraft.Utils.JavaUtils;
+import jdk.jfr.SettingControl;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
 
@@ -122,17 +126,18 @@ public class Opencraft
         GL.createCapabilities();
 
         Logger.debug("Initializing OpenGL");
-        GL11.glEnable(3553);
-        GL11.glShadeModel(7425);
+        GL11.glEnable(GL_TEXTURE_2D);
+        GL11.glShadeModel(GL_SMOOTH);
         GL11.glClearDepth(1.0D);
-        GL11.glEnable(2929);
-        GL11.glDepthFunc(515);
-        GL11.glEnable(3008);
-        GL11.glAlphaFunc(516, 0.0F);
-        GL11.glCullFace(1029);
-        GL11.glMatrixMode(5889);
+        GL11.glEnable(GL_DEPTH_TEST);
+//        GL11.glEnable(GL_CULL_FACE);
+        GL11.glDepthFunc(GL_LEQUAL);
+        GL11.glEnable(GL_ALPHA_TEST);
+        GL11.glAlphaFunc(GL_GREATER, 0.0F);
+        GL11.glCullFace(GL_BACK);
+        GL11.glMatrixMode(GL_PROJECTION);
         GL11.glLoadIdentity();
-        GL11.glMatrixMode(5888);
+        GL11.glMatrixMode(GL_MODELVIEW);
 
         Logger.debug("Initializing font and timer");
         Opencraft.font = new Font("opencraft:gui/font.gif");
@@ -168,6 +173,12 @@ public class Opencraft
         for (ModEntry mod: modsList) {
             try {
                 mod.onModInitialization();
+
+                if (!mod.isInitialized()) {
+                    throw new Exception("Mod '" + mod.getModId() + "' was not initialized! You should call ModEntry::initialize at the beginning of ModEntry::onModInitialization function!");
+                }
+
+                Resources.loadNamespaceResources(mod.getClass(), mod.getModId());
             } catch (Exception e) {
                 Logger.exception("Error while loading mod", e);
             }
@@ -213,6 +224,9 @@ public class Opencraft
 
     public static void drawLoadingScreen(String stage) {
         display.createFrame();
+
+        if (display.isResized())
+            GL11.glViewport(0, 0, display.getWidth(), display.getHeight());
 
         int screenWidth = display.getWidth() * 220 / display.getHeight();
         int screenHeight = display.getHeight() * 220 / display.getHeight();
@@ -262,9 +276,20 @@ public class Opencraft
             sky = getLevel().getSkyColor();
         }
 
-        GL11.glClearColor(sky.x, sky.y, sky.z, 1);
         GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
         GL11.glLoadIdentity();
+
+        GL11.glClearColor(sky.x, sky.y, sky.z, 1);
+
+        if (!inMenu && OptionsRegistry.Values.getBooleanOption("enableFog")) {
+            glEnable(GL_FOG);
+            glFogi(GL_FOG_MODE, GL_LINEAR);
+            glFogfv(GL_FOG_COLOR, new float[]{sky.x, sky.y, sky.z});
+            glFogf(GL_FOG_DENSITY, 0.25f);
+            glHint(GL_FOG_HINT, GL_NICEST);
+            glFogf(GL_FOG_START, (16 * Opencraft.getRenderDistance()) - 32);
+            glFogf(GL_FOG_END, (16 * Opencraft.getRenderDistance()) - 16);
+        }
 
         glPushMatrix();
 
@@ -324,7 +349,7 @@ public class Opencraft
             }
             else {
                 if (prefix.equals("--game-dir")) {
-                    gameDir = arg;
+                    gameDir = arg + "/";
                 }
                 else if (prefix.equals("--player-name")) {
                     playerName = arg;
@@ -375,16 +400,14 @@ public class Opencraft
         setCurrentScreen(GUI.mainMenu);
     }
 
-    public static void startNewGame(int loadState, int seed, LevelType levelType) {
+    public static void startNewGame(int loadState, int seed) {
         try {
-            GUI.loadingScreen.setLoadingText(Lang.getLanguageString("opencraft:gui.text.loading_world"));
-
-            Opencraft.currentLevel = LevelType.WORLD;
+            GUI.loadingScreen.setLoadingText(Lang.getTranslatedString("opencraft:gui.text.loading_world"));
 
             levelRenderer = new LevelRenderer();
             playerController = new PlayerController();
             particleEngine = new ParticleEngine();
-            level = new ClientLevel(levelType);
+            level = new ClientLevel();
 
             entityPlayer = new EntityPlayer(Opencraft.getPlayerController());
             entityPlayer.setNameTag(new Nametag(playerName));
@@ -409,7 +432,7 @@ public class Opencraft
     }
 
     public static void connectTo(String host, int port) {
-        Opencraft.startNewGame(1, -1, LevelType.WORLD);
+        Opencraft.startNewGame(1, -1);
     }
 
     public static int getFPS() {

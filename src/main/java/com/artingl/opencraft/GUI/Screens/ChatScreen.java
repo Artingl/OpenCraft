@@ -33,7 +33,7 @@ public class ChatScreen extends Screen
         super.init();
 
         command = "";
-        commandEditArea = this.addElement(new ChatEditArea(this, 0, 0, 0, Lang.getLanguageString("opencraft:gui.text.enter_in_chat"), () ->
+        commandEditArea = this.addElement(new ChatEditArea(this, 0, 0, 0, Lang.getTranslatedString("opencraft:gui.text.enter_in_chat"), () ->
                 command = ((ChatEditArea)getElements().get(commandEditArea)).getText()));
 
         ((ChatEditArea)getElements().get(commandEditArea)).setText(startText);

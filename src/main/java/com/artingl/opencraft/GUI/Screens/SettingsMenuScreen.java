@@ -6,7 +6,7 @@ import com.artingl.opencraft.GUI.Elements.Element;
 import com.artingl.opencraft.GUI.Elements.Slider;
 import com.artingl.opencraft.GUI.GUI;
 import com.artingl.opencraft.Opencraft;
-import com.artingl.opencraft.Rendering.VerticesBuffer;
+import com.artingl.opencraft.Rendering.Game.VerticesBuffer;
 import com.artingl.opencraft.Resources.Lang.Lang;
 import com.artingl.opencraft.Resources.Options.OptionsRegistry;
 
@@ -21,20 +21,20 @@ public class SettingsMenuScreen extends Screen
     public void init() {
         super.init();
 
-        this.addElement(new Slider(this, 0, 0, 0, 0, 100, Lang.getLanguageString("opencraft:gui.text.sound"), (progress) -> {
-            ((Slider)getElements().get(0)).setText(Lang.getLanguageString("opencraft:gui.text.sound") + ": " + progress + "%");
+        this.addElement(new Slider(this, 0, 0, 0, 0, 100, Lang.getTranslatedString("opencraft:gui.text.sound"), (progress) -> {
+            ((Slider)getElements().get(0)).setText(Lang.getTranslatedString("opencraft:gui.text.sound") + ": " + progress + "%");
             OptionsRegistry.updateOption(OptionsRegistry.Values.getOption("soundVolume").setValue(progress));
         }));
 
-        this.addElement(new Slider(this, 1, 0, 0, 20, 120, Lang.getLanguageString("opencraft:gui.text.fov"), (progress) -> {
+        this.addElement(new Slider(this, 1, 0, 0, 20, 120, Lang.getTranslatedString("opencraft:gui.text.fov"), (progress) -> {
             ((Slider)getElements().get(1)).setText("FOV: " + progress);
             OptionsRegistry.updateOption(OptionsRegistry.Values.getOption("FOV").setValue(progress));
         }));
 
-        this.addElement(new Button(this, 2, 0, 0, Lang.getLanguageString("opencraft:gui.text.video_settings"), () ->
+        this.addElement(new Button(this, 2, 0, 0, Lang.getTranslatedString("opencraft:gui.text.video_settings"), () ->
                 Opencraft.setCurrentScreen(GUI.videoSettings)));
 
-        this.addElement(new Button(this, 3, 0, 0, Lang.getLanguageString("opencraft:gui.text.controls"), () -> {
+        this.addElement(new Button(this, 3, 0, 0, Lang.getTranslatedString("opencraft:gui.text.controls"), () -> {
 
         }));
 

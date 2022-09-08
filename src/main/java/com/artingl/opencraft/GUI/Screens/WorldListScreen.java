@@ -5,7 +5,7 @@ import com.artingl.opencraft.GUI.Elements.Element;
 import com.artingl.opencraft.GUI.GUI;
 import com.artingl.opencraft.Resources.Lang.Lang;
 import com.artingl.opencraft.GUI.Elements.Button;
-import com.artingl.opencraft.Rendering.VerticesBuffer;
+import com.artingl.opencraft.Rendering.Game.VerticesBuffer;
 import com.artingl.opencraft.Opencraft;
 import com.artingl.opencraft.World.Level.LevelType;
 import org.lwjgl.opengl.GL11;
@@ -48,10 +48,10 @@ public class WorldListScreen extends Screen
 
         worldBtnPosition = 70;
 
-        this.addElement(new Button(this, 0, 0, 0, Lang.getLanguageString("opencraft:gui.text.new_world_configurer"), () -> Opencraft.setCurrentScreen(GUI.newWorldConfigurator)));
-        this.addElement(new Button(this, 1, 0, 0, Lang.getLanguageString("opencraft:gui.text.load_world"), () -> {
-            GUI.loadingScreen.setLoadingText(Lang.getLanguageString("opencraft:gui.text.loading_world"));
-            Opencraft.startNewGame(1, -1, LevelType.WORLD);
+        this.addElement(new Button(this, 0, 0, 0, Lang.getTranslatedString("opencraft:gui.text.new_world_configurer"), () -> Opencraft.setCurrentScreen(GUI.newWorldConfigurator)));
+        this.addElement(new Button(this, 1, 0, 0, Lang.getTranslatedString("opencraft:gui.text.load_world"), () -> {
+            GUI.loadingScreen.setLoadingText(Lang.getTranslatedString("opencraft:gui.text.loading_world"));
+            Opencraft.startNewGame(1, -1);
         }));
 
         levelName = "";

@@ -1,8 +1,8 @@
 package com.artingl.opencraft.World.Block;
 
 import com.artingl.opencraft.Logger.Logger;
-import com.artingl.opencraft.Rendering.Texture;
-import com.artingl.opencraft.Rendering.TextureEngine;
+import com.artingl.opencraft.Rendering.Game.Texture;
+import com.artingl.opencraft.Rendering.Game.TextureEngine;
 import com.artingl.opencraft.World.Ambient.Block.Drop;
 import com.artingl.opencraft.World.Direction;
 import com.artingl.opencraft.World.Item.ItemBlock;

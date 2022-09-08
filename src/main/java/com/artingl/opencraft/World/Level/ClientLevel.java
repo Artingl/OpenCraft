@@ -3,7 +3,6 @@ package com.artingl.opencraft.World.Level;
 import com.artingl.opencraft.World.Block.BlockRegistry;
 import com.artingl.opencraft.World.Tick;
 import com.artingl.opencraft.Rendering.RenderHandler;
-import com.artingl.opencraft.World.LevelListener;
 import com.artingl.opencraft.Opencraft;
 import com.artingl.opencraft.World.Ambient.Ambient;
 import com.artingl.opencraft.World.Block.Block;
@@ -36,16 +35,6 @@ public class ClientLevel implements RenderHandler, Tick
             if (level.levelType == LevelType.WORLD) {
                 levelGeneration = new LevelGenerationWorld(this);
             }
-            else if (level.levelType == LevelType.HELL) {
-                levelGeneration = new LevelGenerationHell(this);
-            }
-            else if (level.levelType == LevelType.EXTREME_BIOMES) {
-                MAX_HEIGHT = 1024;
-                levelGeneration = new LevelGenerationExtremeBiomes(this);
-            }
-            else if (level.levelType == LevelType.SUPER_FLAT) {
-                levelGeneration = new LevelGenerationSuperFlat(this);
-            }
         }
 
         public int randomInteger(int min, int max)
@@ -75,10 +64,10 @@ public class ClientLevel implements RenderHandler, Tick
     private int tickEvent;
     private int seed;
 
-    public ClientLevel(LevelType levelType)
+    public ClientLevel()
     {
         this.seed = -1;
-        this.levelType = levelType;
+        this.levelType = LevelType.WORLD;
         this.ambient = new Ambient(this);
         this.generation = new Generation(this);
 
@@ -99,10 +88,6 @@ public class ClientLevel implements RenderHandler, Tick
     }
 
     public Vector3f getSkyColor() {
-        if (this.levelType == LevelType.HELL) {
-            return new Vector3f(0.34f, 0.05f, 0.06f);
-        }
-
         return new Vector3f(0.5f, 0.7f, 1);
     }
 

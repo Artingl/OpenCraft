@@ -1,6 +1,5 @@
 package com.artingl.opencraft.World.Ambient;
 
-import com.artingl.opencraft.World.Level.LevelType;
 import com.artingl.opencraft.World.Level.ClientLevel;
 
 public class Ambient {
@@ -14,15 +13,10 @@ public class Ambient {
     }
 
     public void update() {
-        if (this.level.getLevelType() == LevelType.WORLD) {
-            this.sky.update();
-        }
+        this.sky.update();
     }
 
     public void tick() {
-        if (this.level.getLevelType() == LevelType.HELL) {
-            this.sky.tick();
-        }
     }
 
 }

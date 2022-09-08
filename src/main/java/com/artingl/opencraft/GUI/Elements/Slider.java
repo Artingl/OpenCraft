@@ -5,7 +5,7 @@ import com.artingl.opencraft.GUI.Screens.Screen;
 import com.artingl.opencraft.Logger.Logger;
 import com.artingl.opencraft.Math.Vector2i;
 import com.artingl.opencraft.Opencraft;
-import com.artingl.opencraft.Rendering.TextureEngine;
+import com.artingl.opencraft.Rendering.Game.TextureEngine;
 import com.artingl.opencraft.Resources.Resources;
 import org.lwjgl.opengl.GL11;
 

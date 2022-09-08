@@ -31,20 +31,20 @@ public class LevelGenerationWorld extends LevelGeneration
         {
             region.setBlock(BlockRegistry.Blocks.grass_block, region_x, y, region_z);
 
-            if (level.generation.randomInteger(10, 20) == level.generation.randomInteger(10, 20)) {
-                region.setBlock(BlockRegistry.Blocks.grass, region_x, y+1, region_z);
-            }
-
-            if (level.generation.randomInteger(10, 25) == level.generation.randomInteger(10, 25)) {
-                region.setBlock(BlockRegistry.Blocks.rose, region_x, y+1, region_z);
-            }
+//            if (level.generation.randomInteger(10, 20) == level.generation.randomInteger(10, 20)) {
+//                region.setBlock(BlockRegistry.Blocks.grass, region_x, y+1, region_z);
+//            }
+//
+//            if (level.generation.randomInteger(10, 25) == level.generation.randomInteger(10, 25)) {
+//                region.setBlock(BlockRegistry.Blocks.rose, region_x, y+1, region_z);
+//            }
         }
 
-        if (!wasSand && level.generation.randomInteger(20, 1500) == level.generation.randomInteger(20, 1500))
-        {
-            int treeHeight = level.generation.randomInteger(5, 7);
-            generateTree(region, treeHeight, region_x, y + 1, region_z);
-        }
+//        if (!wasSand && level.generation.randomInteger(20, 1500) == level.generation.randomInteger(20, 1500))
+//        {
+//            int treeHeight = level.generation.randomInteger(5, 7);
+//            generateTree(region, treeHeight, region_x, y + 1, region_z);
+//        }
 
         for (int i = 1; i < y; i++)
         {

@@ -1,8 +1,8 @@
 package com.artingl.opencraft.GUI.Windows;
 
-import com.artingl.opencraft.Rendering.BlockRenderer;
-import com.artingl.opencraft.Rendering.TextureEngine;
-import com.artingl.opencraft.Rendering.VerticesBuffer;
+import com.artingl.opencraft.Rendering.World.BlockRenderer;
+import com.artingl.opencraft.Rendering.Game.TextureEngine;
+import com.artingl.opencraft.Rendering.Game.VerticesBuffer;
 import com.artingl.opencraft.World.Entity.EntityPlayer;
 import com.artingl.opencraft.World.Entity.Gamemode.Survival;
 import com.artingl.opencraft.World.Item.ItemBlock;

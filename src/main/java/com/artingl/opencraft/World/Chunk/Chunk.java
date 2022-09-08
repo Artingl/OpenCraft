@@ -1,9 +1,9 @@
 package com.artingl.opencraft.World.Chunk;
 
 import com.artingl.opencraft.Opencraft;
-import com.artingl.opencraft.Rendering.BlockRenderer;
-import com.artingl.opencraft.Rendering.LevelRenderer;
-import com.artingl.opencraft.Rendering.VerticesBuffer;
+import com.artingl.opencraft.Rendering.World.BlockRenderer;
+import com.artingl.opencraft.Rendering.World.LevelRenderer;
+import com.artingl.opencraft.Rendering.Game.VerticesBuffer;
 import com.artingl.opencraft.World.Block.Block;
 import com.artingl.opencraft.World.Entity.Entity;
 import com.artingl.opencraft.Math.Vector2i;
@@ -11,17 +11,13 @@ import com.artingl.opencraft.Math.Vector3i;
 import com.artingl.opencraft.Phys.AABB;
 import com.artingl.opencraft.Phys.SimpleAABB;
 import com.artingl.opencraft.World.Level.ClientLevel;
-import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 
-import java.nio.IntBuffer;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class Chunk
 {
-    public static final int CHUNK_LAYERS = 64;
+    public static final int CHUNK_LAYERS = 16;
 
     private VerticesBuffer verticesBuffer = VerticesBuffer.getGlobalInstance();
     private Vector2i chunkListPosition;
@@ -67,19 +63,15 @@ public class Chunk
 
         GL11.glNewList(this.chunkList + layer, GL11.GL_COMPILE);
 
-        Vector3i currentBlockPosition = new Vector3i(0, 0, 0);
         verticesBuffer.clear();
 
         for (int y = layer * (ClientLevel.MAX_HEIGHT / CHUNK_LAYERS); y < layer * (ClientLevel.MAX_HEIGHT / CHUNK_LAYERS) + (ClientLevel.MAX_HEIGHT / CHUNK_LAYERS); ++y) {
-            currentBlockPosition.y = y;
-            for (int x = chunkListPosition.x * 16; x < chunkListPosition.x * 16 + 16; ++x) {
-                currentBlockPosition.x = x - chunkListPosition.x * 16;
-                for (int z = chunkListPosition.y * 16; z < chunkListPosition.y * 16 + 16; ++z) {
-                    currentBlockPosition.z = z - chunkListPosition.y * 16;
-                    Block block = chunkRegion.getBlock(currentBlockPosition.x, currentBlockPosition.y, currentBlockPosition.z);
+            for (int x = 0; x < 16; ++x) {
+                for (int z = 0; z < 16; ++z) {
+                    Block block = chunkRegion.getBlock(x, y, z);
 
                     if (block.isVisible()) {
-                        BlockRenderer.render(verticesBuffer, x, y, z, block);
+                        BlockRenderer.render(verticesBuffer, chunkListPosition.x * 16 + x, y, chunkListPosition.y * 16 + z, block);
                         isVisible = true;
                     }
                 }

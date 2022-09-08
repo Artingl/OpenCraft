@@ -1,14 +1,9 @@
 package com.artingl.opencraft.Multiplayer.World.Entity;
 
 import com.artingl.opencraft.Logger.Logger;
-import com.artingl.opencraft.Math.Vector3f;
 import com.artingl.opencraft.Multiplayer.Server;
-import com.artingl.opencraft.Opencraft;
-import com.artingl.opencraft.Rendering.TextureEngine;
 import com.artingl.opencraft.World.Entity.Entity;
-import com.artingl.opencraft.World.Entity.Models.PlayerModel;
 import com.artingl.opencraft.World.Level.ClientLevel;
-import org.lwjgl.opengl.GL11;
 
 public class EntityMP extends Entity {
 

@@ -1,8 +1,8 @@
 package com.artingl.opencraft.GUI.Font;
 
 import com.artingl.opencraft.Opencraft;
-import com.artingl.opencraft.Rendering.TextureEngine;
-import com.artingl.opencraft.Rendering.VerticesBuffer;
+import com.artingl.opencraft.Rendering.Game.TextureEngine;
+import com.artingl.opencraft.Rendering.Game.VerticesBuffer;
 import com.artingl.opencraft.Resources.Resources;
 import org.lwjgl.opengl.GL11;
 import javax.imageio.ImageIO;

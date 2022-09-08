@@ -3,7 +3,7 @@ package com.artingl.opencraft.GUI.Elements;
 import com.artingl.opencraft.GL.Controls;
 import com.artingl.opencraft.GUI.Screens.Screen;
 import com.artingl.opencraft.Opencraft;
-import com.artingl.opencraft.Rendering.TextureEngine;
+import com.artingl.opencraft.Rendering.Game.TextureEngine;
 import org.lwjgl.opengl.GL11;
 
 public class EditArea extends Element

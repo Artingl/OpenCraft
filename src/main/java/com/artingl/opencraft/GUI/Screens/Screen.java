@@ -5,8 +5,8 @@ import com.artingl.opencraft.GUI.Elements.Element;
 import com.artingl.opencraft.GUI.Elements.Slider;
 import com.artingl.opencraft.GUI.Font.Font;
 import com.artingl.opencraft.Opencraft;
-import com.artingl.opencraft.Rendering.TextureEngine;
-import com.artingl.opencraft.Rendering.VerticesBuffer;
+import com.artingl.opencraft.Rendering.Game.TextureEngine;
+import com.artingl.opencraft.Rendering.Game.VerticesBuffer;
 import com.artingl.opencraft.Resources.Lang.Lang;
 import com.artingl.opencraft.Resources.Options.OptionsListener;
 import com.artingl.opencraft.Resources.Options.OptionsRegistry;
@@ -30,6 +30,7 @@ public class Screen implements OptionsListener
     private int keyboardEvent = -1;
     private int mouseEvent = -1;
     private int framesCounter;
+    private long eventsTimeout;
     public final String screenId;
     private Element selectedElement;
     private boolean droppedFirstMouseEvent;
@@ -44,7 +45,7 @@ public class Screen implements OptionsListener
         this.renderGameInBackground = false;
         this.width = width;
         this.height = height;
-        this.title = Lang.getLanguageString("opencraft:gui.screen." + screenId);
+        this.title = Lang.getTranslatedString("opencraft:gui.screen." + screenId);
         this.screenId = screenId;
     }
 
@@ -56,6 +57,7 @@ public class Screen implements OptionsListener
 
     public void init()
     {
+        this.eventsTimeout = System.currentTimeMillis();
         this.framesCounter = 0;
         this.droppedFirstMouseEvent = !Controls.getMouseKey(0);
         this.elements = new HashMap<>();
@@ -130,6 +132,9 @@ public class Screen implements OptionsListener
     }
 
     protected void keyPressed(Controls.KeyInput keyInput) {
+        if (this.eventsTimeout + 100 > System.currentTimeMillis())
+            return;
+
         elements.forEach((id, element) -> {
             if (element != null) element.keyHandler(keyInput);
         });
@@ -176,6 +181,9 @@ public class Screen implements OptionsListener
     }
 
     protected void mouseHandler(Controls.MouseInput mouseInput) {
+        if (this.eventsTimeout + 100 > System.currentTimeMillis())
+            return;
+
         Element dropEvent = null;
 
         if (!droppedFirstMouseEvent)

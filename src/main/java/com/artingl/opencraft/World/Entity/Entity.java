@@ -6,7 +6,7 @@ import com.artingl.opencraft.Math.Vector3f;
 import com.artingl.opencraft.Multiplayer.Packet.PacketUpdateEntity;
 import com.artingl.opencraft.Multiplayer.Server;
 import com.artingl.opencraft.Rendering.RenderHandler;
-import com.artingl.opencraft.Rendering.BlockRenderer;
+import com.artingl.opencraft.Rendering.World.BlockRenderer;
 import com.artingl.opencraft.World.Entity.Models.Model;
 import com.artingl.opencraft.World.EntityData.Nametag;
 import com.artingl.opencraft.World.EntityData.UUID;
