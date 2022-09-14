@@ -2,3 +2,5 @@ out
 .idea
 saves
 logs
+build
+gradle

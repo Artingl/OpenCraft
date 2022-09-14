@@ -37,9 +37,10 @@ public class PacketKick extends Packet {
 
     @Side(Server.Side.SERVER)
     public void kick(KickReason reason) throws IOException {
-        outputStream.writeInt(Packet.MAGIC);
+        outputStream.writeByte(Packet.MAGIC_0);
+        outputStream.writeByte(Packet.MAGIC_1);
         outputStream.writeInt(getIdByPacketName(getName()));
-        outputStream.writeInt(reason.hashCode());
+        outputStream.writeInt(reason.ordinal());
         if (reason == KickReason.BAD_VERSION)
             outputStream.writeUTF(Opencraft.getVersion());
         outputStream.flush();

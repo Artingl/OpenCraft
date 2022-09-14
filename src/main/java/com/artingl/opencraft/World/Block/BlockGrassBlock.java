@@ -1,7 +1,7 @@
 package com.artingl.opencraft.World.Block;
 
-import com.artingl.opencraft.Rendering.Game.Texture;
-import com.artingl.opencraft.Rendering.Game.TextureEngine;
+import com.artingl.opencraft.Control.Game.Texture;
+import com.artingl.opencraft.Control.Game.TextureEngine;
 
 public class BlockGrassBlock extends Block
 {

@@ -1,12 +1,8 @@
 package com.artingl.opencraft.Logger;
 
 import com.artingl.opencraft.Opencraft;
-import com.artingl.opencraft.Utils.StackTrace;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
+import java.io.*;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
@@ -80,7 +76,10 @@ public class Logger {
     public static void exception(String msg, Exception e, boolean outputToFile) {
         writeToFile(String.format("%s[%s/EXCEPTION] (%s)%s %s%s\n", ANSI_CYAN, Calendar.getInstance().getTime(), getCallerClassName(), ANSI_RED, msg,ANSI_RESET), outputToFile);
 
-        for (String line: StackTrace.getStackTrace(e).split("\n")) {
+        StringWriter sw = new StringWriter();
+        e.printStackTrace(new PrintWriter(sw));
+
+        for (String line: sw.toString().split("\n")) {
             writeToFile("\t" + line + "\n", outputToFile);
         }
     }

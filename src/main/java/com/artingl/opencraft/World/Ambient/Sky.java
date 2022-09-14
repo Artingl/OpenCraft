@@ -1,7 +1,7 @@
 package com.artingl.opencraft.World.Ambient;
 
-import com.artingl.opencraft.Rendering.Game.TextureEngine;
-import com.artingl.opencraft.Rendering.Game.VerticesBuffer;
+import com.artingl.opencraft.Control.Game.TextureEngine;
+import com.artingl.opencraft.Control.Game.VerticesBuffer;
 import org.lwjgl.opengl.GL11;
 
 public class Sky {

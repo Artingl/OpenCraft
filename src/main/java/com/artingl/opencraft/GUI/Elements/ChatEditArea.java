@@ -5,8 +5,8 @@ import com.artingl.opencraft.Opencraft;
 import org.lwjgl.opengl.GL11;
 
 public class ChatEditArea extends EditArea {
-    public ChatEditArea(Screen screen, int id, float x, float y, String text, Runnable onEdit) {
-        super(screen, id, x, y, text, onEdit);
+    public ChatEditArea(Screen screen, float x, float y, String text, Runnable onEdit) {
+        super(screen, x, y, text, onEdit);
         selected = true;
     }
 

@@ -1,12 +1,12 @@
 package com.artingl.opencraft.GUI.Screens;
 
-import com.artingl.opencraft.GL.Controls;
+import com.artingl.opencraft.Control.Game.Input;
 import com.artingl.opencraft.GUI.Elements.Element;
 import com.artingl.opencraft.GUI.Elements.Slider;
 import com.artingl.opencraft.GUI.Font.Font;
 import com.artingl.opencraft.Opencraft;
-import com.artingl.opencraft.Rendering.Game.TextureEngine;
-import com.artingl.opencraft.Rendering.Game.VerticesBuffer;
+import com.artingl.opencraft.Control.Game.TextureEngine;
+import com.artingl.opencraft.Control.Game.VerticesBuffer;
 import com.artingl.opencraft.Resources.Lang.Lang;
 import com.artingl.opencraft.Resources.Options.OptionsListener;
 import com.artingl.opencraft.Resources.Options.OptionsRegistry;
@@ -59,7 +59,7 @@ public class Screen implements OptionsListener
     {
         this.eventsTimeout = System.currentTimeMillis();
         this.framesCounter = 0;
-        this.droppedFirstMouseEvent = !Controls.getMouseKey(0);
+        this.droppedFirstMouseEvent = !Input.getMouseKey(0);
         this.elements = new HashMap<>();
 
         if (this.keyboardEvent == -1 || this.optionsListener == -1) {
@@ -131,7 +131,7 @@ public class Screen implements OptionsListener
         font.drawShadow(str, x - font.getTextWidth(str) / 2, y, color);
     }
 
-    protected void keyPressed(Controls.KeyInput keyInput) {
+    protected void keyPressed(Input.KeyInput keyInput) {
         if (this.eventsTimeout + 100 > System.currentTimeMillis())
             return;
 
@@ -139,7 +139,7 @@ public class Screen implements OptionsListener
             if (element != null) element.keyHandler(keyInput);
         });
 
-        if (keyInput.keyCode == Controls.Keys.KEY_TAB) {
+        if (keyInput.keyCode == Input.Keys.KEY_TAB) {
             var values = new Object() {
                 boolean nextHighlight = false;
                 boolean skipEverything = false;
@@ -170,7 +170,7 @@ public class Screen implements OptionsListener
                 elements.get(0).selected = true;
             }
         }
-        else if (keyInput.keyCode == Controls.Keys.KEY_ENTER) {
+        else if (keyInput.keyCode == Input.Keys.KEY_ENTER) {
             elements.forEach((id, element) -> {
                 if (element.isHighlighting)
                 {
@@ -180,14 +180,14 @@ public class Screen implements OptionsListener
         }
     }
 
-    protected void mouseHandler(Controls.MouseInput mouseInput) {
+    protected void mouseHandler(Input.MouseInput mouseInput) {
         if (this.eventsTimeout + 100 > System.currentTimeMillis())
             return;
 
         Element dropEvent = null;
 
         if (!droppedFirstMouseEvent)
-            if (mouseInput.state != Controls.MouseState.UP)
+            if (mouseInput.state != Input.MouseState.UP)
                 return;
             else {
                 this.droppedFirstMouseEvent = true;
@@ -207,7 +207,7 @@ public class Screen implements OptionsListener
             }
         });
 
-        if (mouseInput.state == Controls.MouseState.UP) {
+        if (mouseInput.state == Input.MouseState.UP) {
 
             if (selectedElement != null) {
                 if (selectedElement instanceof Slider) {
@@ -225,7 +225,7 @@ public class Screen implements OptionsListener
             }
         }
 
-        if (mouseInput.state == Controls.MouseState.DOWN) {
+        if (mouseInput.state == Input.MouseState.DOWN) {
             if (selectedElement == null || !(selectedElement instanceof Slider)) {
                 elements.forEach((id, element) -> {
                     if (selectedElement != null && selectedElement instanceof Slider)
@@ -254,8 +254,8 @@ public class Screen implements OptionsListener
     }
 
     public void registerHandlers() {
-        this.keyboardEvent = Controls.registerKeyboardHandler(this, this::keyPressed);
-        this.mouseEvent = Controls.registerMouseHandler(this, this::mouseHandler);
+        this.keyboardEvent = Input.registerKeyboardHandler(this, this::keyPressed);
+        this.mouseEvent = Input.registerMouseHandler(this, this::mouseHandler);
         this.optionsListener = Opencraft.registerOptionsListener(this);
     }
 
@@ -263,6 +263,7 @@ public class Screen implements OptionsListener
     {
         int id = elements.size();
         elements.put(id, e);
+        e.setId(id);
         return id;
     }
 
@@ -297,8 +298,8 @@ public class Screen implements OptionsListener
     }
 
     public void destroy() {
-        Controls.unregisterKeyboardHandler(this.keyboardEvent);
-        Controls.unregisterMouseHandler(this.mouseEvent);
+        Input.unregisterKeyboardHandler(this.keyboardEvent);
+        Input.unregisterMouseHandler(this.mouseEvent);
         Opencraft.unregisterOptionsListener(this.optionsListener);
         this.keyboardEvent = -1;
         this.mouseEvent = -1;
@@ -317,6 +318,9 @@ public class Screen implements OptionsListener
 
     @Override
     public boolean equals(Object obj) {
+        if (!(obj instanceof Screen))
+            return false;
+
         return Objects.equals(((Screen) obj).screenId, this.screenId);
     }
 

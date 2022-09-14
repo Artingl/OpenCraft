@@ -2,7 +2,7 @@ package com.artingl.opencraft.World.Generation;
 
 import java.util.Random;
 
-public class PerlinNoise extends Synth {
+public class PerlinNoise {
    private ImprovedNoise[] noiseLevels;
    private int levels;
 
@@ -33,10 +33,12 @@ public class PerlinNoise extends Synth {
    }
 
    public void destroy() {
+      for(int i = 0; i < levels; ++i)
+         this.noiseLevels[i].destroy();
       this.noiseLevels = null;
    }
 
-   public int getNoiseValue(int num_iterations, float x, float y, float persistence, float scale, float low, float high)
+   public float getNoiseValue(int num_iterations, float x, float y, float persistence, float scale, float low, float high)
    {
       float maxAmp = 0;
       float amp = 1;
@@ -58,6 +60,6 @@ public class PerlinNoise extends Synth {
       //normalize the result
       noise = noise * (high - low) / 2 + (high + low) / 2;
 
-      return (int) noise;
+      return noise;
    }
 }

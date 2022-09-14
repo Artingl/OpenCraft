@@ -4,12 +4,12 @@ import com.artingl.opencraft.GUI.Screens.Screen;
 import com.artingl.opencraft.Math.Vector2f;
 import com.artingl.opencraft.Math.Vector3f;
 import com.artingl.opencraft.Opencraft;
-import com.artingl.opencraft.Rendering.Game.TextureEngine;
-import com.artingl.opencraft.World.Entity.Gamemode.Creative;
-import com.artingl.opencraft.World.Entity.Gamemode.Gamemode;
+import com.artingl.opencraft.Control.Game.TextureEngine;
+import com.artingl.opencraft.Multiplayer.World.Gamemode.Creative;
+import com.artingl.opencraft.Multiplayer.World.Gamemode.Gamemode;
+import com.artingl.opencraft.Multiplayer.World.Gamemode.Survival;
 import com.artingl.opencraft.World.Entity.Models.PlayerModel;
-import com.artingl.opencraft.World.Item.Item;
-import com.artingl.opencraft.World.PlayerController;
+import com.artingl.opencraft.World.NBT.EntityPlayerNBT;
 import com.artingl.opencraft.GUI.Screens.DeathScreen;
 
 import java.util.ArrayList;
@@ -19,8 +19,9 @@ public class EntityPlayer extends Entity {
     public static int TEXTURE = TextureEngine.load("opencraft:entity/steve.png");
     public static PlayerModel model = new PlayerModel();
 
-    private PlayerController controller;
-    private Gamemode gamemode;
+    private EntityPlayerNBT playerNbt;
+
+    private EntityPlayerController controller;
     private ArrayList<String> chatHistory;
 
     private Vector3f motion;
@@ -29,13 +30,17 @@ public class EntityPlayer extends Entity {
     private Vector2f armRotation;
     private Vector2f prevArmRotation;
 
-    public EntityPlayer(PlayerController controller) {
+    public EntityPlayer(EntityPlayerController controller) {
         super(Opencraft.getLevel());
         setModel(model);
 
+        this.isOnlineEntity = true;
+        this.playerNbt = new EntityPlayerNBT();
+
         this.setHeightOffset(1.82F);
+        this.setGamemode(Survival.instance);
+
         this.controller = controller;
-        this.gamemode = Creative.instance;
         this.chatHistory = new ArrayList<>();
         this.motion = new Vector3f(0, 0, 0);
         this.cameraRotation = new Vector2f(0, 0);
@@ -43,6 +48,22 @@ public class EntityPlayer extends Entity {
         this.armRotation = new Vector2f(0, 0);
         this.prevArmRotation = new Vector2f(0, 0);
         this.entityType = Types.PLAYER;
+    }
+
+    public EntityPlayerNBT getPlayerNbt() {
+        return this.playerNbt;
+    }
+
+    public void setPlayerNbt(EntityPlayerNBT nbt) {
+        this.playerNbt = nbt;
+    }
+
+    public void setGamemode(Gamemode gamemode) {
+        this.playerNbt.setGamemode(gamemode);
+    }
+
+    public Gamemode getGamemode() {
+        return this.playerNbt.getGamemode();
     }
 
     public void tick() {
@@ -70,14 +91,6 @@ public class EntityPlayer extends Entity {
         return chatHistory;
     }
 
-    public Gamemode getGamemode() {
-        return this.gamemode;
-    }
-
-    public void setGamemode(Gamemode gm) {
-        this.gamemode = gm;
-    }
-
     @Override
     public boolean hitHandler(float fallHeight) {
         if (getGamemode().getId() == Creative.id)
@@ -101,11 +114,6 @@ public class EntityPlayer extends Entity {
         return true;
     }
 
-    public boolean pick(Item item) {
-        Opencraft.getPlayerController().appendInventory(item);
-        return true;
-    }
-
     public void closeScreen() {
         Opencraft.closePlayerScreen();
     }
@@ -122,7 +130,7 @@ public class EntityPlayer extends Entity {
         return getScreen() == null;
     }
 
-    public PlayerController getController() {
+    public EntityPlayerController getController() {
         return controller;
     }
 

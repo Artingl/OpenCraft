@@ -1,13 +1,12 @@
 package com.artingl.opencraft.GUI.Screens;
 
-import com.artingl.opencraft.GL.Controls;
+import com.artingl.opencraft.Control.Game.Input;
 import com.artingl.opencraft.GUI.Elements.Element;
 import com.artingl.opencraft.GUI.GUI;
 import com.artingl.opencraft.Resources.Lang.Lang;
 import com.artingl.opencraft.GUI.Elements.Button;
-import com.artingl.opencraft.Rendering.Game.VerticesBuffer;
+import com.artingl.opencraft.Control.Game.VerticesBuffer;
 import com.artingl.opencraft.Opencraft;
-import com.artingl.opencraft.World.Level.LevelType;
 import org.lwjgl.opengl.GL11;
 
 import java.io.DataInputStream;
@@ -21,6 +20,10 @@ public class WorldListScreen extends Screen
 
     public String levelName;
     private int worldBtnPosition;
+
+    private int newWorldCreationButton;
+    private int loadWorldButton;
+    private int worldButton = 3;
 
     public WorldListScreen() {
         super(Opencraft.getWidth(), Opencraft.getHeight(), "world_select");
@@ -48,14 +51,14 @@ public class WorldListScreen extends Screen
 
         worldBtnPosition = 70;
 
-        this.addElement(new Button(this, 0, 0, 0, Lang.getTranslatedString("opencraft:gui.text.new_world_configurer"), () -> Opencraft.setCurrentScreen(GUI.newWorldConfigurator)));
-        this.addElement(new Button(this, 1, 0, 0, Lang.getTranslatedString("opencraft:gui.text.load_world"), () -> {
+        newWorldCreationButton = this.addElement(new Button(this, 0, 0, Lang.getTranslatedString("opencraft:gui.text.new_world_creation"), () -> Opencraft.setCurrentScreen(GUI.newWorldConfigurator)));
+        loadWorldButton = this.addElement(new Button(this, 0, 0, Lang.getTranslatedString("opencraft:gui.text.load_world"), () -> {
             GUI.loadingScreen.setLoadingText(Lang.getTranslatedString("opencraft:gui.text.loading_world"));
             Opencraft.startNewGame(1, -1);
         }));
 
         levelName = "";
-        ((Button)getElements().get(1)).enabled = false;
+        ((Button)getElements().get(loadWorldButton)).enabled = false;
 
         File folder = new File(Opencraft.getGameDirectory() + "saves");
         folder.mkdir();
@@ -78,7 +81,9 @@ public class WorldListScreen extends Screen
                             int seed = dis.readInt();
 
                             final int id = this.getElements().size();
-                            this.addElement(new Button(this, 3, 0, 0, worldName, () -> selectWorld(id, file.getName())));
+                            Element elem = new Button(this, 0, 0, worldName, () -> selectWorld(id, file.getName()));
+                            this.addElement(elem);
+                            elem.setId(worldButton);
                         }
 
                         dis.close();
@@ -95,14 +100,14 @@ public class WorldListScreen extends Screen
         {
             btn.setY(screenHeight - (btn.getHeight() / 2f) - 25);
 
-            if (btn.getId() == 1)
+            if (btn.getId() == loadWorldButton)
             {
                 btn.setX(screenWidth / 2f - btn.getWidth() - 10);
             }
-            else if (btn.getId() == 0) {
+            else if (btn.getId() == newWorldCreationButton) {
                 btn.setX(screenWidth / 2f + 10);
             }
-            else if (btn.getId() == 3) {
+            else if (btn.getId() == worldButton) {
                 btn.setY(worldBtnPosition);
                 btn.setX(screenWidth / 2f - btn.getWidth() / 2);
                 worldBtnPosition += btn.getHeight() + 20;
@@ -127,10 +132,10 @@ public class WorldListScreen extends Screen
     }
 
     @Override
-    protected void keyPressed(Controls.KeyInput keyInput) {
+    protected void keyPressed(Input.KeyInput keyInput) {
         super.keyPressed(keyInput);
 
-        if (keyInput.keyCode == Controls.Keys.KEY_ESCAPE) {
+        if (keyInput.keyCode == Input.Keys.KEY_ESCAPE) {
             Opencraft.setCurrentScreen(GUI.mainMenu);
         }
     }

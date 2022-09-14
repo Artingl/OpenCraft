@@ -1,9 +1,9 @@
 package com.artingl.opencraft.World.Chunk;
 
 import com.artingl.opencraft.Opencraft;
-import com.artingl.opencraft.Rendering.World.BlockRenderer;
-import com.artingl.opencraft.Rendering.World.LevelRenderer;
-import com.artingl.opencraft.Rendering.Game.VerticesBuffer;
+import com.artingl.opencraft.Control.World.BlockRenderer;
+import com.artingl.opencraft.Control.World.LevelRenderer;
+import com.artingl.opencraft.Control.Game.VerticesBuffer;
 import com.artingl.opencraft.World.Block.Block;
 import com.artingl.opencraft.World.Entity.Entity;
 import com.artingl.opencraft.Math.Vector2i;
@@ -13,36 +13,31 @@ import com.artingl.opencraft.Phys.SimpleAABB;
 import com.artingl.opencraft.World.Level.ClientLevel;
 import org.lwjgl.opengl.GL11;
 
-import java.util.ArrayList;
-
 public class Chunk
 {
     public static final int CHUNK_LAYERS = 16;
 
     private VerticesBuffer verticesBuffer = VerticesBuffer.getGlobalInstance();
     private Vector2i chunkListPosition;
-    private final Region chunkRegion;
+    private Region chunkRegion;
     private AABB aabb;
-    private ArrayList<Boolean> layersState;
-    private ArrayList<Boolean> layersVisible;
+    private boolean[] layersState;
+    private boolean[] layersVisible;
+    private boolean[] fullyFilled;
     private int chunkList;
     private boolean initialized;
 
     public Chunk(Vector2i chunkListPosition)
     {
         this.chunkListPosition = chunkListPosition;
-        this.layersState = new ArrayList<>();
-        this.layersVisible = new ArrayList<>();
+        this.layersState = new boolean[CHUNK_LAYERS];
+        this.layersVisible = new boolean[CHUNK_LAYERS];
+        this.fullyFilled = new boolean[CHUNK_LAYERS];
         this.aabb = new AABB(
                 chunkListPosition.x * 16, 0, chunkListPosition.y * 16,
                 chunkListPosition.x * 16 + 16, ClientLevel.MAX_HEIGHT, chunkListPosition.y * 16 + 16);
         this.chunkRegion = new Region(this);
         this.chunkList = GL11.glGenLists(CHUNK_LAYERS);
-
-        for (int i = 0; i < CHUNK_LAYERS; i++) {
-            layersState.add(false);
-            layersVisible.add(false);
-        }
 
         Opencraft.getThreadsManager().execute(() -> {
             this.chunkRegion.generate();
@@ -51,13 +46,26 @@ public class Chunk
     }
 
     public boolean buildLayer(int layer) {
-        if (!this.initialized)
+        if (!this.initialized) {
             return false;
+        }
+
+        Chunk c0 = Opencraft.getLevelRenderer().getChunkByPos(chunkListPosition.x - 1, chunkListPosition.y);
+        Chunk c1 = Opencraft.getLevelRenderer().getChunkByPos(chunkListPosition.x, chunkListPosition.y - 1);
+        Chunk c2 = Opencraft.getLevelRenderer().getChunkByPos(chunkListPosition.x + 1, chunkListPosition.y);
+        Chunk c3 = Opencraft.getLevelRenderer().getChunkByPos(chunkListPosition.x, chunkListPosition.y + 1);
+
+        if (layer > 1 && layer < CHUNK_LAYERS-1 && c0 != null && c1 != null && c2 != null && c3 != null) {
+            if (getFilledState(layer + 1) && getFilledState(layer - 1) && c0.getFilledState(layer) && c1.getFilledState(layer) && c2.getFilledState(layer) && c3.getFilledState(layer)) {
+                return false;
+            }
+        }
 
         ++LevelRenderer.CHUNK_UPDATES;
 
-        layersState.set(layer, false);
-        layersVisible.set(layer, false);
+        layersState[layer] = false;
+        layersVisible[layer] = false;
+        fullyFilled[layer] = true;
 
         boolean isVisible = false;
 
@@ -68,18 +76,21 @@ public class Chunk
         for (int y = layer * (ClientLevel.MAX_HEIGHT / CHUNK_LAYERS); y < layer * (ClientLevel.MAX_HEIGHT / CHUNK_LAYERS) + (ClientLevel.MAX_HEIGHT / CHUNK_LAYERS); ++y) {
             for (int x = 0; x < 16; ++x) {
                 for (int z = 0; z < 16; ++z) {
-                    Block block = chunkRegion.getBlock(x, y, z);
+                    Block block = Opencraft.getLevel().getBlock(chunkListPosition.x * 16 + x, y, chunkListPosition.y * 16 + z);
 
                     if (block.isVisible()) {
                         BlockRenderer.render(verticesBuffer, chunkListPosition.x * 16 + x, y, chunkListPosition.y * 16 + z, block);
                         isVisible = true;
                     }
+                    else {
+                        fullyFilled[layer] = false;
+                    }
                 }
             }
         }
 
-        layersVisible.set(layer, isVisible);
-        layersState.set(layer, true);
+        layersVisible[layer] = isVisible;
+        layersState[layer] = true;
 
         verticesBuffer.end();
         verticesBuffer.clear();
@@ -119,14 +130,10 @@ public class Chunk
 
         this.initialized = false;
 
-        Opencraft.runInGLContext(() -> {
-            if (this.chunkList != -1)
-                GL11.glDeleteLists(this.chunkList, CHUNK_LAYERS);
-        });
-
         this.chunkRegion.destroy();
-        this.layersState.clear();
-        this.layersVisible.clear();
+        this.layersState = null;
+        this.layersVisible = null;
+        this.fullyFilled = null;
     }
 
     public float distanceToEntity(Entity entity) {
@@ -152,14 +159,18 @@ public class Chunk
     }
 
     public boolean getLayerState(int layer) {
-        return layersState.get(layer);
+        return layersState[layer];
     }
 
     public boolean getLayersVisible(int layer) {
-        return layersVisible.get(layer);
+        return layersVisible[layer];
     }
 
     public void setLayerState(int k) {
-        layersState.set(k, false);
+        layersState[k] = false;
+    }
+
+    public boolean getFilledState(int layer) {
+        return fullyFilled[layer];
     }
 }

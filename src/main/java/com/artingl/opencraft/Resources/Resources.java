@@ -2,7 +2,7 @@ package com.artingl.opencraft.Resources;
 
 import com.artingl.opencraft.Logger.Logger;
 import com.artingl.opencraft.Opencraft;
-import com.artingl.opencraft.Rendering.Game.TextureEngine;
+import com.artingl.opencraft.Control.Game.TextureEngine;
 import com.artingl.opencraft.Resources.Lang.Lang;
 
 import java.io.FileInputStream;

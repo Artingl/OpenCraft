@@ -1,32 +1,32 @@
 package com.artingl.opencraft;
 
-import com.artingl.opencraft.GL.Controls;
-import com.artingl.opencraft.GL.Display;
+import com.artingl.opencraft.Control.Game.Input;
+import com.artingl.opencraft.Control.Game.Display;
 import com.artingl.opencraft.GUI.GUI;
 import com.artingl.opencraft.Logger.Logger;
 import com.artingl.opencraft.Multiplayer.Client;
 import com.artingl.opencraft.Multiplayer.InternalServer;
 import com.artingl.opencraft.Multiplayer.Server;
-import com.artingl.opencraft.Rendering.Game.GameRenderer;
-import com.artingl.opencraft.Rendering.Game.TextureEngine;
-import com.artingl.opencraft.Rendering.World.LevelRenderer;
-import com.artingl.opencraft.Rendering.World.ParticleEngine;
+import com.artingl.opencraft.Control.Game.GameRenderer;
+import com.artingl.opencraft.Control.Game.TextureEngine;
+import com.artingl.opencraft.Control.World.LevelRenderer;
+import com.artingl.opencraft.Control.World.ParticleEngine;
 import com.artingl.opencraft.Resources.Options.OptionsListener;
-import com.artingl.opencraft.World.Level.LevelType;
-import com.artingl.opencraft.Rendering.*;
+import com.artingl.opencraft.World.Level.*;
+import com.artingl.opencraft.Control.*;
 import com.artingl.opencraft.Resources.Lang.Lang;
 import com.artingl.opencraft.Resources.Resources;
 import com.artingl.opencraft.Resources.Options.OptionsRegistry;
 import com.artingl.opencraft.Sound.SoundEngine;
 import com.artingl.opencraft.Utils.Random;
-import com.artingl.opencraft.Utils.ThreadsManager;
+import com.artingl.opencraft.Control.Game.ThreadsManager;
 import com.artingl.opencraft.World.Block.BlockRegistry;
 import com.artingl.opencraft.World.Entity.EntityPlayer;
 import com.artingl.opencraft.World.EntityData.Nametag;
+import com.artingl.opencraft.World.Level.Biomes.BiomesRegistry;
+import com.artingl.opencraft.World.Level.Generation.LevelGenerationWorld;
 import com.artingl.opencraft.World.Tick;
-import com.artingl.opencraft.World.Level.ClientLevel;
-import com.artingl.opencraft.World.Level.LevelListener;
-import com.artingl.opencraft.World.PlayerController;
+import com.artingl.opencraft.World.Entity.EntityPlayerController;
 import com.artingl.opencraft.World.TickTimer;
 import com.artingl.opencraft.GUI.Font.Font;
 import com.artingl.opencraft.GUI.GuiInterface;
@@ -34,7 +34,6 @@ import com.artingl.opencraft.GUI.Screens.Screen;
 import com.artingl.opencraft.Math.Vector3f;
 import com.artingl.opencraft.ModAPI.ModEntry;
 import com.artingl.opencraft.Utils.JavaUtils;
-import jdk.jfr.SettingControl;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
 
@@ -50,20 +49,19 @@ public class Opencraft
 {
 
     private static String gameDir = "";
-    private static String version = "Dev";
+    private static String version = "dev";
     private static final int width = 868;
     private static final int height = 568;
     private static Display display;
     private static boolean close = false;
-    private static PlayerController playerController;
+    private static EntityPlayerController playerController;
     private static ParticleEngine particleEngine;
     private static LevelRenderer levelRenderer;
     private static ClientLevel level;
-    private static LevelType currentLevel;
     private static boolean isWorldLoaded;
     private static final HashMap<Integer, GuiInterface> guiInterface = new HashMap<>();
     private static final HashMap<Integer, Tick> ticks = new HashMap<>();
-    private static final HashMap<Integer, RenderHandler> glUpdateEvent = new HashMap<>();
+    private static final HashMap<Integer, RenderInterface> glUpdateEvent = new HashMap<>();
     private static final HashMap<Integer, LevelListener> levelListeners = new HashMap<>();
     private static final HashMap<Integer, OptionsListener> optionsListeners = new HashMap<>();
     private static final ConcurrentLinkedQueue<Runnable> glContext = new ConcurrentLinkedQueue<>();
@@ -120,6 +118,8 @@ public class Opencraft
 
         Logger.debug("Creating display");
 
+        Input.init();
+
         display = new Display(width, height, "OpenCraft " + version);
         display.create();
 
@@ -151,11 +151,33 @@ public class Opencraft
 
         // load game resources
         Lang.init();
-        Controls.init();
         TextureEngine.init();
-        BlockRegistry.registerAllBlocks();
 
         Resources.loadNamespaceResources(Opencraft.class, "opencraft");
+
+        BiomesRegistry.init();
+        BlockRegistry.init();
+        LevelRegistry.init();
+
+        LevelRegistry.setLevelGeneration(LevelTypes.WORLD, LevelGenerationWorld.class);
+
+
+        Logger.debug("Loading screens");
+        GUI.initScreens();
+        setCurrentScreen(GUI.mainMenu);
+
+        lastTime = System.currentTimeMillis();
+        frames = 0;
+
+        Logger.debug("Initializing server and client class");
+        internalServer = new InternalServer();
+        internalServerConnection = new Client(internalServer.getHost(), internalServer.getPort());
+
+        Logger.debug("Initializing sound engine");
+        soundEngine = new SoundEngine();
+
+        Logger.debug("Loading threads manager");
+        threadsManager = new ThreadsManager();
 
         // load all mods from mods directory
         Logger.debug("Loading mods");
@@ -179,27 +201,11 @@ public class Opencraft
                 }
 
                 Resources.loadNamespaceResources(mod.getClass(), mod.getModId());
+                mod.onResourcesInitialized();
             } catch (Exception e) {
                 Logger.exception("Error while loading mod", e);
             }
         }
-
-        Logger.debug("Loading screens");
-        GUI.initScreens();
-        setCurrentScreen(GUI.mainMenu);
-
-        lastTime = System.currentTimeMillis();
-        frames = 0;
-
-        Logger.debug("Initializing server and client class");
-        internalServer = new InternalServer();
-        internalServerConnection = new Client(internalServer.getHost(), internalServer.getPort());
-
-        Logger.debug("Initializing sound engine");
-        soundEngine = new SoundEngine();
-
-        Logger.debug("Loading threads manager");
-        threadsManager = new ThreadsManager();
 
         Logger.debug("Initializing complete");
 
@@ -217,7 +223,7 @@ public class Opencraft
 
         Logger.debug("Preparing to exit");
 
-        Controls.destroy();
+        Input.destroy();
         display.destroy();
         System.exit(0);
     }
@@ -268,7 +274,7 @@ public class Opencraft
 
     public static void renderEverything() {
         timer.advanceTime();
-        Controls.update();
+        Input.update();
 
         Vector3f sky = new Vector3f(0, 0, 0);
 
@@ -301,7 +307,7 @@ public class Opencraft
             GL11.glColor4f(1F, 1F, 1F, 1.0F);
 
             GameRenderer.drawGui();
-            Controls.setMouseGrabbed(false);
+            Input.setMouseGrabbed(false);
         }
         else {
             for(int i = 0; i < timer.ticks; ++i) {
@@ -320,9 +326,9 @@ public class Opencraft
         }
 
         if (currentScreen != null) {
-//                if (currentScreen.doGameRenderingInBackground()) {
-//                    GameRenderer.render();
-//                }
+            if (currentScreen.doGameRenderingInBackground() && isWorldLoaded) {
+                GameRenderer.render();
+            }
         }
 
         while(System.currentTimeMillis() >= lastTime + 1000L) {
@@ -377,12 +383,10 @@ public class Opencraft
             if (particleEngine != null) particleEngine.destroy();
             if (playerController != null) playerController.destroy();
             if (playerController != null) playerController = null;
-            level = null;
-            levelRenderer = null;
-            particleEngine = null;
+            if (entityPlayer != null) entityPlayer.destroy();
+            if (entityPlayer != null) entityPlayer = null;
 
             isWorldLoaded = false;
-
             Thread.currentThread().interrupt();
         }).start();
 
@@ -397,28 +401,32 @@ public class Opencraft
 
         Opencraft.inMenu = true;
         Opencraft.renderWhenInMenu = false;
-        setCurrentScreen(GUI.mainMenu);
+        Opencraft.runInGLContext(() -> setCurrentScreen(GUI.mainMenu));
     }
 
     public static void startNewGame(int loadState, int seed) {
+        startNewGame("", 0, loadState, seed);
+    }
+
+    public static void startNewGame(String host, int port, int loadState, int seed) {
         try {
             GUI.loadingScreen.setLoadingText(Lang.getTranslatedString("opencraft:gui.text.loading_world"));
 
-            levelRenderer = new LevelRenderer();
-            playerController = new PlayerController();
-            particleEngine = new ParticleEngine();
-            level = new ClientLevel();
-
+            playerController = new EntityPlayerController();
             entityPlayer = new EntityPlayer(Opencraft.getPlayerController());
             entityPlayer.setNameTag(new Nametag(playerName));
+            level = new ClientLevel();
 
-            if (loadState != 1)
+            if (loadState != 1) {
                 internalServer.create(seed);
-            internalServerConnection.create();
+                internalServerConnection.create();
+            }
+            else {
+                internalServerConnection.connect(host, port);
+            }
 
-//            if (loadState == 1) {
-//                internalServerConnection.connect(internalServer.getHost(), internalServer.getPort());
-//            }
+            levelRenderer = new LevelRenderer();
+            particleEngine = new ParticleEngine();
 
             levelRenderer.prepareChunks();
 
@@ -432,7 +440,7 @@ public class Opencraft
     }
 
     public static void connectTo(String host, int port) {
-        Opencraft.startNewGame(1, -1);
+        Opencraft.startNewGame(host, port, 1, -1);
     }
 
     public static int getFPS() {
@@ -455,10 +463,6 @@ public class Opencraft
     public static ClientLevel getLevel()
     {
         return level;
-    }
-
-    public static LevelType getLevelType() {
-        return currentLevel;
     }
 
     public static int getRenderDistance() {
@@ -490,7 +494,7 @@ public class Opencraft
         return OptionsRegistry.Values.getIntOption("FOV");
     }
 
-    public static PlayerController getPlayerController()
+    public static EntityPlayerController getPlayerController()
     {
         return Opencraft.playerController;
     }
@@ -527,7 +531,7 @@ public class Opencraft
         return levelRenderer;
     }
 
-    public static int registerRenderEvent(RenderHandler tick)
+    public static int registerRenderEvent(RenderInterface tick)
     {
         glUpdateEvent.put(glUpdateEvent.size(), tick);
         return glUpdateEvent.size()-1;
@@ -674,7 +678,7 @@ public class Opencraft
         return chunksUpdate;
     }
 
-    public static HashMap<Integer, RenderHandler> getRenderersInterfaceMap() {
+    public static HashMap<Integer, RenderInterface> getRenderersInterfaceMap() {
         return glUpdateEvent;
     }
 

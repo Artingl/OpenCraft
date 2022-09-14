@@ -1,66 +1,81 @@
 package com.artingl.opencraft.World.Chunk;
 
 import com.artingl.opencraft.Math.Vector2i;
+import com.artingl.opencraft.Math.Vector3i;
 import com.artingl.opencraft.Opencraft;
 import com.artingl.opencraft.World.Block.Block;
 import com.artingl.opencraft.World.Block.BlockRegistry;
+import com.artingl.opencraft.World.Direction;
+import com.artingl.opencraft.World.Generation.PerlinNoise;
 import com.artingl.opencraft.World.Level.ClientLevel;
-
-import java.util.ArrayList;
 
 public class Region {
 
-    private final Chunk chunk;
-
-    private Block[][][] blocks;
-
+    private PerlinNoise noise;
+    private long randomSeed;
+    private short[] buffer;
+    private Chunk chunk;
     private boolean isDestroyed;
+    private boolean ready;
 
     public Region(Chunk chunk) {
         this.chunk = chunk;
-        this.blocks = new Block[16][ClientLevel.MAX_HEIGHT][16];
+        this.ready = false;
+        this.randomSeed = (Opencraft.getLevel().getSeed() + ((long) chunk.getPosition().x * chunk.getPosition().y));
+        this.noise = new PerlinNoise(3, (int) this.randomSeed);
+        this.buffer = new short[16 * 16 * ClientLevel.MAX_HEIGHT];
+    }
+
+    public Region(Vector2i pos) {
+        this.ready = false;
+        this.randomSeed = (Opencraft.getLevel().getSeed() + ((long) pos.x * pos.y));
+        this.buffer = new short[16 * 16 * ClientLevel.MAX_HEIGHT];
     }
 
     public void generate() {
-        Vector2i pos = chunk.getPosition();
+        if (this.ready)
+            return;
 
-        for (int i = 0; i < 16; i++) {
-            for (int j = 0; j < 16; j++) {
-                Opencraft.getLevel().generation.getLevelGeneration().generateRegion(
-                        this,
-                        i,
-                        j,
-                        (pos.x * 16) + i, (pos.y * 16) + j);
-            }
-        }
+        this.ready = true;
+        Opencraft.getLevel().generation.getLevelGeneration().generateRegion(this);
+
+    }
+
+    public Vector2i getPosition() {
+        return chunk.getPosition();
     }
 
     public Block getBlock(int x, int y, int z) {
-        if (x > 15 || x < 0 || z > 15 || z < 0 || y > ClientLevel.MAX_HEIGHT-1 || y < 0 || this.blocks == null) {
+        if (x > 15 || x < 0 || z > 15 || z < 0 || y > ClientLevel.MAX_HEIGHT-1 || y < 0 || this.buffer == null) {
             return BlockRegistry.Blocks.air;
         }
 
-        if (this.blocks[x][y][z] == null)
-            return BlockRegistry.Blocks.air;
-
-        return this.blocks[x][y][z];
+        return Block.unpackFromShort(this.buffer[(y * 16 + z) * 16 + x]);
     }
 
     public void setBlock(Block block, int x, int y, int z) {
-        if (x > 15 || x < 0 || z > 15 || z < 0 || y > ClientLevel.MAX_HEIGHT-1 || y < 0 || this.blocks == null) {
+        if (x > 15 || x < 0 || z > 15 || z < 0 || y > ClientLevel.MAX_HEIGHT-1 || y < 0 || this.buffer == null) {
             return;
         }
 
-        this.blocks[x][y][z] = block;
+        this.buffer[(y * 16 + z) * 16 + x] = block.packToShort();
 
-//        if (y + 1 < Chunk.MAX_HEIGHT) {
-//            getBlock(x, y + 1, z).neighborChanged(
-//                    OpenCraft.getLevel(),
-//                    chunk.translateToRealCoords(x, y + 1, z),
-//                    Direction.Values.UP,
-//                    block
-//            );
-//        }
+        if (y + 1 < ClientLevel.MAX_HEIGHT && chunk != null) {
+            getBlock(x, y + 1, z).neighborChanged(
+                    Opencraft.getLevel(),
+                    chunk.translateToRealCoords(x, y + 1, z),
+                    Direction.Values.UP,
+                    block
+            );
+        }
+    }
+
+    public void setBlock(Block block, Vector3i pos) {
+        setBlock(block, pos.x, pos.y, pos.z);
+    }
+
+    public Block getBlock(Vector3i pos) {
+        return getBlock(pos.x, pos.y, pos.z);
     }
 
     public Chunk getChunk() {
@@ -68,17 +83,30 @@ public class Region {
     }
 
     public void destroy() {
-        this.blocks = null;
         this.isDestroyed = true;
+        this.buffer = null;
+        this.noise.destroy();
     }
 
-    public Block[][][] getBlocks() {
-        return blocks;
+    public float getNoiseValue(int x, int z, int min ,int max, int iterations, float smoothness) {
+        return this.noise.getNoiseValue(iterations, x, z, .5f, smoothness, min, max);
     }
 
+    public int randomInteger(int min, int max)
+    {
+        randomSeed = randomSeed * 1664525 + 1013904223;
+        return (int) ((randomSeed >> 24) % (max + 1 - min) + min);
+    }
 
     public boolean isDestroyed() {
         return isDestroyed;
     }
 
+    public long getSeed() {
+        return this.randomSeed;
+    }
+
+    public boolean isReady() {
+        return ready;
+    }
 }

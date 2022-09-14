@@ -130,7 +130,7 @@ public class OptionsRegistry {
             options.put("soundVolume",              new Option("soundVolume", 100));
             options.put("enableViewBobbing",        new Option("enableViewBobbing", true));
             options.put("showInformation",          new Option("showInformation", false));
-            options.put("enableFog",                new Option("showInformation", true));
+            options.put("enableFog",                new Option("enableFog", true));
         }
     }
 

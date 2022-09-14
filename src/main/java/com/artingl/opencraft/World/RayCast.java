@@ -3,6 +3,7 @@ package com.artingl.opencraft.World;
 import com.artingl.opencraft.Opencraft;
 import com.artingl.opencraft.World.Block.Block;
 import com.artingl.opencraft.Math.Vector3i;
+import com.artingl.opencraft.World.Block.BlockRegistry;
 
 public class RayCast
 {

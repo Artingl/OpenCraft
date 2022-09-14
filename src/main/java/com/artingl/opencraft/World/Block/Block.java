@@ -1,23 +1,18 @@
 package com.artingl.opencraft.World.Block;
 
-import com.artingl.opencraft.Logger.Logger;
-import com.artingl.opencraft.Rendering.Game.Texture;
-import com.artingl.opencraft.Rendering.Game.TextureEngine;
-import com.artingl.opencraft.World.Ambient.Block.Drop;
-import com.artingl.opencraft.World.Direction;
-import com.artingl.opencraft.World.Item.ItemBlock;
-import com.artingl.opencraft.World.Item.Tool;
-import com.artingl.opencraft.World.Ambient.Block.Particle;
 import com.artingl.opencraft.Math.Vector3i;
-import com.artingl.opencraft.Phys.AABB;
 import com.artingl.opencraft.Opencraft;
+import com.artingl.opencraft.Phys.AABB;
+import com.artingl.opencraft.Control.Game.Texture;
+import com.artingl.opencraft.Control.Game.TextureEngine;
+import com.artingl.opencraft.World.Ambient.Block.Particle;
+import com.artingl.opencraft.World.Direction;
+import com.artingl.opencraft.World.Item.Tool;
 import com.artingl.opencraft.World.Level.ClientLevel;
 
 public class Block
 {
-    private int randomization;
     private String blockId;
-    private int integerId;
 
     protected Texture texture;
 
@@ -35,7 +30,6 @@ public class Block
         this.blockId = blockId;
         this.tool = Tool.HAND;
         this.strength = 1;
-        this.makeRandomization();
 
         if (createTexture) {
             float tx, ty, bx, by, sx, sy;
@@ -50,7 +44,6 @@ public class Block
             this.texture = new Texture(id, tx, ty, bx, by, sx, sy);
         }
 
-        this.integerId = -1;
     }
 
     public void setTexture(Texture texture)
@@ -69,27 +62,8 @@ public class Block
     }
 
     public int getIntegerId() {
-        if (this.integerId == -1) {
-            this.integerId = 0;
-
-            try {
-                for (Class<?> blockClass : BlockRegistry.blocks) {
-                    Block block = (Block) blockClass.getConstructor().newInstance();
-
-                    if (block.getId().equals(blockId))
-                        break;
-
-                    ++this.integerId;
-                }
-            } catch (Exception e) {
-                Logger.exception("Error while getting block id", e);
-            }
-        }
-
-        return this.integerId;
+        return this.blockId.hashCode();
     }
-
-    public int getRandomization() { return this.randomization; }
 
     public static AABB getAABB(Vector3i position) {
         return getAABB(position.x, position.y, position.z);
@@ -97,6 +71,10 @@ public class Block
 
     public static AABB getAABB(int x, int y, int z) {
         return new AABB((float)x, (float)y, (float)z, (float)(x + 1), (float)(y + 1), (float)(z + 1));
+    }
+    
+    public boolean isCollidable() {
+        return !isLiquid() && isVisible() && !isTile();
     }
 
     public boolean isVisible()
@@ -146,12 +124,6 @@ public class Block
         return false;
     }
 
-    protected void makeRandomization() {
-        // todo: fix it. right now it may change world generation
-        //       because it uses level seed
-        // this.randomization = OpenCraft.getLevel().getRandomNumber(-100, 100);
-    }
-
     public float getStrength() {
         return strength;
     }
@@ -178,7 +150,7 @@ public class Block
 
     public void createDrop(int x, int y, int z) {
         // todo: when next block is dropped, the last one would disappear
-        new Drop(new ItemBlock(this, 1), new Vector3i(x, y, z));
+//        new Drop(new ItemBlock(this, 1), new Vector3i(x, y, z));
     }
 
     public int getStackAmount() {
@@ -187,6 +159,9 @@ public class Block
 
     @Override
     public boolean equals(Object obj) {
+        if (!(obj instanceof Block))
+            return false;
+
         return getId().equals(((Block)obj).getId());
     }
 
@@ -196,6 +171,17 @@ public class Block
     }
 
     public void neighborChanged(ClientLevel level, Vector3i blockPos, Direction.Values direction, Block newBlock) {
+    }
+
+    public short packToShort() {
+        return (short) getIntegerId();
+    }
+
+    public static Block unpackFromShort(short i) {
+        if (!BlockRegistry.blocksHashes.containsKey(i))
+            return BlockRegistry.Blocks.air;
+
+        return BlockRegistry.blocksHashes.get(i);
     }
 
 }

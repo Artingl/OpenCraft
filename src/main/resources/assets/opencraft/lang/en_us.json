@@ -5,11 +5,12 @@
   "gui.screen.servers_select": "Select server",
   "gui.screen.video_settings": "Video settings",
   "gui.screen.settings": "Settings",
+  "gui.screen.mods_list": "Mods List",
 
   "gui.text.singleplayer": "Singleplayer",
   "gui.text.multiplayer":  "Multiplayer",
   "gui.text.quit_game": "Quit the game",
-  "gui.text.new_world_configurer": "Create a new world",
+  "gui.text.new_world_creation": "Create a new world",
   "gui.text.world_seed": "World seed",
   "gui.text.world_name": "World name",
   "gui.text.loading_world": "Loading world",
@@ -40,5 +41,9 @@
   "gui.text.back": "Back",
   "gui.text.join_server": "Join server",
   "gui.text.show_information": "Show information",
-  "gui.text.fog": "FOG"
+  "gui.text.fog": "FOG",
+  "gui.text.mods_list": "Mods list",
+  "gui.text.loading_chunk": "Loading chunk",
+  "gui.text.loading_region": "Loading region",
+  "gui.text.out_of": "out of"
 }

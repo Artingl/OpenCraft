@@ -1,8 +1,9 @@
 package com.artingl.opencraft.World.Level;
 
 import com.artingl.opencraft.World.Block.BlockRegistry;
+import com.artingl.opencraft.World.Level.Generation.LevelGeneration;
 import com.artingl.opencraft.World.Tick;
-import com.artingl.opencraft.Rendering.RenderHandler;
+import com.artingl.opencraft.Control.RenderInterface;
 import com.artingl.opencraft.Opencraft;
 import com.artingl.opencraft.World.Ambient.Ambient;
 import com.artingl.opencraft.World.Block.Block;
@@ -14,33 +15,26 @@ import com.artingl.opencraft.Math.Vector3i;
 import com.artingl.opencraft.Phys.AABB;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
-public class ClientLevel implements RenderHandler, Tick
+public class ClientLevel implements RenderInterface, Tick
 {
-    public static final int WATER_LEVEL = 64;
+    public static final int WATER_LEVEL = 52;
+    public static final int MIN_TERRAIN_LEVEL = 64;
+    public static final float TREES_MAX_Y_SPAWN = 74;
     public static int MAX_HEIGHT = 256;
 
     public static class Generation {
-        private int randomSeed;
 
-        private LevelGeneration levelGeneration = null;
+        private LevelGeneration levelGeneration;
         private final ClientLevel level;
 
         public Generation(ClientLevel level) {
-            this.randomSeed = level.seed;
             this.level = level;
-
-            MAX_HEIGHT = 256;
-
-            if (level.levelType == LevelType.WORLD) {
-                levelGeneration = new LevelGenerationWorld(this);
-            }
         }
 
-        public int randomInteger(int min, int max)
-        {
-            randomSeed = randomSeed * 1664525 + 1013904223;
-            return (randomSeed >> 24) % (max + 1 - min) + min;
+        public void setSeed(int seed) {
+            levelGeneration = LevelRegistry.createLevelGenerationInstance(level.levelType, this);
         }
 
         public LevelGeneration getLevelGeneration() {
@@ -54,22 +48,28 @@ public class ClientLevel implements RenderHandler, Tick
         public int getSeed() {
             return level.seed;
         }
+
+        public void destroy() {
+            this.levelGeneration.destroy();
+        }
     }
 
 
     public final ClientLevel.Generation generation;
-    private final LevelType levelType;
+    private final LevelTypes levelType;
     private Ambient ambient;
     private int glUpdateEvent;
     private int tickEvent;
     private int seed;
+    private HashMap<Vector3i, Block> blocksQueue;
 
     public ClientLevel()
     {
         this.seed = -1;
-        this.levelType = LevelType.WORLD;
+        this.levelType = LevelTypes.WORLD;
         this.ambient = new Ambient(this);
         this.generation = new Generation(this);
+        this.blocksQueue = new HashMap<>();
 
         this.glUpdateEvent = Opencraft.registerRenderEvent(this);
         this.tickEvent = Opencraft.registerTickEvent(this);
@@ -81,17 +81,14 @@ public class ClientLevel implements RenderHandler, Tick
 
     public void setSeed(int seed) {
         this.seed = seed;
-    }
-
-    public boolean isReady() {
-        return seed != -1;
+        this.generation.setSeed(seed);
     }
 
     public Vector3f getSkyColor() {
         return new Vector3f(0.5f, 0.7f, 1);
     }
 
-    public LevelType getLevelType() {
+    public LevelTypes getLevelType() {
         return levelType;
     }
 
@@ -106,6 +103,8 @@ public class ClientLevel implements RenderHandler, Tick
     public Block getBlock(int x, int y, int z)
     {
         Chunk chunk = Opencraft.getLevelRenderer().getChunkByBlockPos(x, z);
+        Vector3i blockPos = new Vector3i(x, y, z);
+
         if (chunk == null) {
             return BlockRegistry.Blocks.air;
         }
@@ -113,6 +112,16 @@ public class ClientLevel implements RenderHandler, Tick
         Region region = chunk.getRegion();
         if (region == null) {
             return BlockRegistry.Blocks.air;
+        }
+
+        if (blocksQueue.containsKey(blockPos)) {
+            Block block = blocksQueue.get(blockPos);
+            blocksQueue.remove(blockPos);
+            region.setBlock(block,
+                    x - (x >> 4) * 16,
+                    y,
+                    z - (z >> 4) * 16
+            );
         }
 
         return region.getBlock(
@@ -122,15 +131,24 @@ public class ClientLevel implements RenderHandler, Tick
         );
     }
 
-    public void setBlockWithoutRendering(int x, int y, int z, Block block) {
+    public void setBlockQuietly(int x, int y, int z, Block block) {
         Chunk chunk = Opencraft.getLevelRenderer().getChunkByBlockPos(x, z);
+        Vector3i blockPos = new Vector3i(x, y, z);
+
         if (chunk == null) {
+            blocksQueue.put(blockPos, block);
             return;
         }
 
         Region region = chunk.getRegion();
         if (region == null) {
+            blocksQueue.put(blockPos, block);
             return;
+        }
+
+        if (blocksQueue.containsKey(blockPos)) {
+            block = blocksQueue.get(blockPos);
+            blocksQueue.remove(blockPos);
         }
 
         region.setBlock(block,
@@ -140,9 +158,9 @@ public class ClientLevel implements RenderHandler, Tick
         );
     }
 
-    public void setBlock(int x, int y, int z, Block block)
+    public void setBlock(Block block, int x, int y, int z)
     {
-        this.setBlockWithoutRendering(x, y, z, block);
+        this.setBlockQuietly(x, y, z, block);
 
         for (int i = -1; i < 2; i++) {
             for (int j = -1; j < 2; j++) {
@@ -165,12 +183,14 @@ public class ClientLevel implements RenderHandler, Tick
 
     public void removeBlock(int x, int y, int z)
     {
-        setBlock(x, y, z, BlockRegistry.Blocks.air);
+        setBlock(BlockRegistry.Blocks.air, x, y, z);
     }
 
-    public void setBlock(Vector3i pos, Block block)
+    public void setBlockQuietly(Block block, Vector3i pos) { setBlockQuietly(pos.x, pos.y, pos.z, block); }
+
+    public void setBlock(Block block, Vector3i pos)
     {
-        setBlock(pos.x, pos.y, pos.z, block);
+        setBlock(block, pos.x, pos.y, pos.z);
     }
 
     public Block getBlock(Vector3i pos)
@@ -193,7 +213,7 @@ public class ClientLevel implements RenderHandler, Tick
                     Block block = getBlock(x, y, z);
 
                     if (block == null) continue;
-                    if (block.isVisible() && !block.isLiquid() && !block.isTile()) {
+                    if (block.isCollidable()) {
                         boxes.add(new AABB((float)x, (float)y, (float)z, (float)(x + 1), (float)(y + 1), (float)(z + 1)));
                     }
                 }
@@ -236,9 +256,16 @@ public class ClientLevel implements RenderHandler, Tick
         return false;
     }
 
+    public Generation getGeneration() {
+        return generation;
+    }
+
     public void destroy()
     {
         // todo: destroy all entities
+        this.generation.destroy();
+        this.blocksQueue.clear();
+
         Opencraft.unregisterRenderEvent(this.glUpdateEvent);
         Opencraft.unregisterTickEvent(this.tickEvent);
     }

@@ -4,9 +4,9 @@ import com.artingl.opencraft.GUI.Elements.Button;
 import com.artingl.opencraft.GUI.Elements.Element;
 import com.artingl.opencraft.GUI.GUI;
 import com.artingl.opencraft.Opencraft;
-import com.artingl.opencraft.Rendering.World.BlockRenderer;
-import com.artingl.opencraft.GL.Camera;
-import com.artingl.opencraft.Rendering.Game.TextureEngine;
+import com.artingl.opencraft.Control.World.BlockRenderer;
+import com.artingl.opencraft.Control.Game.Camera;
+import com.artingl.opencraft.Control.Game.TextureEngine;
 import com.artingl.opencraft.Resources.Lang.Lang;
 import org.lwjgl.opengl.GL11;
 
@@ -22,8 +22,14 @@ public class MainMenuScreen extends Screen
             TextureEngine.load("opencraft:title/bg/panorama5.png")
     };
     private final int logo;
-
     private float panoramaTimer = 0;
+
+    private int singleplayerButton;
+    private int multiplayerButton;
+    private int modsListButton;
+    private int settingsButton;
+    private int quitButton;
+
 
     public MainMenuScreen() {
         super(Opencraft.getWidth(), Opencraft.getHeight(), "main_menu");
@@ -35,13 +41,14 @@ public class MainMenuScreen extends Screen
     public void init() {
         super.init();
 
-        this.addElement(new Button(this, 0, 0, 0, Lang.getTranslatedString("opencraft:gui.text.singleplayer"), () -> Opencraft.setCurrentScreen(GUI.worldList)));
-        this.addElement(new Button(this, 1, 0, 0, Lang.getTranslatedString("opencraft:gui.text.multiplayer"), () -> Opencraft.setCurrentScreen(GUI.serversList)));
-        this.addElement(new Button(this, 2, 0, 0, Lang.getTranslatedString("opencraft:gui.text.settings"), () -> Opencraft.setCurrentScreen(GUI.settingsScreen)));
-        this.addElement(new Button(this, 3, 0, 0, Lang.getTranslatedString("opencraft:gui.text.quit_game"), Opencraft::close));
+        singleplayerButton = this.addElement(new Button(this, 0, 0, Lang.getTranslatedString("opencraft:gui.text.singleplayer"), () -> Opencraft.setCurrentScreen(GUI.worldList)));
+        multiplayerButton = this.addElement(new Button(this, 0, 0, Lang.getTranslatedString("opencraft:gui.text.multiplayer"), () -> Opencraft.connectTo("95.165.132.6", 65000)));
+        modsListButton = this.addElement(new Button(this, 0, 0, Lang.getTranslatedString("opencraft:gui.text.mods_list"), () -> Opencraft.setCurrentScreen(GUI.modsList)));
+        settingsButton = this.addElement(new Button(this, 0, 0, Lang.getTranslatedString("opencraft:gui.text.settings"), () -> Opencraft.setCurrentScreen(GUI.settingsScreen)));
+        quitButton = this.addElement(new Button(this, 0, 0, Lang.getTranslatedString("opencraft:gui.text.quit_game"), Opencraft::close));
 
-        getElements().get(2).setWidth(90);
-        getElements().get(3).setWidth(90);
+        getElements().get(settingsButton).setWidth(90);
+        getElements().get(quitButton).setWidth(90);
     }
 
     @Override
@@ -49,22 +56,27 @@ public class MainMenuScreen extends Screen
         super.updateElement(element, screenWidth, screenHeight, scale);
         if (element instanceof Button btn)
         {
-            if (btn.getId() == 0)
+            if (btn.getId() == singleplayerButton)
             {
-                btn.setY(screenHeight / 2f - 50);
+                btn.setY(screenHeight / 2f - 55);
                 btn.setX(screenWidth / 2f - btn.getWidth() / 2f);
             }
-            else if (btn.getId() == 1)
+            else if (btn.getId() == multiplayerButton)
             {
-                btn.setY(screenHeight / 2f - 50 + btn.getHeight() + 5);
+                btn.setY(screenHeight / 2f - 50 + btn.getHeight());
                 btn.setX(screenWidth / 2f - btn.getWidth() / 2f);
             }
-            else if (btn.getId() == 2)
+            else if (btn.getId() == modsListButton)
+            {
+                btn.setY(screenHeight / 2f - 50 + btn.getHeight() + btn.getHeight() + 5);
+                btn.setX(screenWidth / 2f - btn.getWidth() / 2f);
+            }
+            else if (btn.getId() == settingsButton)
             {
                 btn.setY(screenHeight / 2f + 50);
                 btn.setX(screenWidth / 2f - btn.getWidth() - 10);
             }
-            else if (btn.getId() == 3)
+            else if (btn.getId() == quitButton)
             {
                 btn.setY(screenHeight / 2f + 50);
                 btn.setX(screenWidth / 2f + 10);

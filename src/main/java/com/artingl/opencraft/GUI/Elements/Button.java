@@ -1,10 +1,10 @@
 package com.artingl.opencraft.GUI.Elements;
 
-import com.artingl.opencraft.GL.Controls;
+import com.artingl.opencraft.Control.Game.Input;
 import com.artingl.opencraft.GUI.Screens.Screen;
 import com.artingl.opencraft.Logger.Logger;
 import com.artingl.opencraft.Math.Vector2i;
-import com.artingl.opencraft.Rendering.Game.TextureEngine;
+import com.artingl.opencraft.Control.Game.TextureEngine;
 import com.artingl.opencraft.Resources.Resources;
 import com.artingl.opencraft.Opencraft;
 import org.lwjgl.opengl.GL11;
@@ -31,9 +31,9 @@ public class Button extends Element
 
     private int[][] croppedImages;
 
-    public Button(Screen screen, int id, float x, float y, String text, Runnable onClick)
+    public Button(Screen screen, float x, float y, String text, Runnable onClick)
     {
-        super(id, screen, x, y, 200, 20);
+        super(screen, x, y, 200, 20);
         this.text = text;
         this.onClick = onClick;
 
@@ -95,11 +95,11 @@ public class Button extends Element
     }
 
     @Override
-    public void mouseHandler(Controls.MouseInput mouseInput) {
+    public void mouseHandler(Input.MouseInput mouseInput) {
         super.mouseHandler(mouseInput);
 
-        if (mouseInput.state == Controls.MouseState.UP) {
-            if (mouseInput.button == Controls.Buttons.BUTTON_LEFT && enabled) {
+        if (mouseInput.state == Input.MouseState.UP) {
+            if (mouseInput.button == Input.Buttons.BUTTON_LEFT && enabled) {
                 if (isMouseHover())
                     clickHandler();
             }

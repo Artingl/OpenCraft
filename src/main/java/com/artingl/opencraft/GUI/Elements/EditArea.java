@@ -1,9 +1,9 @@
 package com.artingl.opencraft.GUI.Elements;
 
-import com.artingl.opencraft.GL.Controls;
+import com.artingl.opencraft.Control.Game.Input;
 import com.artingl.opencraft.GUI.Screens.Screen;
 import com.artingl.opencraft.Opencraft;
-import com.artingl.opencraft.Rendering.Game.TextureEngine;
+import com.artingl.opencraft.Control.Game.TextureEngine;
 import org.lwjgl.opengl.GL11;
 
 public class EditArea extends Element
@@ -20,9 +20,9 @@ public class EditArea extends Element
     protected long bracketTimer;
     protected boolean bracketTimerWait;
 
-    public EditArea(Screen screen, int id, float x, float y, String text, Runnable onEdit)
+    public EditArea(Screen screen, float x, float y, String text, Runnable onEdit)
     {
-        super(id, screen, x, y, 200, 20);
+        super(screen, x, y, 200, 20);
         this.hint = text;
         this.text = "";
         this.onEdit = onEdit;
@@ -30,20 +30,20 @@ public class EditArea extends Element
         this.bracketTimerWait = false;
     }
 
-    public void keyHandler(Controls.KeyInput keyInput) {
+    public void keyHandler(Input.KeyInput keyInput) {
         if (selected) {
-            if (keyInput.keyCode == Controls.Keys.KEY_BACKSPACE && this.text.length() - bracketPosOffset - 1 >= 0) {
+            if (keyInput.keyCode == Input.Keys.KEY_BACKSPACE && this.text.length() - bracketPosOffset - 1 >= 0) {
                 this.text = this.text.substring(0, this.text.length()-1-bracketPosOffset) + this.text.substring(this.text.length()-1-bracketPosOffset+1);
             }
-            else if (keyInput.keyCode == Controls.Keys.KEY_DELETE && this.text.length() - 1 >= 0 && bracketPosOffset > 0) {
+            else if (keyInput.keyCode == Input.Keys.KEY_DELETE && this.text.length() - 1 >= 0 && bracketPosOffset > 0) {
                 this.text = this.text.substring(0, this.text.length()-1-bracketPosOffset+1) + this.text.substring(this.text.length()-1-bracketPosOffset+2);
                 bracketPosOffset--;
             }
-            else if (keyInput.keyCode == Controls.Keys.KEY_LEFT) {
+            else if (keyInput.keyCode == Input.Keys.KEY_LEFT) {
                 if (this.text.length() > bracketPosOffset)
                     bracketPosOffset++;
             }
-            else if (keyInput.keyCode == Controls.Keys.KEY_RIGHT) {
+            else if (keyInput.keyCode == Input.Keys.KEY_RIGHT) {
                 if (bracketPosOffset-1 >= 0)
                     bracketPosOffset--;
             }
@@ -128,12 +128,12 @@ public class EditArea extends Element
     }
 
     @Override
-    public void mouseHandler(Controls.MouseInput mouseInput) {
+    public void mouseHandler(Input.MouseInput mouseInput) {
         super.mouseHandler(mouseInput);
 
         if (selected) {
-            if (mouseInput.state == Controls.MouseState.UP) {
-                if (mouseInput.button == Controls.Buttons.BUTTON_LEFT) {
+            if (mouseInput.state == Input.MouseState.UP) {
+                if (mouseInput.button == Input.Buttons.BUTTON_LEFT) {
                     int pos = (int) (normalizeX(mouseInput.mousePosition.x) - this.x);
                     int w = 0;
                     int j = 0;

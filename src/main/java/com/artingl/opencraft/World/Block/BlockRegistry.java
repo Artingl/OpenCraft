@@ -4,6 +4,7 @@ import com.artingl.opencraft.Logger.Logger;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 
 public class BlockRegistry {
     public static class Blocks {
@@ -23,11 +24,13 @@ public class BlockRegistry {
         public static Block hellrock = new BlockHellrock();
         public static Block grass = new BlockGrass();
         public static Block rose = new BlockRose();
+        public static Block snow = new BlockSnow();
     }
 
     public static ArrayList<Class<?>> blocks = new ArrayList<>();
+    public static HashMap<Short, Block> blocksHashes = new HashMap<>();
 
-    public static void registerAllBlocks() {
+    public static void init() {
         Class<?>[] vanilla_blocks = {
                 BlockAir.class,
                 BlockStone.class,
@@ -44,40 +47,26 @@ public class BlockRegistry {
                 BlockSandStone.class,
                 BlockHellrock.class,
                 BlockGrass.class,
-                BlockRose.class
+                BlockRose.class,
+                BlockSnow.class,
         };
 
         blocks.addAll(Arrays.asList(vanilla_blocks));
-    }
 
-    public static Block registerBlock(Block block) {
-        blocks.add(block.getClass());
-        return block;
-    }
-
-    public static Block getBlockById(int id) {
-        try {
-            return (Block) BlockRegistry.blocks.get(id).getConstructor().newInstance();
-        } catch (Exception e) {
-            Logger.exception("Error while getting block by its id", e);
-        }
-
-        return Blocks.air;
-    }
-
-    public static Block getBlockById(String id) {
         try {
             for (Class<?> blockClass : BlockRegistry.blocks) {
                 Block block = (Block) blockClass.getConstructor().newInstance();
-
-                if (block.getId().equals(id))
-                    return block;
+                blocksHashes.put((short) block.getId().hashCode(), block);
             }
         } catch (Exception e) {
             Logger.exception("Error while getting block id", e);
         }
+    }
 
-        return BlockRegistry.Blocks.air;
+    public static Block registerBlock(Block block) {
+        blocks.add(block.getClass());
+        blocksHashes.put((short) block.getId().hashCode(), block);
+        return block;
     }
 
 }

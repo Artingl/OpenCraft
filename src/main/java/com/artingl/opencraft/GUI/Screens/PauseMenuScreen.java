@@ -1,6 +1,6 @@
 package com.artingl.opencraft.GUI.Screens;
 
-import com.artingl.opencraft.GL.Controls;
+import com.artingl.opencraft.Control.Game.Input;
 import com.artingl.opencraft.GUI.Elements.Element;
 import com.artingl.opencraft.GUI.GUI;
 import com.artingl.opencraft.Resources.Lang.Lang;
@@ -10,6 +10,11 @@ import com.artingl.opencraft.Opencraft;
 public class PauseMenuScreen extends Screen
 {
 
+    private int settingsButton;
+    private int backToGameButton;
+    private int quitButton;
+    private int hostGameButton;
+
     public PauseMenuScreen() {
         super(Opencraft.getWidth(), Opencraft.getHeight(), "game_menu");
         this.renderGameInBackground = true;
@@ -18,10 +23,10 @@ public class PauseMenuScreen extends Screen
     public void init() {
         super.init();
 
-        this.addElement(new Button(this, 2, 0, 0, Lang.getTranslatedString("opencraft:gui.text.settings"), () -> Opencraft.setCurrentScreen(GUI.settingsScreen)));
-        this.addElement(new Button(this, 1, 0, 0, Lang.getTranslatedString("opencraft:gui.text.back_to_game"), Opencraft::closeCurrentScreen));
-        this.addElement(new Button(this, 0, 0, 0, Lang.getTranslatedString("opencraft:gui.text.quit_world"), Opencraft::quitToMainMenu));
-        this.addElement(new Button(this, 3, 0, 0, "Host game", () -> {
+        settingsButton = this.addElement(new Button(this, 0, 0, Lang.getTranslatedString("opencraft:gui.text.settings"), () -> Opencraft.setCurrentScreen(GUI.settingsScreen)));
+        backToGameButton = this.addElement(new Button(this, 0, 0, Lang.getTranslatedString("opencraft:gui.text.back_to_game"), Opencraft::closeCurrentScreen));
+        quitButton = this.addElement(new Button(this, 0, 0, Lang.getTranslatedString("opencraft:gui.text.quit_world"), Opencraft::quitToMainMenu));
+        hostGameButton = this.addElement(new Button(this, 0, 0, "Host game", () -> {
             Opencraft.getInternalServer().hostgame();
             Opencraft.closeCurrentScreen();
         }));
@@ -34,17 +39,17 @@ public class PauseMenuScreen extends Screen
         {
 
             btn.setX(screenWidth / 2f - btn.getWidth() / 2f);
-            if (btn.getId() == 1)
+            if (btn.getId() == backToGameButton)
             {
                 btn.setY(screenHeight / 2f - btn.getHeight() / 2f - 10);
             }
-            else if (btn.getId() == 2) {
+            else if (btn.getId() == settingsButton) {
                 btn.setY(screenHeight / 2f + 5);
             }
-            else if (btn.getId() == 3) {
+            else if (btn.getId() == hostGameButton) {
                 btn.setY(screenHeight / 2f + btn.getHeight() / 2f + 20);
             }
-            else if (btn.getId() == 0) {
+            else if (btn.getId() == quitButton) {
                 btn.setY(screenHeight / 2f + (btn.getHeight() * 2) + 15);
             }
 
@@ -58,10 +63,10 @@ public class PauseMenuScreen extends Screen
     }
 
     @Override
-    protected void keyPressed(Controls.KeyInput keyInput) {
+    protected void keyPressed(Input.KeyInput keyInput) {
         super.keyPressed(keyInput);
 
-        if (keyInput.keyCode == Controls.Keys.KEY_ESCAPE) {
+        if (keyInput.keyCode == Input.Keys.KEY_ESCAPE) {
             Opencraft.closeCurrentScreen();
         }
     }

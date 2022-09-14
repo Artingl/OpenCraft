@@ -1,11 +1,13 @@
 package com.artingl.opencraft.GUI.Screens;
 
-import com.artingl.opencraft.GL.Controls;
+import com.artingl.opencraft.Control.Game.Input;
 import com.artingl.opencraft.GUI.Elements.ChatEditArea;
 import com.artingl.opencraft.GUI.Elements.Element;
+import com.artingl.opencraft.Logger.Logger;
+import com.artingl.opencraft.Multiplayer.Packet.PacketEntityUpdate;
+import com.artingl.opencraft.Multiplayer.World.Entity.EntityPlayerMP;
 import com.artingl.opencraft.Opencraft;
 import com.artingl.opencraft.Resources.Lang.Lang;
-import com.artingl.opencraft.World.Commands.Command;
 import com.artingl.opencraft.World.Entity.EntityPlayer;
 import com.artingl.opencraft.World.Level.ClientLevel;
 import org.lwjgl.opengl.GL11;
@@ -17,7 +19,7 @@ public class ChatScreen extends Screen
     private int commandEditArea;
     private EntityPlayer player;
     private ClientLevel level;
-    private String command;
+    private String message;
     private final String startText;
 
     public ChatScreen(EntityPlayer player, ClientLevel level, String startText) {
@@ -26,15 +28,15 @@ public class ChatScreen extends Screen
         this.player = player;
         this.level = level;
         this.startText = startText;
-        this.command = "";
+        this.message = "";
     }
 
     public void init() {
         super.init();
 
-        command = "";
-        commandEditArea = this.addElement(new ChatEditArea(this, 0, 0, 0, Lang.getTranslatedString("opencraft:gui.text.enter_in_chat"), () ->
-                command = ((ChatEditArea)getElements().get(commandEditArea)).getText()));
+        message = "";
+        commandEditArea = this.addElement(new ChatEditArea(this,0, 0, Lang.getTranslatedString("opencraft:gui.text.enter_in_chat"), () ->
+                message = ((ChatEditArea)getElements().get(commandEditArea)).getText()));
 
         ((ChatEditArea)getElements().get(commandEditArea)).setText(startText);
     }
@@ -65,17 +67,23 @@ public class ChatScreen extends Screen
     }
 
     @Override
-    protected void keyPressed(Controls.KeyInput keyInput) {
+    protected void keyPressed(Input.KeyInput keyInput) {
         super.keyPressed(keyInput);
 
-        if (keyInput.keyCode == Controls.Keys.KEY_ESCAPE) {
+        if (keyInput.keyCode == Input.Keys.KEY_ESCAPE) {
             Opencraft.closePlayerScreen();
         }
-        else if (keyInput.keyCode == Controls.Keys.KEY_ENTER) {
-            if (command.length() > 0) {
-                if (command.charAt(0) == '/')
-                    Command.execute(command, player, level);
-                else player.tellInChat(player.getNameTag() + ": " + command);
+        else if (keyInput.keyCode == Input.Keys.KEY_ENTER) {
+            if (message.length() > 0) {
+                if (Opencraft.getClientConnection().isActive()) {
+                    try {
+                        new PacketEntityUpdate(null, Opencraft.getClientConnection()
+                                .getConnection()).tellInChat((EntityPlayerMP) player.convertToMP(), message);
+                    } catch (Exception e) {
+                        Logger.exception("Unable to tell in chat", e);
+                    }
+                }
+
                 ((ChatEditArea) getElements().get(commandEditArea)).setText("");
             }
 

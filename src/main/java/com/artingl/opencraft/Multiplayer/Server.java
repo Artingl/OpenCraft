@@ -6,15 +6,17 @@ import com.artingl.opencraft.Math.Vector3f;
 import com.artingl.opencraft.Multiplayer.Packet.Packet;
 import com.artingl.opencraft.Multiplayer.Packet.PacketHandshake;
 import com.artingl.opencraft.Multiplayer.Packet.PacketKick;
-import com.artingl.opencraft.Multiplayer.Packet.PacketUpdateEntity;
+import com.artingl.opencraft.Multiplayer.Packet.PacketEntityUpdate;
 import com.artingl.opencraft.Multiplayer.World.Entity.EntityMP;
 import com.artingl.opencraft.Multiplayer.World.Entity.EntityPlayerMP;
 import com.artingl.opencraft.Opencraft;
 import com.artingl.opencraft.Utils.Utils;
+import com.artingl.opencraft.World.Block.BlockRegistry;
 import com.artingl.opencraft.World.Entity.Entity;
 import com.artingl.opencraft.World.Entity.EntityPlayer;
 import com.artingl.opencraft.World.EntityData.Nametag;
 import com.artingl.opencraft.World.EntityData.UUID;
+import com.artingl.opencraft.World.Item.ItemSlot;
 
 import java.io.*;
 import java.net.ServerSocket;
@@ -23,7 +25,7 @@ import java.util.ArrayList;
 
 public class Server {
     public enum Side {
-        SERVER, CLIENT
+        SERVER, CLIENT, BOTH
     }
 
     public static class _ServerSettings {
@@ -67,9 +69,15 @@ public class Server {
     public void destroy() throws IOException {
         this.handlerThread.interrupt();
         this.connections.clear();
-        this.entities.clear();
 
+        this.entities.clear();
         this.server.close();
+    }
+
+    public void tick() {
+        for (EntityMP entityMP : this.entities) {
+            entityMP.tick();
+        }
     }
 
     public void broadcastToEverybody(String text) {
@@ -95,7 +103,7 @@ public class Server {
                             DataOutputStream dataOutputStream = new DataOutputStream(connection.getOutputStream());
 
                             PacketHandshake handshake = new PacketHandshake(this, connection);
-                            PacketHandshake.Type handshakeResult = handshake.handshakeConnection();
+                            PacketHandshake.Type handshakeResult = handshake.checkHandshake();
 
                             if (handshakeResult == PacketHandshake.Type.SUCCESS) {
                                 Connection playerConnection = new Connection(connection);
@@ -107,10 +115,11 @@ public class Server {
                                 summonPlayerEntity(handshake.getPlayerUUID(), handshake.getPlayerNametag(), connection);
 
                                 while (!connection.isClosed()) {
-                                    int magic = dataInputStream.readInt();
-                                    if (magic != Packet.MAGIC) {
-                                        Logger.error("Bad magic " + magic + ". Should be " + Packet.MAGIC);
-                                        continue;
+                                    byte magic_0 = dataInputStream.readByte();
+                                    byte magic_1 = dataInputStream.readByte();
+                                    while (magic_0 != Packet.MAGIC_0 || magic_1 != Packet.MAGIC_1) {
+                                        magic_0 = dataInputStream.readByte();
+                                        magic_1 = dataInputStream.readByte();
                                     }
 
                                     int id = dataInputStream.readInt();
@@ -169,12 +178,12 @@ public class Server {
     }
 
     public EntityMP getEntity(UUID uuid, Entity.Types entityType) {
-        return getEntity(uuid, entityType.hashCode());
+        return getEntitySave(uuid, entityType.ordinal());
     }
 
-    public EntityMP getEntity(UUID uuid, int entityType) {
+    public EntityMP getEntitySave(UUID uuid, int entityType) {
         for (EntityMP e: entities) {
-            if (e.getNbt().getUUID().equals(uuid) && e.getEntityType().hashCode() == entityType) {
+            if (e.getNbt().getUUID().equals(uuid) && e.getEntityType().ordinal() == entityType) {
                 return e;
             }
         }
@@ -182,22 +191,43 @@ public class Server {
         return EntityMP.getDefaultEntityByType(entityType);
     }
 
+    public EntityMP getEntity(UUID uuid, int entityType) {
+        for (EntityMP e: entities) {
+            if (e.getNbt().getUUID().equals(uuid) && e.getEntityType().ordinal() == entityType) {
+                return e;
+            }
+        }
+
+        return null;
+    }
+
     private void summonPlayerEntity(UUID playerUUID, Nametag nametag, Socket connection) throws IOException {
         EntityPlayerMP playerMP = (EntityPlayerMP) getEntity(playerUUID, Entity.Types.PLAYER);
         playerMP.setConnection(connection);
         playerMP.getNbt().setNameTag(nametag);
         playerMP.getNbt().setUUID(playerUUID);
-        playerMP.setPosition(new Vector3f(1000, 110, 1000));
+        playerMP.setPosition(new Vector3f(290, 148, 1053));
+        playerMP.setFlyingState(true);
 
-        entities.add(playerMP);
+        playerMP.appendInventory(new ItemSlot(BlockRegistry.Blocks.grass_block, 64));
 
         for (Connection conn: connections) {
-            new PacketUpdateEntity(this, conn.getConnection()).summonEntity(playerMP);
+            PacketEntityUpdate packet = new PacketEntityUpdate(this, conn.getConnection());
+            packet.summonEntityPlayer(playerMP);
         }
 
         for (EntityMP entityMP: entities) {
-            new PacketUpdateEntity(this, connection).summonEntity(entityMP);
+            PacketEntityUpdate packet = new PacketEntityUpdate(this, connection);
+
+            if (entityMP instanceof EntityPlayerMP) {
+                packet.summonEntityPlayer((EntityPlayerMP) entityMP);
+            }
+            else {
+                packet.summonEntity(entityMP);
+            }
         }
+
+        entities.add(playerMP);
 
         broadcastToEverybody("Player " + nametag.getNametag() + " joined the game!");
     }

@@ -1,7 +1,7 @@
 package com.artingl.opencraft.ModAPI.World.Block;
 
 import com.artingl.opencraft.ModAPI.Texture.TexturesApi;
-import com.artingl.opencraft.Rendering.Game.Texture;
+import com.artingl.opencraft.Control.Game.Texture;
 import com.artingl.opencraft.World.Item.Tool;
 
 public class BlockProperties {

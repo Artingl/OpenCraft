@@ -9,6 +9,9 @@ import org.lwjgl.opengl.GL11;
 public class DeathScreen extends Screen
 {
 
+    private int respawnButton;
+    private int quitWorldButton;
+
     public DeathScreen() {
         super(Opencraft.getWidth(), Opencraft.getHeight(), "death_screen");
         this.renderGameInBackground = true;
@@ -18,11 +21,11 @@ public class DeathScreen extends Screen
     public void init() {
         super.init();
 
-        this.addElement(new Button(this, 1, 0, 0, Lang.getTranslatedString("opencraft:gui.text.respawn"), () -> {
+        respawnButton = this.addElement(new Button(this,0, 0, Lang.getTranslatedString("opencraft:gui.text.respawn"), () -> {
             Opencraft.getPlayerEntity().respawn();
             Opencraft.closeCurrentScreen();
         }));
-        this.addElement(new Button(this, 0, 0, 0, Lang.getTranslatedString("opencraft:gui.text.quit_world"), Opencraft::quitToMainMenu));
+        quitWorldButton = this.addElement(new Button(this,0, 0, Lang.getTranslatedString("opencraft:gui.text.quit_world"), Opencraft::quitToMainMenu));
     }
 
 
@@ -32,11 +35,11 @@ public class DeathScreen extends Screen
         if (element instanceof Button btn)
         {
             btn.setX(screenWidth / 2f - btn.getWidth() / 2f);
-            if (btn.getId() == 1)
+            if (btn.getId() == respawnButton)
             {
                 btn.setY(screenHeight / 2f - btn.getHeight() / 2f - 10);
             }
-            else if (btn.getId() == 0) {
+            else if (btn.getId() == quitWorldButton) {
                 btn.setY(screenHeight / 2f + 10);
             }
 

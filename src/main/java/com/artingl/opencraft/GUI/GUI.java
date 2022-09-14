@@ -8,6 +8,7 @@ public class GUI {
     public static PauseMenuScreen pauseMenu;
     public static WorldListScreen worldList;
     public static ServersListScreen serversList;
+    public static ModsListScreen modsList;
     public static SettingsMenuScreen settingsScreen;
     public static MainMenuScreen mainMenu;
     public static VideoSettingsMenuScreen videoSettings;
@@ -19,6 +20,7 @@ public class GUI {
         worldList = new WorldListScreen();
         serversList = new ServersListScreen();
         pauseMenu = new PauseMenuScreen();
+        modsList = new ModsListScreen();
         newWorldConfigurator = new NewWorldConfiguratorScreen();
         settingsScreen = new SettingsMenuScreen();
         videoSettings = new VideoSettingsMenuScreen();

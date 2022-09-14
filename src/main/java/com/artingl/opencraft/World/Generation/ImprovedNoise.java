@@ -2,7 +2,7 @@ package com.artingl.opencraft.World.Generation;
 
 import java.util.Random;
 
-public class ImprovedNoise extends Synth {
+public class ImprovedNoise {
    private int[] p;
    public double scale;
 
@@ -63,5 +63,9 @@ public class ImprovedNoise extends Synth {
 
    public double getValue(double x, double y) {
       return this.noise(x, y, 0.0D);
+   }
+
+   public void destroy() {
+      this.p = null;
    }
 }

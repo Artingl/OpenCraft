@@ -78,13 +78,8 @@ public class Utils {
         return path.replaceFirst("[.][^.]+$", "");
     }
 
-    public static void sleep(long time) {
-        try { Thread.sleep(time); } catch (Exception e) {
-            Logger.exception("Unable to call Thread::sleep", e);
-        }
-    }
-
     public static String capitalizeString(String id) {
         return id.substring(0, 1).toUpperCase() + id.substring(1).toLowerCase();
     }
+
 }

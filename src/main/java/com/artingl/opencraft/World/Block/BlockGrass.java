@@ -14,8 +14,6 @@ public class BlockGrass extends Block
 
         this.setStrength(1);
         this.setDefaultTool(Tool.IMMEDIATELY);
-
-        super.makeRandomization();
     }
 
     public boolean isTile()

@@ -3,6 +3,7 @@ package com.artingl.opencraft.Multiplayer;
 import com.artingl.opencraft.GUI.GUI;
 import com.artingl.opencraft.Logger.Logger;
 import com.artingl.opencraft.Multiplayer.Packet.Packet;
+import com.artingl.opencraft.Multiplayer.Packet.PacketHandshake;
 import com.artingl.opencraft.Multiplayer.World.Entity.EntityMP;
 import com.artingl.opencraft.Opencraft;
 import com.artingl.opencraft.Utils.Utils;
@@ -53,61 +54,69 @@ public class Client {
                 DataInputStream dataInputStream = new DataInputStream(connection.getInputStream());
                 DataOutputStream dataOutputStream = new DataOutputStream(connection.getOutputStream());
 
-                dataOutputStream.writeInt(Opencraft.getVersion().hashCode());
-                dataOutputStream.writeUTF(Opencraft.getPlayerEntity().getUUID().getStringUUID());
-                dataOutputStream.writeUTF(Opencraft.getPlayerEntity().getNameTag().getNametag());
-                dataOutputStream.flush();
+                PacketHandshake handshake = new PacketHandshake(this, connection);
+                handshake.sendHandshake();
 
-                int seed = dataInputStream.readInt();
+                byte magic_0 = dataInputStream.readByte();
+                byte magic_1 = dataInputStream.readByte();
+                while (magic_0 != Packet.MAGIC_0 || magic_1 != Packet.MAGIC_1) {
+                    Logger.error("Bad magic " + magic_0 + " " + magic_1);
+                    magic_0 = dataInputStream.readByte();
+                    magic_1 = dataInputStream.readByte();
+                }
 
-                Opencraft.getLevel().setSeed(seed);
+                if (dataInputStream.readInt() == 1) {
+                    int seed = dataInputStream.readInt();
 
-                this.isActive = true;
+                    Opencraft.getLevel().setSeed(seed);
 
-                while (this.isActive) {
-                    try {
-                        int magic = dataInputStream.readInt();
-                        if (magic != Packet.MAGIC) {
-                            Logger.error("Bad magic " + magic + ". Should be " + Packet.MAGIC);
-                            continue;
-                        }
+                    this.isActive = true;
 
-                        int id = dataInputStream.readInt();
-                        Packet packetInput = Packet.getPacketById(id, this, connection);
-
-                        if (packetInput != null) {
-                            packetInput.executeClientSide();
-                        }
-                        else {
-                            Logger.error("Bad packet with id " + id);
-                        }
-                    } catch (Exception e) {
-                        String kl = e.getLocalizedMessage();
-
-                        if (kl != null) {
-                            if (kl.contains("Socket closed")) {
-                                Logger.error("Socket connection closed");
-                                this.isActive = false;
+                    while (this.isActive) {
+                        try {
+                            magic_0 = dataInputStream.readByte();
+                            magic_1 = dataInputStream.readByte();
+                            while (magic_0 != Packet.MAGIC_0 || magic_1 != Packet.MAGIC_1) {
+                                magic_0 = dataInputStream.readByte();
+                                magic_1 = dataInputStream.readByte();
                             }
-                            else
+
+                            int id = dataInputStream.readInt();
+                            Packet packetInput = Packet.getPacketById(id, this, connection);
+
+                            if (packetInput != null) {
+                                packetInput.executeClientSide();
+                            } else {
+                                Logger.error("Bad packet with id " + id);
+                            }
+                        } catch (Exception e) {
+                            String kl = e.getLocalizedMessage();
+
+                            if (kl != null) {
+                                if (kl.contains("Socket closed")) {
+                                    Logger.error("Socket connection closed");
+                                    this.isActive = false;
+                                } else
+                                    Logger.exception("Received bad packet!", e);
+                            } else
                                 Logger.exception("Received bad packet!", e);
                         }
-                        else
-                            Logger.exception("Received bad packet!", e);
-                    }
 
-                    if (!this.checked) {
-                        this.checked = true;
-                        Utils.createThread(() -> {
-                            try {
-                                this.isActive = connection.getInetAddress().isReachable(Server.TIMEOUT);
-                                this.checked = false;
-                            } catch (IOException e) {
-                                this.isActive = false;
-                            }
-                        });
+//                        if (!this.checked) {
+//                            this.checked = true;
+//                            Utils.createThread(() -> {
+//                                try {
+//                                    this.isActive = connection.getInetAddress().isReachable(Server.TIMEOUT);
+//                                    this.checked = false;
+//                                } catch (IOException e) {
+//                                    this.isActive = false;
+//                                }
+//                            });
+//                        }
                     }
                 }
+
+                connection.close();
 
             } catch (Exception e) {
                 Logger.exception("Unable to connect to the server", e);
@@ -116,6 +125,12 @@ public class Client {
 
         this.handlerThread.setDaemon(true);
         this.handlerThread.start();
+    }
+
+    public void tick() {
+        for (EntityMP entityMP : this.entities) {
+            entityMP.tick();
+        }
     }
 
     public String getHost() {
@@ -144,8 +159,12 @@ public class Client {
 
     public void destroy() throws IOException {
         this.handlerThread.interrupt();
-        this.entities.clear();
 
+        for (EntityMP entityMP : this.entities) {
+            entityMP.destroy();
+        }
+
+        this.entities.clear();
         this.connection.close();
     }
 
@@ -161,14 +180,13 @@ public class Client {
         this.handlerThread.interrupt();
     }
 
-
-    public EntityMP getEntity(UUID uuid, Entity.Types entityType) {
-        return getEntity(uuid, entityType.hashCode());
+    public EntityMP getEntitySave(UUID uuid, Entity.Types entityType) {
+        return getEntitySave(uuid, entityType.ordinal());
     }
 
-    public EntityMP getEntity(UUID uuid, int entityType) {
+    public EntityMP getEntitySave(UUID uuid, int entityType) {
         for (EntityMP e: entities) {
-            if (e.getNbt().getUUID().equals(uuid) && e.getEntityType().hashCode() == entityType) {
+            if (e.getNbt().getUUID().equals(uuid) && e.getEntityType().ordinal() == entityType) {
                 return e;
             }
         }
@@ -176,7 +194,18 @@ public class Client {
         return EntityMP.getDefaultEntityByType(entityType);
     }
 
+    public EntityMP getEntity(UUID uuid, int entityType) {
+        for (EntityMP e: entities) {
+            if (e.getNbt().getUUID().equals(uuid) && e.getEntityType().ordinal() == entityType) {
+                return e;
+            }
+        }
+
+        return null;
+    }
+
     public ArrayList<EntityMP> getEntities() {
         return entities;
     }
+
 }

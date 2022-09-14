@@ -1,9 +1,9 @@
 package com.artingl.opencraft.GUI.Elements;
 
-import com.artingl.opencraft.GL.Controls;
+import com.artingl.opencraft.Control.Game.Input;
 import com.artingl.opencraft.GUI.Screens.Screen;
 import com.artingl.opencraft.Opencraft;
-import com.artingl.opencraft.Rendering.Game.VerticesBuffer;
+import com.artingl.opencraft.Control.Game.VerticesBuffer;
 import org.lwjgl.opengl.GL11;
 
 public class Element
@@ -21,9 +21,8 @@ public class Element
 
     public Element(){}
 
-    public Element(int id, Screen screen, float x, float y, float width, float height)
+    public Element(Screen screen, float x, float y, float width, float height)
     {
-        this.id = id;
         this.x = x;
         this.y = y;
         this.width = width;
@@ -31,6 +30,10 @@ public class Element
         this.isHighlighting = false;
         this.selected = false;
         this.screen = screen;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     protected void fillTexture(float x0, float y0, float x1, float y1, int texture) {
@@ -61,8 +64,8 @@ public class Element
     }
 
     public boolean isMouseHover() {
-        int mx = Controls.getMouseX() * Opencraft.getGuiScaleValue() / Opencraft.getHeight();
-        int my = Controls.getMouseY() * Opencraft.getGuiScaleValue() / Opencraft.getHeight();
+        int mx = Input.getMouseX() * Opencraft.getGuiScaleValue() / Opencraft.getHeight();
+        int my = Input.getMouseY() * Opencraft.getGuiScaleValue() / Opencraft.getHeight();
         return mouseHover(mx, my, x, ((float) Opencraft.getHeight() * Opencraft.getGuiScaleValue() / Opencraft.getHeight()) - (y + height), width, height);
     }
 
@@ -137,10 +140,10 @@ public class Element
         height = h;
     }
 
-    public void keyHandler(Controls.KeyInput keyInput) {
+    public void keyHandler(Input.KeyInput keyInput) {
     }
 
-    public void mouseHandler(Controls.MouseInput mouseInput) {
+    public void mouseHandler(Input.MouseInput mouseInput) {
     }
 
     public void clickHandler() {
@@ -155,6 +158,9 @@ public class Element
 
     @Override
     public boolean equals(Object obj) {
+        if (!(obj instanceof Element))
+            return false;
+
         return ((Element)obj).getId() == id;
     }
 

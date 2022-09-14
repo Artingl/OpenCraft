@@ -52,4 +52,5 @@ public abstract class ModEntry {
     }
 
     public abstract void onModInitialization() throws Exception;
+    public abstract void onResourcesInitialized() throws Exception;
 }

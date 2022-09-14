@@ -5,7 +5,7 @@ public class BlockAir extends Block
 
     public BlockAir()
     {
-        super("air");
+        super("opencraft:air");
     }
 
     public void createDrop(int x, int y, int z)  {}

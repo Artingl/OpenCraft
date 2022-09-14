@@ -1,17 +1,22 @@
 package com.artingl.opencraft.GUI.Screens;
 
-import com.artingl.opencraft.GL.Controls;
+import com.artingl.opencraft.Control.Game.Input;
 import com.artingl.opencraft.GUI.Elements.Button;
 import com.artingl.opencraft.GUI.Elements.Element;
 import com.artingl.opencraft.GUI.Elements.Slider;
 import com.artingl.opencraft.GUI.GUI;
 import com.artingl.opencraft.Opencraft;
-import com.artingl.opencraft.Rendering.Game.VerticesBuffer;
+import com.artingl.opencraft.Control.Game.VerticesBuffer;
 import com.artingl.opencraft.Resources.Lang.Lang;
 import com.artingl.opencraft.Resources.Options.OptionsRegistry;
 
 public class SettingsMenuScreen extends Screen
 {
+
+    private int soundSlider;
+    private int fovSlider;
+    private int videoSettingsButton;
+    private int controlsButton;
 
     public SettingsMenuScreen() {
         super(Opencraft.getWidth(), Opencraft.getHeight(), "settings");
@@ -21,27 +26,27 @@ public class SettingsMenuScreen extends Screen
     public void init() {
         super.init();
 
-        this.addElement(new Slider(this, 0, 0, 0, 0, 100, Lang.getTranslatedString("opencraft:gui.text.sound"), (progress) -> {
-            ((Slider)getElements().get(0)).setText(Lang.getTranslatedString("opencraft:gui.text.sound") + ": " + progress + "%");
+        soundSlider = this.addElement(new Slider(this, 0, 0, 0, 100, Lang.getTranslatedString("opencraft:gui.text.sound"), (progress) -> {
+            ((Slider)getElements().get(soundSlider)).setText(Lang.getTranslatedString("opencraft:gui.text.sound") + ": " + progress + "%");
             OptionsRegistry.updateOption(OptionsRegistry.Values.getOption("soundVolume").setValue(progress));
         }));
 
-        this.addElement(new Slider(this, 1, 0, 0, 20, 120, Lang.getTranslatedString("opencraft:gui.text.fov"), (progress) -> {
-            ((Slider)getElements().get(1)).setText("FOV: " + progress);
+        fovSlider = this.addElement(new Slider(this, 0, 0, 20, 120, Lang.getTranslatedString("opencraft:gui.text.fov"), (progress) -> {
+            ((Slider)getElements().get(fovSlider)).setText("FOV: " + progress);
             OptionsRegistry.updateOption(OptionsRegistry.Values.getOption("FOV").setValue(progress));
         }));
 
-        this.addElement(new Button(this, 2, 0, 0, Lang.getTranslatedString("opencraft:gui.text.video_settings"), () ->
+        videoSettingsButton = this.addElement(new Button(this, 0, 0, Lang.getTranslatedString("opencraft:gui.text.video_settings"), () ->
                 Opencraft.setCurrentScreen(GUI.videoSettings)));
 
-        this.addElement(new Button(this, 3, 0, 0, Lang.getTranslatedString("opencraft:gui.text.controls"), () -> {
+        controlsButton = this.addElement(new Button(this, 0, 0, Lang.getTranslatedString("opencraft:gui.text.controls"), () -> {
 
         }));
 
 
 
-        ((Slider)getElements().get(0)).setProgress(OptionsRegistry.Values.getIntOption("soundVolume"));
-        ((Slider)getElements().get(1)).setProgress(Opencraft.getFOV());
+        ((Slider)getElements().get(soundSlider)).setProgress(OptionsRegistry.Values.getIntOption("soundVolume"));
+        ((Slider)getElements().get(fovSlider)).setProgress(Opencraft.getFOV());
     }
 
     @Override
@@ -51,21 +56,21 @@ public class SettingsMenuScreen extends Screen
 
         if (element instanceof Slider edit)
         {
-            if (edit.getId() == 0) {
+            if (edit.getId() == soundSlider) {
                 edit.setX(screenWidth / 2f - edit.getWidth() - 10);
                 edit.setY(screenHeight / 2f - (edit.getHeight() * 2));
             }
-            else if (edit.getId() == 1) {
+            else if (edit.getId() == fovSlider) {
                 edit.setX(screenWidth / 2f);
                 edit.setY(screenHeight / 2f - (edit.getHeight() * 2));
             }
         }
         else if (element instanceof Button btn) {
-            if (btn.getId() == 2) {
+            if (btn.getId() == videoSettingsButton) {
                 btn.setX(screenWidth / 2f - btn.getWidth() - 10);
                 btn.setY(screenHeight / 2f - btn.getHeight() + 5);
             }
-            else if (btn.getId() == 3) {
+            else if (btn.getId() == controlsButton) {
                 btn.setX(screenWidth / 2f);
                 btn.setY(screenHeight / 2f - btn.getHeight() + 5);
             }
@@ -87,10 +92,10 @@ public class SettingsMenuScreen extends Screen
     }
 
     @Override
-    protected void keyPressed(Controls.KeyInput keyInput) {
+    protected void keyPressed(Input.KeyInput keyInput) {
         super.keyPressed(keyInput);
 
-        if (keyInput.keyCode == Controls.Keys.KEY_ESCAPE) {
+        if (keyInput.keyCode == Input.Keys.KEY_ESCAPE) {
             if (!Opencraft.isWorldLoaded())
                 Opencraft.setCurrentScreen(GUI.mainMenu);
             else Opencraft.closeCurrentScreen();

@@ -1,11 +1,11 @@
 package com.artingl.opencraft.GUI.Elements;
 
-import com.artingl.opencraft.GL.Controls;
+import com.artingl.opencraft.Control.Game.Input;
 import com.artingl.opencraft.GUI.Screens.Screen;
 import com.artingl.opencraft.Logger.Logger;
 import com.artingl.opencraft.Math.Vector2i;
 import com.artingl.opencraft.Opencraft;
-import com.artingl.opencraft.Rendering.Game.TextureEngine;
+import com.artingl.opencraft.Control.Game.TextureEngine;
 import com.artingl.opencraft.Resources.Resources;
 import org.lwjgl.opengl.GL11;
 
@@ -34,9 +34,9 @@ public class Slider extends Element
     private int max;
     private float actualWidth;
 
-    public Slider(Screen screen, int id, float x, float y, int min, int max, String text, Consumer<Integer> onSlide)
+    public Slider(Screen screen, float x, float y, int min, int max, String text, Consumer<Integer> onSlide)
     {
-        super(id, screen, x, y, 200, 20);
+        super(screen, x, y, 200, 20);
         this.text = text;
         this.onSlide = onSlide;
         this.min = min;
@@ -104,11 +104,11 @@ public class Slider extends Element
     }
 
     @Override
-    public void mouseHandler(Controls.MouseInput mouseInput) {
+    public void mouseHandler(Input.MouseInput mouseInput) {
         super.mouseHandler(mouseInput);
 
         if (selected) {
-            if (mouseInput.button == Controls.Buttons.BUTTON_LEFT) {
+            if (mouseInput.button == Input.Buttons.BUTTON_LEFT) {
                 this.progress = (int) (((int)(normalizeX(mouseInput.mousePosition.x) - this.x)) / this.width * 100);
                 if (this.progress < 0) this.progress = 0;
                 if (this.progress > 100) this.progress = 100;
@@ -116,22 +116,22 @@ public class Slider extends Element
                 this.sendProgress();
             }
 
-            if (mouseInput.state == Controls.MouseState.UP) {
+            if (mouseInput.state == Input.MouseState.UP) {
                 Opencraft.getSoundEngine().loadAndPlay("opencraft", "gui/click1");
             }
         }
     }
 
     @Override
-    public void keyHandler(Controls.KeyInput keyInput) {
+    public void keyHandler(Input.KeyInput keyInput) {
         super.keyHandler(keyInput);
 
         if (selected) {
-            if (keyInput.keyCode == Controls.Keys.KEY_LEFT) {
+            if (keyInput.keyCode == Input.Keys.KEY_LEFT) {
                 this.progress -= 5;
             }
             else
-            if (keyInput.keyCode == Controls.Keys.KEY_RIGHT) {
+            if (keyInput.keyCode == Input.Keys.KEY_RIGHT) {
                 this.progress += 5;
             }
 

@@ -21,7 +21,7 @@ If you found some bug, create an issue. Describe the bug (it will be good if you
 - [ ] Singleplayer
 - [ ] Mobs
 - [X] Gamemodes
-- [ ] Biomes
+- [X] Biomes
 - [X] Dimensions
 - [X] Infinity world generation
 - [X] Mods Engine
@@ -31,5 +31,4 @@ If you found some bug, create an issue. Describe the bug (it will be good if you
 - [X] Languages
 
 # Screenshots
-![](images/screenshot.png)
-![](images/hell.jpg)
+![](images/screenshot.jpg)

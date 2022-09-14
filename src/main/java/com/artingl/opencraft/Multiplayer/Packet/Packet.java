@@ -1,6 +1,7 @@
 package com.artingl.opencraft.Multiplayer.Packet;
 
 import com.artingl.opencraft.Logger.Logger;
+import com.artingl.opencraft.Math.Vector2i;
 import com.artingl.opencraft.Multiplayer.Client;
 import com.artingl.opencraft.Multiplayer.Server;
 import com.artingl.opencraft.Multiplayer.Side;
@@ -12,11 +13,13 @@ import java.net.Socket;
 
 public class Packet {
 
-    public static final int MAGIC = 0xFFCA;
+    public static final byte MAGIC_0 = 'F';
+    public static final byte MAGIC_1 = 'J';
     public static Packet[] packets = {
             new PacketHandshake(),
-            new PacketUpdateEntity(),
-            new PacketKick()
+            new PacketEntityUpdate(),
+            new PacketKick(),
+            new PacketWorldUpdate(),
     };
 
     protected Socket connection;
@@ -85,7 +88,17 @@ public class Packet {
 
     @Override
     public boolean equals(Object obj) {
+        if (!(obj instanceof Packet))
+            return false;
+
         return ((Packet)obj).getName().equals(getName());
     }
 
+    public DataOutputStream getOutputStream() {
+        return outputStream;
+    }
+
+    public DataInputStream getInputStream() {
+        return inputStream;
+    }
 }
