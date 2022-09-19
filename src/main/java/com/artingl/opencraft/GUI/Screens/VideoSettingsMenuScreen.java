@@ -4,9 +4,9 @@ import com.artingl.opencraft.Control.Game.Input;
 import com.artingl.opencraft.GUI.Elements.Button;
 import com.artingl.opencraft.GUI.Elements.Element;
 import com.artingl.opencraft.GUI.Elements.Slider;
-import com.artingl.opencraft.GUI.GUI;
+import com.artingl.opencraft.GUI.ScreenRegistry;
 import com.artingl.opencraft.Opencraft;
-import com.artingl.opencraft.Control.Game.VerticesBuffer;
+import com.artingl.opencraft.Control.Render.BufferRenderer;
 import com.artingl.opencraft.Resources.Lang.Lang;
 import com.artingl.opencraft.Resources.Options.OptionsRegistry;
 
@@ -131,7 +131,7 @@ public class VideoSettingsMenuScreen extends Screen
             fill(0, 0, screenWidth, screenHeight, 0x99111111);
         }
         else {
-            VerticesBuffer t = VerticesBuffer.getGlobalInstance();
+            BufferRenderer t = BufferRenderer.getGlobalInstance();
             drawBackground(t, screenWidth, screenHeight, 0x808080);
         }
 
@@ -144,7 +144,7 @@ public class VideoSettingsMenuScreen extends Screen
 
         if (keyInput.keyCode == Input.Keys.KEY_ESCAPE) {
             if (!Opencraft.isWorldLoaded())
-                Opencraft.setCurrentScreen(GUI.mainMenu);
+                Opencraft.setCurrentScreen(ScreenRegistry.mainMenu);
             else Opencraft.closeCurrentScreen();
         }
     }

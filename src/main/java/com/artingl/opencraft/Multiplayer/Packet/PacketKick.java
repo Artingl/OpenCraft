@@ -1,6 +1,6 @@
 package com.artingl.opencraft.Multiplayer.Packet;
 
-import com.artingl.opencraft.GUI.GUI;
+import com.artingl.opencraft.GUI.ScreenRegistry;
 import com.artingl.opencraft.Multiplayer.Server;
 import com.artingl.opencraft.Multiplayer.Side;
 import com.artingl.opencraft.Opencraft;
@@ -28,8 +28,8 @@ public class PacketKick extends Packet {
 
         Opencraft.runInGLContext(() -> {
             Opencraft.quitToMainMenu();
-            Opencraft.setCurrentScreen(GUI.loadingScreen);
-            GUI.loadingScreen.setLoadingText("Bad version", true);
+            Opencraft.setCurrentScreen(ScreenRegistry.loadingScreen);
+            ScreenRegistry.loadingScreen.setLoadingText("Bad version", true);
         });
 
         Opencraft.getClientConnection().close();

@@ -3,9 +3,9 @@ package com.artingl.opencraft.GUI.Screens;
 import com.artingl.opencraft.Control.Game.Input;
 import com.artingl.opencraft.GUI.Elements.Button;
 import com.artingl.opencraft.GUI.Elements.Element;
-import com.artingl.opencraft.GUI.GUI;
+import com.artingl.opencraft.GUI.ScreenRegistry;
 import com.artingl.opencraft.Opencraft;
-import com.artingl.opencraft.Control.Game.VerticesBuffer;
+import com.artingl.opencraft.Control.Render.BufferRenderer;
 import com.artingl.opencraft.Resources.Lang.Lang;
 import org.lwjgl.opengl.GL11;
 
@@ -22,7 +22,7 @@ public class ServersListScreen extends Screen
     public void init() {
         super.init();
 
-        backButton = this.addElement(new Button(this, 0, 0, Lang.getTranslatedString("opencraft:gui.text.back"), () -> Opencraft.setCurrentScreen(GUI.mainMenu)));
+        backButton = this.addElement(new Button(this, 0, 0, Lang.getTranslatedString("opencraft:gui.text.back"), () -> Opencraft.setCurrentScreen(ScreenRegistry.mainMenu)));
         joinServerButton = this.addElement(new Button(this, 0, 0, Lang.getTranslatedString("opencraft:gui.text.join_server"), () -> {
         }));
     }
@@ -46,7 +46,7 @@ public class ServersListScreen extends Screen
 
     public void render(int screenWidth, int screenHeight, int scale)
     {
-        VerticesBuffer t = VerticesBuffer.getGlobalInstance();
+        BufferRenderer t = BufferRenderer.getGlobalInstance();
 
         drawBackground(t, screenWidth, screenHeight, 0x808080);
         GL11.glPushMatrix();
@@ -64,7 +64,7 @@ public class ServersListScreen extends Screen
         super.keyPressed(keyInput);
 
         if (keyInput.keyCode == Input.Keys.KEY_ESCAPE) {
-            Opencraft.setCurrentScreen(GUI.mainMenu);
+            Opencraft.setCurrentScreen(ScreenRegistry.mainMenu);
         }
     }
 

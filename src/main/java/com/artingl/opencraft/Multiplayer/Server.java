@@ -1,6 +1,6 @@
 package com.artingl.opencraft.Multiplayer;
 
-import com.artingl.opencraft.GUI.GUI;
+import com.artingl.opencraft.GUI.ScreenRegistry;
 import com.artingl.opencraft.Logger.Logger;
 import com.artingl.opencraft.Math.Vector3f;
 import com.artingl.opencraft.Multiplayer.Packet.Packet;
@@ -58,7 +58,7 @@ public class Server {
             this.createHandler();
         } catch (Exception e) {
             Logger.exception("Unable to bind server", e);
-            Opencraft.setCurrentScreen(GUI.mainMenu);
+            Opencraft.setCurrentScreen(ScreenRegistry.mainMenu);
         }
     }
 
@@ -206,10 +206,12 @@ public class Server {
         playerMP.setConnection(connection);
         playerMP.getNbt().setNameTag(nametag);
         playerMP.getNbt().setUUID(playerUUID);
-        playerMP.setPosition(new Vector3f(290, 148, 1053));
+        playerMP.setPosition(new Vector3f(290, 72, 1053));
         playerMP.setFlyingState(true);
 
         playerMP.appendInventory(new ItemSlot(BlockRegistry.Blocks.grass_block, 64));
+        playerMP.appendInventory(new ItemSlot(BlockRegistry.Blocks.glass, 64));
+        playerMP.appendInventory(new ItemSlot(BlockRegistry.Blocks.stone, 64));
 
         for (Connection conn: connections) {
             PacketEntityUpdate packet = new PacketEntityUpdate(this, conn.getConnection());

@@ -2,10 +2,13 @@ package com.artingl.opencraft.Utils;
 
 import com.artingl.opencraft.Logger.Logger;
 import com.artingl.opencraft.Opencraft;
+import com.artingl.opencraft.Resources.Resources;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -47,6 +50,10 @@ public class Utils {
 
     }
 
+    public static String readFileFromStream(InputStream stream) throws IOException {
+        return new String(stream.readAllBytes(), StandardCharsets.UTF_8);
+    }
+
     public static void listf(String directoryName, List<File> files) {
         File directory = new File(directoryName);
 
@@ -82,4 +89,11 @@ public class Utils {
         return id.substring(0, 1).toUpperCase() + id.substring(1).toLowerCase();
     }
 
+    public static void sleep(int ms) {
+        try {
+            Thread.sleep(ms);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

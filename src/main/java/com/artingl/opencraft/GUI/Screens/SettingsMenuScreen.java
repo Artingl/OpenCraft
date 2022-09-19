@@ -4,9 +4,9 @@ import com.artingl.opencraft.Control.Game.Input;
 import com.artingl.opencraft.GUI.Elements.Button;
 import com.artingl.opencraft.GUI.Elements.Element;
 import com.artingl.opencraft.GUI.Elements.Slider;
-import com.artingl.opencraft.GUI.GUI;
+import com.artingl.opencraft.GUI.ScreenRegistry;
 import com.artingl.opencraft.Opencraft;
-import com.artingl.opencraft.Control.Game.VerticesBuffer;
+import com.artingl.opencraft.Control.Render.BufferRenderer;
 import com.artingl.opencraft.Resources.Lang.Lang;
 import com.artingl.opencraft.Resources.Options.OptionsRegistry;
 
@@ -36,14 +36,12 @@ public class SettingsMenuScreen extends Screen
             OptionsRegistry.updateOption(OptionsRegistry.Values.getOption("FOV").setValue(progress));
         }));
 
-        videoSettingsButton = this.addElement(new Button(this, 0, 0, Lang.getTranslatedString("opencraft:gui.text.video_settings"), () ->
-                Opencraft.setCurrentScreen(GUI.videoSettings)));
-
-        controlsButton = this.addElement(new Button(this, 0, 0, Lang.getTranslatedString("opencraft:gui.text.controls"), () -> {
-
+        videoSettingsButton = this.addElement(new Button(this, 0, 0, Lang.getTranslatedString("opencraft:gui.text.video_settings"), () -> {
+            Opencraft.setCurrentScreen(ScreenRegistry.videoSettings);
         }));
 
-
+        controlsButton = this.addElement(new Button(this, 0, 0, Lang.getTranslatedString("opencraft:gui.text.controls"), () -> {
+        }));
 
         ((Slider)getElements().get(soundSlider)).setProgress(OptionsRegistry.Values.getIntOption("soundVolume"));
         ((Slider)getElements().get(fovSlider)).setProgress(Opencraft.getFOV());
@@ -83,10 +81,9 @@ public class SettingsMenuScreen extends Screen
             fill(0, 0, screenWidth, screenHeight, 0x99111111);
         }
         else {
-            VerticesBuffer t = VerticesBuffer.getGlobalInstance();
+            BufferRenderer t = BufferRenderer.getGlobalInstance();
             drawBackground(t, screenWidth, screenHeight, 0x808080);
         }
-
 
         super.render(screenWidth, screenHeight, scale);
     }
@@ -97,7 +94,7 @@ public class SettingsMenuScreen extends Screen
 
         if (keyInput.keyCode == Input.Keys.KEY_ESCAPE) {
             if (!Opencraft.isWorldLoaded())
-                Opencraft.setCurrentScreen(GUI.mainMenu);
+                Opencraft.setCurrentScreen(ScreenRegistry.mainMenu);
             else Opencraft.closeCurrentScreen();
         }
     }

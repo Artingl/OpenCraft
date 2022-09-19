@@ -3,11 +3,13 @@ package com.artingl.opencraft.World.Entity;
 import com.artingl.opencraft.GUI.Screens.Screen;
 import com.artingl.opencraft.Math.Vector2f;
 import com.artingl.opencraft.Math.Vector3f;
+import com.artingl.opencraft.Multiplayer.World.Gamemode.Spectator;
 import com.artingl.opencraft.Opencraft;
 import com.artingl.opencraft.Control.Game.TextureEngine;
 import com.artingl.opencraft.Multiplayer.World.Gamemode.Creative;
 import com.artingl.opencraft.Multiplayer.World.Gamemode.Gamemode;
 import com.artingl.opencraft.Multiplayer.World.Gamemode.Survival;
+import com.artingl.opencraft.Phys.AABB;
 import com.artingl.opencraft.World.Entity.Models.PlayerModel;
 import com.artingl.opencraft.World.NBT.EntityPlayerNBT;
 import com.artingl.opencraft.GUI.Screens.DeathScreen;
@@ -68,6 +70,11 @@ public class EntityPlayer extends Entity {
 
     public void tick() {
         super.tick();
+
+        if (getGamemode().equals(Spectator.instance)) {
+            this.setFlyingState(true);
+        }
+
         this.prevCameraRotation = this.cameraRotation;
         this.prevArmRotation = this.armRotation;
         this.armRotation.x = (float)((double)this.armRotation.x + (double)(this.getRotation().x - this.armRotation.x) * 0.5D);
@@ -175,4 +182,10 @@ public class EntityPlayer extends Entity {
         this.prevArmRotation = prevArmRotation;
     }
 
+    public boolean headInWater() {
+        Vector3f pos = getPosition();
+        Vector2f size = getSize();
+
+        return Opencraft.getLevel().containsLiquid(new AABB(pos.x - size.x, pos.y - 0.1f, pos.z - size.x, pos.x + size.x, pos.y, pos.z + size.x));
+    }
 }

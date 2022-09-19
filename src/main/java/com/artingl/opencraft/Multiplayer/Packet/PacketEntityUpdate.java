@@ -1,6 +1,5 @@
 package com.artingl.opencraft.Multiplayer.Packet;
 
-import com.artingl.opencraft.Logger.Logger;
 import com.artingl.opencraft.Math.MathUtils;
 import com.artingl.opencraft.Math.Vector2f;
 import com.artingl.opencraft.Math.Vector2i;
@@ -13,6 +12,7 @@ import com.artingl.opencraft.Multiplayer.World.Commands.CommandsRegistry;
 import com.artingl.opencraft.Multiplayer.World.Entity.EntityMP;
 import com.artingl.opencraft.Multiplayer.World.Entity.EntityPlayerMP;
 import com.artingl.opencraft.Multiplayer.World.Gamemode.Gamemode;
+import com.artingl.opencraft.Multiplayer.World.Gamemode.Spectator;
 import com.artingl.opencraft.Multiplayer.World.Gamemode.Survival;
 import com.artingl.opencraft.Opencraft;
 import com.artingl.opencraft.World.Entity.Entity;
@@ -219,7 +219,7 @@ public class PacketEntityUpdate extends Packet {
             float acceleration = inputStream.readFloat();
             float height = inputStream.readFloat();
 
-            if (entity == null)
+            if (true)//entity == null)
                 return;
 
             entity.setFlyingState(isFlying);
@@ -227,14 +227,18 @@ public class PacketEntityUpdate extends Packet {
             entity.setHeightOffset(height != 1.72F && height != 1.82F ? 1.82F : height);
 
             if (entity instanceof EntityPlayerMP) {
-                if (((EntityPlayerMP) entity).getGamemode().getId() == Survival.id) {
+                if (((EntityPlayerMP) entity).getGamemode().getId() == Spectator.id) {
+                    entity.setFlyingState(true);
+                    sendMinorEntityNbt(entity, outputStream);
+                }
+                else if (((EntityPlayerMP) entity).getGamemode().getId() == Survival.id) {
                     entity.setFlyingState(false);
                     sendMinorEntityNbt(entity, outputStream);
                 }
             }
 
             for (EntityMP entityMP : getServer().getEntities()) {
-                if (entityMP instanceof EntityPlayerMP && entityMP.getLevel() == entity.getLevel() && (entityMP.insideRenderDistance(entity))) {
+                if (entityMP instanceof EntityPlayerMP && entityMP.getLevelMP() == entity.getLevelMP() && (entityMP.insideRenderDistance(entity))) {
                     DataOutputStream outputStream = new DataOutputStream(entityMP.getConnection().getOutputStream());
                     sendMinorEntityNbt(entity, outputStream);
                 }
@@ -259,7 +263,7 @@ public class PacketEntityUpdate extends Packet {
     @Side(Server.Side.SERVER)
     public void sendEntityPositionToEverybody(EntityMP entity, boolean checkDistance) throws IOException {
         for (EntityMP entityMP : getServer().getEntities()) {
-            if (entityMP instanceof EntityPlayerMP && entityMP.getLevel() == entity.getLevel() && (entityMP.insideRenderDistance(entity) || !checkDistance)) {
+            if (entityMP instanceof EntityPlayerMP && entityMP.getLevelMP() == entity.getLevelMP() && (entityMP.insideRenderDistance(entity) || !checkDistance)) {
                 DataOutputStream outputStream = new DataOutputStream(entityMP.getConnection().getOutputStream());
 
                 outputStream.writeByte(Packet.MAGIC_0);
@@ -281,7 +285,7 @@ public class PacketEntityUpdate extends Packet {
     @Side(Server.Side.SERVER)
     public void sendEntityNbtToEverybody(EntityMP entity, boolean checkDistance) throws IOException {
         for (EntityMP entityMP : getServer().getEntities()) {
-            if (entityMP instanceof EntityPlayerMP && entityMP.getLevel() == entity.getLevel() && (entityMP.insideRenderDistance(entity) || !checkDistance)) {
+            if (entityMP instanceof EntityPlayerMP && entityMP.getLevelMP() == entity.getLevelMP() && (entityMP.insideRenderDistance(entity) || !checkDistance)) {
                 DataOutputStream outputStream = new DataOutputStream(entityMP.getConnection().getOutputStream());
                 sendEntityNbt(entity, outputStream);
             }

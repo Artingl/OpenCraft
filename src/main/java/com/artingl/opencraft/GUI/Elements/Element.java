@@ -3,7 +3,7 @@ package com.artingl.opencraft.GUI.Elements;
 import com.artingl.opencraft.Control.Game.Input;
 import com.artingl.opencraft.GUI.Screens.Screen;
 import com.artingl.opencraft.Opencraft;
-import com.artingl.opencraft.Control.Game.VerticesBuffer;
+import com.artingl.opencraft.Control.Render.BufferRenderer;
 import org.lwjgl.opengl.GL11;
 
 public class Element
@@ -79,7 +79,7 @@ public class Element
         float r = (float)(col >> 16 & 255) / 255.0F;
         float g = (float)(col >> 8 & 255) / 255.0F;
         float b = (float)(col & 255) / 255.0F;
-        VerticesBuffer t = VerticesBuffer.getGlobalInstance();
+        BufferRenderer t = BufferRenderer.getGlobalInstance();
         GL11.glEnable(GL11.GL_BLEND);
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
         GL11.glColor4f(r, g, b, a);
@@ -94,7 +94,7 @@ public class Element
 
     public void render(int screenWidth, int screenHeight, int scale) {
         if (this.isHighlighting) {
-            fill((int) (x - 2), (int) (y - 2), (int) (x+width + 2), (int) (y+height + 2), 0xFFFFFFFF);
+            fill((int) (x - 1), (int) (y - 1), (int) (x+width + 1), (int) (y+height + 1), 0xFFFFFFFF);
         }
 
     }

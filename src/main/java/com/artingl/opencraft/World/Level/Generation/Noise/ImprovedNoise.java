@@ -1,4 +1,4 @@
-package com.artingl.opencraft.World.Generation;
+package com.artingl.opencraft.World.Level.Generation.Noise;
 
 import java.util.Random;
 
@@ -63,6 +63,10 @@ public class ImprovedNoise {
 
    public double getValue(double x, double y) {
       return this.noise(x, y, 0.0D);
+   }
+
+   public double getValue(double x, double y, double z) {
+      return this.noise(x, y, z);
    }
 
    public void destroy() {

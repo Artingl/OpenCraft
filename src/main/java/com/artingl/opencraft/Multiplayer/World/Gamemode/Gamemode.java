@@ -1,7 +1,5 @@
 package com.artingl.opencraft.Multiplayer.World.Gamemode;
 
-import com.artingl.opencraft.Math.Vector3f;
-
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -15,11 +13,27 @@ public class Gamemode {
             return Creative.instance;
         }
 
+        if (Spectator.id == id) {
+            return Spectator.instance;
+        }
+
         return Survival.instance;
     }
 
     public int getId() {
         return Gamemode.id;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof Integer) {
+            return ((Integer)obj) == getId();
+        }
+        else if (obj instanceof Gamemode) {
+            return ((Gamemode)obj).getId() == getId();
+        }
+
+        return false;
     }
 
     @Override

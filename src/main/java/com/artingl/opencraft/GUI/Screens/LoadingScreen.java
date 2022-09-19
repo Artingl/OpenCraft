@@ -2,9 +2,9 @@ package com.artingl.opencraft.GUI.Screens;
 
 import com.artingl.opencraft.GUI.Elements.Button;
 import com.artingl.opencraft.GUI.Elements.Element;
-import com.artingl.opencraft.GUI.GUI;
+import com.artingl.opencraft.GUI.ScreenRegistry;
 import com.artingl.opencraft.Opencraft;
-import com.artingl.opencraft.Control.Game.VerticesBuffer;
+import com.artingl.opencraft.Control.Render.BufferRenderer;
 import com.artingl.opencraft.Resources.Lang.Lang;
 
 public class LoadingScreen extends Screen
@@ -25,7 +25,7 @@ public class LoadingScreen extends Screen
         super.init();
 
         closeButton = this.addElement(new Button(this, 0, 0, Lang.getTranslatedString("opencraft:gui.text.close"), () -> {
-            Opencraft.setCurrentScreen(GUI.mainMenu);
+            Opencraft.setCurrentScreen(ScreenRegistry.mainMenu);
         }));
     }
 
@@ -47,7 +47,7 @@ public class LoadingScreen extends Screen
         if (getElements().get(0) != null)
             this.updateElement(getElements().get(0), screenWidth, screenHeight, scale);
 
-        drawBackground(VerticesBuffer.getGlobalInstance(), screenWidth, screenHeight, 0x808080);
+        drawBackground(BufferRenderer.getGlobalInstance(), screenWidth, screenHeight, 0x808080);
         Opencraft.getFont().drawShadow(loadingText,
                 (screenWidth - Opencraft.getFont().getTextWidth(loadingText)) / 2, (int) (screenHeight / 2f) - 5, 0xFFFFFF);
 
@@ -66,7 +66,7 @@ public class LoadingScreen extends Screen
 
     public void setLoadingText(String s, boolean showBtn) {
         this.loadingText = s;
-        GUI.loadingScreen.showCloseButton(showBtn);
-        GUI.loadingScreen.updateDisplay();
+        ScreenRegistry.loadingScreen.showCloseButton(showBtn);
+        ScreenRegistry.loadingScreen.updateDisplay();
     }
 }

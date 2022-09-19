@@ -4,7 +4,7 @@ import com.artingl.opencraft.Math.Vector3f;
 import com.artingl.opencraft.World.Entity.Entity;
 import com.artingl.opencraft.Control.Game.Texture;
 import com.artingl.opencraft.Control.Game.TextureEngine;
-import com.artingl.opencraft.Control.Game.VerticesBuffer;
+import com.artingl.opencraft.Control.Render.BufferRenderer;
 import com.artingl.opencraft.World.Level.ClientLevel;
 
 public class Particle extends Entity {
@@ -20,6 +20,7 @@ public class Particle extends Entity {
 
     public Particle(ClientLevel level, float x, float y, float z, float xa, float ya, float za, Texture tex) {
         super(level);
+        this.entityType = Types.PARTICLE;
         this.tex = tex;
         this.setSize(0.2F, 0.2F);
         this.setHeightOffset(this.getSize().y / 2.0F);
@@ -63,7 +64,7 @@ public class Particle extends Entity {
         }
     }
 
-    public void render(VerticesBuffer t, float a, float xa, float ya, float za, float xa2, float za2) {
+    public void render(BufferRenderer t, float a, float xa, float ya, float za, float xa2, float za2) {
         if (tex == null) {
             return;
         }

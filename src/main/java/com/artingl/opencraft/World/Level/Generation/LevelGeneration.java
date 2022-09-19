@@ -1,21 +1,17 @@
 package com.artingl.opencraft.World.Level.Generation;
 
-import com.artingl.opencraft.Math.Vector2i;
-import com.artingl.opencraft.World.Generation.NoiseGenerator3D;
-import com.artingl.opencraft.World.Generation.PerlinNoise;
+import com.artingl.opencraft.World.Level.Generation.Noise.PerlinNoise;
 import com.artingl.opencraft.World.Chunk.Region;
 import com.artingl.opencraft.World.Level.Biomes.Biome;
 import com.artingl.opencraft.World.Level.Biomes.BiomesRegistry;
 import com.artingl.opencraft.World.Level.ClientLevel;
 import com.artingl.opencraft.World.Level.LevelTypes;
 
-import java.util.ArrayList;
-
 public class LevelGeneration {
 
     protected ClientLevel level;
     protected PerlinNoise noise;
-    protected NoiseGenerator3D noise3d;
+    protected PerlinNoise caveNoise;
     protected PerlinNoise biomeNoise;
 
     public LevelGeneration() {
@@ -25,7 +21,7 @@ public class LevelGeneration {
         this.level = generation.getLevel();
 
         this.noise = new PerlinNoise(3, generation.getSeed());
-        this.noise3d = new NoiseGenerator3D(generation.getSeed());
+        this.caveNoise = new PerlinNoise(3, generation.getSeed()*4 << 5);
         this.biomeNoise = new PerlinNoise(1, generation.getSeed()*2 << 4);
     }
 
@@ -36,7 +32,7 @@ public class LevelGeneration {
     }
 
     public Biome getBiomeByNoise(int x, int z) {
-        return BiomesRegistry.getBiome(LevelTypes.WORLD, (int) this.biomeNoise.getNoiseValue(1, (float) (int) x, (float) (int) z, .5f, .005f, 0, 90));
+        return BiomesRegistry.getBiome(LevelTypes.WORLD, (int) (this.biomeNoise.getNoiseValue(1, (float) (int) x, (float) (int) z, .5f, .005f, 0, 12) * 15));
     }
 
     public Biome getBiome(int x, int z) {

@@ -2,6 +2,7 @@ package com.artingl.opencraft.Resources.Options;
 
 import com.artingl.opencraft.Logger.Logger;
 import com.artingl.opencraft.Opencraft;
+import com.artingl.opencraft.Utils.Utils;
 import com.google.gson.*;
 
 import java.io.*;
@@ -180,6 +181,8 @@ public class OptionsRegistry {
 
     public static void updateOption(Option field) {
         Opencraft.getThreadsManager().execute(() -> {
+            Utils.sleep(100);
+
             try {
                 Writer writer = new FileWriter(Opencraft.getGameDirectory() + "options.json");
                 Gson gson = new GsonBuilder().setPrettyPrinting().create();

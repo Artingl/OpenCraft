@@ -4,9 +4,9 @@ import com.artingl.opencraft.Math.Vector2f;
 import com.artingl.opencraft.Math.Vector3f;
 import com.artingl.opencraft.Control.RenderInterface;
 import com.artingl.opencraft.Opencraft;
-import com.artingl.opencraft.Control.World.BlockRenderer;
+import com.artingl.opencraft.Control.Render.BlockRenderer;
 import com.artingl.opencraft.Control.Game.TextureEngine;
-import com.artingl.opencraft.Control.Game.VerticesBuffer;
+import com.artingl.opencraft.Control.Render.BufferRenderer;
 import com.artingl.opencraft.World.Block.Block;
 import com.artingl.opencraft.World.Entity.Entity;
 import com.artingl.opencraft.Math.Vector3i;
@@ -22,6 +22,7 @@ public class Drop extends Entity implements RenderInterface {
 
     public Drop(ItemSlot itemBlock, Vector3i position) {
         super(Opencraft.getLevel());
+        this.entityType = Types.DROP;
         this.itemBlock = itemBlock;
         this.picked = false;
 
@@ -52,7 +53,7 @@ public class Drop extends Entity implements RenderInterface {
         super.render();
         if (this.picked) return;
 
-        VerticesBuffer t = VerticesBuffer.getGlobalInstance();
+        BufferRenderer t = BufferRenderer.getGlobalInstance();
 
         float animation = 0;
 
@@ -63,7 +64,7 @@ public class Drop extends Entity implements RenderInterface {
         }
 
         GL11.glEnable(GL11.GL_TEXTURE_2D);
-        GL11.glBindTexture(GL11.GL_TEXTURE_2D, TextureEngine.getTerrain());
+        Opencraft.getShaderProgram().bindTexture(TextureEngine.getTerrain());
 //        GL11.glRotatef(rotation, 0, 1, 0);
 
         Block block = itemBlock.getBlock();
@@ -90,7 +91,7 @@ public class Drop extends Entity implements RenderInterface {
 
 //        GL11.glRotatef(-rotation, 0, 1, 0);
         GL11.glEndList();
-        GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
+        Opencraft.getShaderProgram().bindTexture(0);
 
         if (this.isOnGround()) {
             this.timer++;

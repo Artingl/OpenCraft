@@ -1,12 +1,11 @@
 package com.artingl.opencraft.Multiplayer;
 
-import com.artingl.opencraft.GUI.GUI;
+import com.artingl.opencraft.GUI.ScreenRegistry;
 import com.artingl.opencraft.Logger.Logger;
 import com.artingl.opencraft.Multiplayer.Packet.Packet;
 import com.artingl.opencraft.Multiplayer.Packet.PacketHandshake;
 import com.artingl.opencraft.Multiplayer.World.Entity.EntityMP;
 import com.artingl.opencraft.Opencraft;
-import com.artingl.opencraft.Utils.Utils;
 import com.artingl.opencraft.World.Entity.Entity;
 import com.artingl.opencraft.World.EntityData.UUID;
 
@@ -42,7 +41,7 @@ public class Client {
             this.createHandler();
         } catch (Exception e) {
             Logger.exception("Unable to connect to the server", e);
-            Opencraft.setCurrentScreen(GUI.mainMenu);
+            Opencraft.setCurrentScreen(ScreenRegistry.mainMenu);
         }
     }
 

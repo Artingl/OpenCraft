@@ -32,7 +32,7 @@ public class Lang {
             if (path.contains(resourcesPath) && path.endsWith(".json")) {
                 Logger.debug("Loading " + id + ":lang/" + name + " language");
 
-                Opencraft.drawLoadingScreen(Utils.capitalizeString(id) + " Languages: Loading " + Utils.removeFileExtension(name));
+                Opencraft.drawLoadingScreen(Utils.capitalizeString(id) + " Languages: Loading " + Utils.removeFileExtension(name) + " language");
 
                 try {
                     JsonElement root = new JsonParser().parse(new String(Resources.load(c, id + ":lang/" + name).readAllBytes(), StandardCharsets.UTF_8));

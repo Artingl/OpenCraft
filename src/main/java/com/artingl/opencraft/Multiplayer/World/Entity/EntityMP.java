@@ -1,14 +1,11 @@
 package com.artingl.opencraft.Multiplayer.World.Entity;
 
 import com.artingl.opencraft.Logger.Logger;
-import com.artingl.opencraft.Math.Vector2f;
 import com.artingl.opencraft.Math.Vector3f;
 import com.artingl.opencraft.Multiplayer.Packet.PacketEntityUpdate;
 import com.artingl.opencraft.Multiplayer.Server;
 import com.artingl.opencraft.Multiplayer.Side;
-import com.artingl.opencraft.Opencraft;
 import com.artingl.opencraft.World.Entity.Entity;
-import com.artingl.opencraft.World.Level.ClientLevel;
 import com.artingl.opencraft.World.Level.LevelTypes;
 
 import java.net.Socket;
@@ -57,7 +54,7 @@ public class EntityMP extends Entity {
         this.currentLevel = currentLevel;
     }
 
-    public LevelTypes getLevel() {
+    public LevelTypes getLevelMP() {
         return currentLevel;
     }
 

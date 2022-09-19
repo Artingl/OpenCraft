@@ -2,9 +2,9 @@ package com.artingl.opencraft.GUI.Screens;
 
 import com.artingl.opencraft.Control.Game.Input;
 import com.artingl.opencraft.GUI.Elements.Element;
-import com.artingl.opencraft.GUI.GUI;
+import com.artingl.opencraft.GUI.ScreenRegistry;
 import com.artingl.opencraft.Opencraft;
-import com.artingl.opencraft.Control.Game.VerticesBuffer;
+import com.artingl.opencraft.Control.Render.BufferRenderer;
 import org.lwjgl.opengl.GL11;
 
 public class ModsListScreen extends Screen
@@ -25,7 +25,7 @@ public class ModsListScreen extends Screen
 
     public void render(int screenWidth, int screenHeight, int scale)
     {
-        VerticesBuffer t = VerticesBuffer.getGlobalInstance();
+        BufferRenderer t = BufferRenderer.getGlobalInstance();
 
         drawBackground(t, screenWidth, screenHeight, 0x808080);
         GL11.glPushMatrix();
@@ -43,7 +43,7 @@ public class ModsListScreen extends Screen
         super.keyPressed(keyInput);
 
         if (keyInput.keyCode == Input.Keys.KEY_ESCAPE) {
-            Opencraft.setCurrentScreen(GUI.mainMenu);
+            Opencraft.setCurrentScreen(ScreenRegistry.mainMenu);
         }
     }
 

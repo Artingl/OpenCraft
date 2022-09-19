@@ -2,8 +2,8 @@ package com.artingl.opencraft.GUI.Screens;
 
 import com.artingl.opencraft.Control.Game.Input;
 import com.artingl.opencraft.GUI.Elements.Element;
-import com.artingl.opencraft.GUI.GUI;
-import com.artingl.opencraft.Control.Game.VerticesBuffer;
+import com.artingl.opencraft.GUI.ScreenRegistry;
+import com.artingl.opencraft.Control.Render.BufferRenderer;
 import com.artingl.opencraft.Resources.Lang.Lang;
 import com.artingl.opencraft.GUI.Elements.Button;
 import com.artingl.opencraft.GUI.Elements.EditArea;
@@ -38,8 +38,8 @@ public class NewWorldConfiguratorScreen extends Screen
         }));
         worldSeedEdit = this.addElement(new EditArea(this, 0, 0, Lang.getTranslatedString("opencraft:gui.text.world_seed"), () -> {}));
         worldCreationButton = this.addElement(new Button(this, 0, 0, Lang.getTranslatedString("opencraft:gui.text.new_world_creation"), () -> {
-            GUI.loadingScreen.setLoadingText(Lang.getTranslatedString("opencraft:gui.text.loading_world"));
-            GUI.worldList.levelName = ((EditArea)getElements().get(0)).getText();
+            ScreenRegistry.loadingScreen.setLoadingText(Lang.getTranslatedString("opencraft:gui.text.loading_world"));
+            ScreenRegistry.worldList.levelName = ((EditArea)getElements().get(0)).getText();
             int seed = ((EditArea)getElements().get(worldSeedEdit)).getText().hashCode();
 
             if (((EditArea) getElements().get(worldSeedEdit)).getText().equals("")) {
@@ -80,7 +80,7 @@ public class NewWorldConfiguratorScreen extends Screen
 
     public void render(int screenWidth, int screenHeight, int scale)
     {
-        VerticesBuffer t = VerticesBuffer.getGlobalInstance();
+        BufferRenderer t = BufferRenderer.getGlobalInstance();
 
         //GL11.glClear(16640);
         drawBackground(t, screenWidth, screenHeight, 0x808080);
@@ -93,7 +93,7 @@ public class NewWorldConfiguratorScreen extends Screen
         super.keyPressed(keyInput);
 
         if (keyInput.keyCode == Input.Keys.KEY_ESCAPE) {
-            Opencraft.setCurrentScreen(GUI.worldList);
+            Opencraft.setCurrentScreen(ScreenRegistry.worldList);
         }
     }
 }

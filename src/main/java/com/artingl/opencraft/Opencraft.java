@@ -2,16 +2,18 @@ package com.artingl.opencraft;
 
 import com.artingl.opencraft.Control.Game.Input;
 import com.artingl.opencraft.Control.Game.Display;
-import com.artingl.opencraft.GUI.GUI;
+import com.artingl.opencraft.Control.Render.ShaderProgram;
+import com.artingl.opencraft.GUI.ScreenRegistry;
 import com.artingl.opencraft.Logger.Logger;
 import com.artingl.opencraft.Multiplayer.Client;
 import com.artingl.opencraft.Multiplayer.InternalServer;
 import com.artingl.opencraft.Multiplayer.Server;
-import com.artingl.opencraft.Control.Game.GameRenderer;
+import com.artingl.opencraft.Control.Render.GameRenderer;
 import com.artingl.opencraft.Control.Game.TextureEngine;
-import com.artingl.opencraft.Control.World.LevelRenderer;
+import com.artingl.opencraft.Control.World.LevelController;
 import com.artingl.opencraft.Control.World.ParticleEngine;
 import com.artingl.opencraft.Resources.Options.OptionsListener;
+import com.artingl.opencraft.Utils.Utils;
 import com.artingl.opencraft.World.Level.*;
 import com.artingl.opencraft.Control.*;
 import com.artingl.opencraft.Resources.Lang.Lang;
@@ -25,6 +27,7 @@ import com.artingl.opencraft.World.Entity.EntityPlayer;
 import com.artingl.opencraft.World.EntityData.Nametag;
 import com.artingl.opencraft.World.Level.Biomes.BiomesRegistry;
 import com.artingl.opencraft.World.Level.Generation.LevelGenerationWorld;
+import com.artingl.opencraft.World.Level.Listener.LevelListener;
 import com.artingl.opencraft.World.Tick;
 import com.artingl.opencraft.World.Entity.EntityPlayerController;
 import com.artingl.opencraft.World.TickTimer;
@@ -38,7 +41,10 @@ import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -56,7 +62,7 @@ public class Opencraft
     private static boolean close = false;
     private static EntityPlayerController playerController;
     private static ParticleEngine particleEngine;
-    private static LevelRenderer levelRenderer;
+    private static LevelController levelController;
     private static ClientLevel level;
     private static boolean isWorldLoaded;
     private static final HashMap<Integer, GuiInterface> guiInterface = new HashMap<>();
@@ -82,6 +88,8 @@ public class Opencraft
     private static EntityPlayer entityPlayer;
     private static long lastTime;
     private static int frames;
+
+    private static ShaderProgram shaderProgram;
 
     public Opencraft(String[] args) throws Exception {
         String ver = getClass().getPackage().getImplementationVersion();
@@ -130,7 +138,6 @@ public class Opencraft
         GL11.glShadeModel(GL_SMOOTH);
         GL11.glClearDepth(1.0D);
         GL11.glEnable(GL_DEPTH_TEST);
-//        GL11.glEnable(GL_CULL_FACE);
         GL11.glDepthFunc(GL_LEQUAL);
         GL11.glEnable(GL_ALPHA_TEST);
         GL11.glAlphaFunc(GL_GREATER, 0.0F);
@@ -138,6 +145,12 @@ public class Opencraft
         GL11.glMatrixMode(GL_PROJECTION);
         GL11.glLoadIdentity();
         GL11.glMatrixMode(GL_MODELVIEW);
+
+        Logger.debug("Loading shaders");
+
+        shaderProgram = new ShaderProgram();
+//        shaderProgram.createFragmentShader(Utils.readFileFromStream(Resources.load(Opencraft.class, "opencraft:shaders/fragment.glsl")));
+//        shaderProgram.link();
 
         Logger.debug("Initializing font and timer");
         Opencraft.font = new Font("opencraft:gui/font.gif");
@@ -163,8 +176,8 @@ public class Opencraft
 
 
         Logger.debug("Loading screens");
-        GUI.initScreens();
-        setCurrentScreen(GUI.mainMenu);
+        ScreenRegistry.initScreens();
+        setCurrentScreen(ScreenRegistry.mainMenu);
 
         lastTime = System.currentTimeMillis();
         frames = 0;
@@ -218,10 +231,14 @@ public class Opencraft
                 if (currentScreen != null) currentScreen.resize(display.getWidth(), display.getHeight());
             }
 
+            shaderProgram.bind();
             Opencraft.renderEverything();
+            shaderProgram.unbind();
         }
 
         Logger.debug("Preparing to exit");
+
+        shaderProgram.cleanup();
 
         Input.destroy();
         display.destroy();
@@ -333,8 +350,8 @@ public class Opencraft
 
         while(System.currentTimeMillis() >= lastTime + 1000L) {
             FPS = frames;
-            chunksUpdate = LevelRenderer.CHUNK_UPDATES;
-            LevelRenderer.CHUNK_UPDATES = 0;
+            chunksUpdate = LevelController.CHUNK_UPDATES;
+            LevelController.CHUNK_UPDATES = 0;
             lastTime += 1000L;
             frames = 0;
         }
@@ -379,7 +396,7 @@ public class Opencraft
         new Thread(() -> {
             if (ticks != null) ticks.clear();
             if (level != null) level.destroy();
-            if (levelRenderer != null) levelRenderer.destroy();
+            if (levelController != null) levelController.destroy();
             if (particleEngine != null) particleEngine.destroy();
             if (playerController != null) playerController.destroy();
             if (playerController != null) playerController = null;
@@ -401,7 +418,7 @@ public class Opencraft
 
         Opencraft.inMenu = true;
         Opencraft.renderWhenInMenu = false;
-        Opencraft.runInGLContext(() -> setCurrentScreen(GUI.mainMenu));
+        Opencraft.runInGLContext(() -> setCurrentScreen(ScreenRegistry.mainMenu));
     }
 
     public static void startNewGame(int loadState, int seed) {
@@ -410,8 +427,9 @@ public class Opencraft
 
     public static void startNewGame(String host, int port, int loadState, int seed) {
         try {
-            GUI.loadingScreen.setLoadingText(Lang.getTranslatedString("opencraft:gui.text.loading_world"));
+            ScreenRegistry.loadingScreen.setLoadingText(Lang.getTranslatedString("opencraft:gui.text.loading_world"));
 
+            levelController = new LevelController();
             playerController = new EntityPlayerController();
             entityPlayer = new EntityPlayer(Opencraft.getPlayerController());
             entityPlayer.setNameTag(new Nametag(playerName));
@@ -425,17 +443,16 @@ public class Opencraft
                 internalServerConnection.connect(host, port);
             }
 
-            levelRenderer = new LevelRenderer();
             particleEngine = new ParticleEngine();
 
-            levelRenderer.prepareChunks();
+            levelController.prepareChunks();
 
             closeCurrentScreen();
             Opencraft.isWorldLoaded = true;
         } catch (Exception e) {
             Logger.exception("Error loading the world", e);
             quitToMainMenu();
-//            GUI.loadingScreen.setLoadingText(Lang.getLanguageString("gui.text.unable_to_load"), true);
+            ScreenRegistry.loadingScreen.setLoadingText(Lang.getTranslatedString("opencraft:gui.text.unable_to_load"), true);
         }
     }
 
@@ -527,8 +544,8 @@ public class Opencraft
         return 6;
     }
 
-    public static LevelRenderer getLevelRenderer() {
-        return levelRenderer;
+    public static LevelController getLevelController() {
+        return levelController;
     }
 
     public static int registerRenderEvent(RenderInterface tick)
@@ -744,5 +761,9 @@ public class Opencraft
 
     public static HashMap<Integer, OptionsListener> getOptionsListeners() {
         return optionsListeners;
+    }
+
+    public static ShaderProgram getShaderProgram() {
+        return shaderProgram;
     }
 }

@@ -26,7 +26,7 @@ public class BiomeGrassLand extends BiomeForest {
     }
 
     @Override
-    public boolean canTreesSpawn() {
+    public boolean doTreesSpawn() {
         return false;
     }
 

@@ -80,7 +80,12 @@ public class Resources {
 
     public static void loadNamespaceResources(Class<?> namespace, String id) throws URISyntaxException {
         Lang.loadLanguage(namespace, id);
-        TextureEngine.loadTextures(namespace, id);
+        TextureEngine.loadTextures(namespace, id, id);
+    }
+
+    public static void loadNamespaceResources(Class<?> namespace, String id, String resourceId) throws URISyntaxException {
+        Lang.loadLanguage(namespace, id);
+        TextureEngine.loadTextures(namespace, id, resourceId);
     }
 
 }

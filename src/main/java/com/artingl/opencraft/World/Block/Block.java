@@ -23,27 +23,24 @@ public class Block
     public Block(){}
 
     public Block(String blockId) {
-        this(blockId, true);
-    }
-
-    public Block(String blockId, boolean createTexture) {
         this.blockId = blockId;
         this.tool = Tool.HAND;
         this.strength = 1;
 
-        if (createTexture) {
-            float tx, ty, bx, by, sx, sy;
+        this.createTexture();
+    }
 
-            tx = TextureEngine.getBlockTextureX(this.getId());
-            ty = TextureEngine.getBlockTextureY(this.getId());
-            bx = TextureEngine.getBlockTextureX(this.getId());
-            by = TextureEngine.getBlockTextureY(this.getId());
-            sx = TextureEngine.getBlockTextureX(this.getId());
-            sy = TextureEngine.getBlockTextureY(this.getId());
-            int id = TextureEngine.getBlockTextureId(this.getId());
-            this.texture = new Texture(id, tx, ty, bx, by, sx, sy);
-        }
+    public void createTexture() {
+        float tx, ty, bx, by, sx, sy;
 
+        tx = TextureEngine.getBlockTextureX(this.getId());
+        ty = TextureEngine.getBlockTextureY(this.getId());
+        bx = TextureEngine.getBlockTextureX(this.getId());
+        by = TextureEngine.getBlockTextureY(this.getId());
+        sx = TextureEngine.getBlockTextureX(this.getId());
+        sy = TextureEngine.getBlockTextureY(this.getId());
+        int id = TextureEngine.getBlockTextureId(this.getId());
+        this.texture = new Texture(id, tx, ty, bx, by, sx, sy);
     }
 
     public void setTexture(Texture texture)
@@ -170,6 +167,11 @@ public class Block
         return "Block{id=" + getId() + "}";
     }
 
+    @Override
+    public int hashCode() {
+        return toString().hashCode();
+    }
+
     public void neighborChanged(ClientLevel level, Vector3i blockPos, Direction.Values direction, Block newBlock) {
     }
 
@@ -183,5 +185,4 @@ public class Block
 
         return BlockRegistry.blocksHashes.get(i);
     }
-
 }

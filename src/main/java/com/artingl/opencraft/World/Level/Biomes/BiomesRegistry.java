@@ -14,19 +14,21 @@ public class BiomesRegistry {
         public static BiomeDesert desert = new BiomeDesert();
         public static BiomeGrassLand grassLand = new BiomeGrassLand();
         public static BiomeFlowers flowers = new BiomeFlowers();
+        public static BiomeLowland lowland = new BiomeLowland();
     }
 
     public static int totalBiomes;
     public static ArrayList<Class<?>> biomes = new ArrayList<>();
 
     public static void init() {
-        Logger.info("Initializing biomes");
+        Logger.debug("Initializing biomes");
         Class<?>[] vanilla_biomes = {
                 BiomeForest.class,
                 BiomeMountains.class,
                 BiomeDesert.class,
                 BiomeGrassLand.class,
                 BiomeFlowers.class,
+                BiomeLowland.class,
         };
 
         biomes.addAll(Arrays.asList(vanilla_biomes));

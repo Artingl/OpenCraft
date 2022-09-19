@@ -3,7 +3,7 @@ package com.artingl.opencraft.Control.World;
 import com.artingl.opencraft.Logger.Logger;
 import com.artingl.opencraft.Math.Vector2f;
 import com.artingl.opencraft.Control.Game.TextureEngine;
-import com.artingl.opencraft.Control.Game.VerticesBuffer;
+import com.artingl.opencraft.Control.Render.BufferRenderer;
 import com.artingl.opencraft.World.Entity.EntityPlayer;
 import com.artingl.opencraft.World.Level.ClientLevel;
 import com.artingl.opencraft.World.Ambient.Block.Particle;
@@ -58,7 +58,7 @@ public class ParticleEngine implements Tick {
          float xa2 = -za * (float)Math.sin((double)rotation.x * 3.141592653589793D / 180.0D);
          float za2 = xa * (float)Math.sin((double)rotation.x * 3.141592653589793D / 180.0D);
          float ya = (float)Math.cos((double)rotation.x * 3.141592653589793D / 180.0D);
-         VerticesBuffer t = VerticesBuffer.getGlobalInstance();
+         BufferRenderer t = BufferRenderer.getGlobalInstance();
          GL11.glColor4f(0.8F, 0.8F, 0.8F, 1.0F);
          t.begin();
 

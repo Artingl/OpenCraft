@@ -2,11 +2,11 @@ package com.artingl.opencraft.Multiplayer.Packet;
 
 import com.artingl.opencraft.Math.Vector2i;
 import com.artingl.opencraft.Math.Vector3i;
-import com.artingl.opencraft.Multiplayer.Connection;
 import com.artingl.opencraft.Multiplayer.Server;
 import com.artingl.opencraft.Multiplayer.Side;
 import com.artingl.opencraft.Multiplayer.World.Entity.EntityMP;
 import com.artingl.opencraft.Multiplayer.World.Entity.EntityPlayerMP;
+import com.artingl.opencraft.Multiplayer.World.Gamemode.Spectator;
 import com.artingl.opencraft.Opencraft;
 import com.artingl.opencraft.World.Block.Block;
 import com.artingl.opencraft.World.Block.BlockRegistry;
@@ -18,13 +18,13 @@ import com.artingl.opencraft.World.Item.ItemSlot;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.ArrayList;
 
 public class PacketWorldUpdate extends Packet {
 
     public enum Types {
         SET_BLOCK, BREAK_BLOCK
     }
-
 
     public PacketWorldUpdate(){}
     public PacketWorldUpdate(Object clientOrServer, Socket connection) {
@@ -61,18 +61,23 @@ public class PacketWorldUpdate extends Packet {
             if (entity == null)
                 return;
 
+            boolean canBreak = true;
+
+            if (entity instanceof EntityPlayerMP) {
+                canBreak = !(((EntityPlayerMP) entity).getGamemode().equals(Spectator.instance));
+            }
+
             ItemSlot itemSlot = entity.getInventoryItem(selectedSlot);
 
             if (itemSlot == null || block.equals(BlockRegistry.Blocks.air)) {
                 for (EntityMP entityMP : getServer().getEntities()) {
-                    if (entityMP instanceof EntityPlayerMP && entityMP.getLevel() == entity.getLevel() && entityMP.insideRenderDistance(entity)) {
+                    if (entityMP instanceof EntityPlayerMP && entityMP.getLevelMP() == entity.getLevelMP() && entityMP.insideRenderDistance(entity)) {
                         sendBlock(blockPosition, BlockRegistry.Blocks.air, new DataOutputStream(entityMP.getConnection().getOutputStream()));
                     }
                 }
-            }
-            else {
+            } else {
                 for (EntityMP entityMP : getServer().getEntities()) {
-                    if (entityMP instanceof EntityPlayerMP && entityMP.getLevel() == entity.getLevel() && entityMP.insideRenderDistance(entity)) {
+                    if (entityMP instanceof EntityPlayerMP && entityMP.getLevelMP() == entity.getLevelMP() && entityMP.insideRenderDistance(entity)) {
                         sendBlock(blockPosition, block, new DataOutputStream(entityMP.getConnection().getOutputStream()));
                     }
                 }
@@ -90,7 +95,7 @@ public class PacketWorldUpdate extends Packet {
                 return;
 
             for (EntityMP entityMP : getServer().getEntities()) {
-                if (entityMP instanceof EntityPlayerMP && entityMP.getLevel() == entity.getLevel() && entityMP.insideRenderDistance(entity)) {
+                if (entityMP instanceof EntityPlayerMP && entityMP.getLevelMP() == entity.getLevelMP() && entityMP.insideRenderDistance(entity)) {
                     sendBlock(blockPosition, BlockRegistry.Blocks.air, new DataOutputStream(entityMP.getConnection().getOutputStream()));
                 }
             }
@@ -98,11 +103,7 @@ public class PacketWorldUpdate extends Packet {
 //            ItemSlot itemSlot = entity.getInventoryItem(selectedSlot);
 //            Region tempRegion = new Region(new Vector2i(blockPosition.x >> 4, blockPosition.z >> 4));
 //
-//            Opencraft.getLevel().generation.getLevelGeneration().generateRegion(
-//                    tempRegion,
-//                    blockPosition.x - ((blockPosition.x >> 4) * 16),
-//                    blockPosition.z - ((blockPosition.z >> 4) * 16),
-//                    blockPosition.x, blockPosition.z);
+//            Opencraft.getLevel().generation.getLevelGeneration().generateRegion(tempRegion);
 //
 //            Block block = tempRegion.getBlock(
 //                blockPosition.x - ((blockPosition.x >> 4) * 16),

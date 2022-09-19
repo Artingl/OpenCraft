@@ -10,11 +10,15 @@ import com.artingl.opencraft.Multiplayer.Server;
 import com.artingl.opencraft.Multiplayer.SocketVectorArraylist;
 import com.artingl.opencraft.Multiplayer.World.Entity.EntityMP;
 import com.artingl.opencraft.Control.RenderInterface;
-import com.artingl.opencraft.Control.World.BlockRenderer;
+import com.artingl.opencraft.Control.Render.BlockRenderer;
+import com.artingl.opencraft.Multiplayer.World.Gamemode.Spectator;
 import com.artingl.opencraft.World.Entity.Models.Model;
+import com.artingl.opencraft.World.EntityData.EntityEvent;
 import com.artingl.opencraft.World.EntityData.Nametag;
 import com.artingl.opencraft.World.EntityData.UUID;
 import com.artingl.opencraft.World.Item.ItemSlot;
+import com.artingl.opencraft.World.Level.Listener.LevelListener;
+import com.artingl.opencraft.World.Level.Listener.LevelListenerEventEntityUpdate;
 import com.artingl.opencraft.World.Tick;
 import com.artingl.opencraft.Phys.AABB;
 import com.artingl.opencraft.Opencraft;
@@ -28,7 +32,7 @@ public class Entity implements Tick, RenderInterface
 {
 
     public enum Types {
-        PLAYER, MOB, BASE
+        PLAYER, MOB, BASE, DROP, PARTICLE
     }
 
     public static Class<?>[] ENTITIES = {
@@ -85,6 +89,14 @@ public class Entity implements Tick, RenderInterface
             this.tickEvent = Opencraft.registerTickEvent(this);
             this.renderEvent = Opencraft.registerRenderEvent(this);
         }
+
+        if (entityType != Types.PARTICLE && entityType != Types.DROP) {
+            Opencraft.getLevelController().sendEvent(
+                    LevelListener.Events.ENTITY_UPDATE,
+                    level,
+                    new LevelListenerEventEntityUpdate(this, EntityEvent.SPAWN, getPosition())
+            );
+        }
     }
 
     public void setModel(Model model)
@@ -127,6 +139,12 @@ public class Entity implements Tick, RenderInterface
         float yaOrg = ya;
         float zaOrg = za;
         List<AABB> aABBs = Opencraft.getLevel().getCubes(this.aabb.expand(xa, ya, za));
+
+        if (this instanceof EntityPlayer) {
+            if (((EntityPlayer)this).getGamemode().equals(Spectator.instance)) {
+                aABBs.clear();
+            }
+        }
 
         int i;
         for(i = 0; i < aABBs.size(); ++i) {
@@ -209,7 +227,17 @@ public class Entity implements Tick, RenderInterface
             this.getVelocity().z += (za * cos + xa * sin);
 
             if (isOnlineEntity)
+            {
                 this.positionQueue.add(new Vector2i(initial_xa, initial_za));
+
+                if (entityType != Types.PARTICLE && entityType != Types.DROP) {
+                    Opencraft.getLevelController().sendEvent(
+                            LevelListener.Events.ENTITY_UPDATE,
+                            level,
+                            new LevelListenerEventEntityUpdate(this, EntityEvent.MOVEMENT, getPosition())
+                    );
+                }
+            }
         }
     }
 
@@ -315,6 +343,14 @@ public class Entity implements Tick, RenderInterface
     public void die() {
         this.nbt.setHearts(0);
         this.nbt.setDeadState(true);
+
+        if (entityType != Types.PARTICLE && entityType != Types.DROP) {
+            Opencraft.getLevelController().sendEvent(
+                    LevelListener.Events.ENTITY_UPDATE,
+                    level,
+                    new LevelListenerEventEntityUpdate(this, EntityEvent.DIE, getPosition())
+            );
+        }
     }
 
     public boolean isDead() {
@@ -328,6 +364,14 @@ public class Entity implements Tick, RenderInterface
         this.setVelocity(new Vector3f(0, 0, 0));
         this.nbt.setRotation(new Vector2f(0, 0));
         this.nbt.setFallValue(0);
+
+        if (entityType != Types.PARTICLE && entityType != Types.DROP) {
+            Opencraft.getLevelController().sendEvent(
+                    LevelListener.Events.ENTITY_UPDATE,
+                    level,
+                    new LevelListenerEventEntityUpdate(this, EntityEvent.RESPAWN, getPosition())
+            );
+        }
     }
 
     public boolean isInWater() {
@@ -650,4 +694,7 @@ public class Entity implements Tick, RenderInterface
         this.nbt.setAcceleration(acceleration);
     }
 
+    public ClientLevel getLevel() {
+        return level;
+    }
 }

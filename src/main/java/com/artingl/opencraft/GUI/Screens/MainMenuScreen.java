@@ -2,10 +2,10 @@ package com.artingl.opencraft.GUI.Screens;
 
 import com.artingl.opencraft.GUI.Elements.Button;
 import com.artingl.opencraft.GUI.Elements.Element;
-import com.artingl.opencraft.GUI.GUI;
+import com.artingl.opencraft.GUI.ScreenRegistry;
 import com.artingl.opencraft.Opencraft;
-import com.artingl.opencraft.Control.World.BlockRenderer;
-import com.artingl.opencraft.Control.Game.Camera;
+import com.artingl.opencraft.Control.Render.BlockRenderer;
+import com.artingl.opencraft.Control.Render.Camera;
 import com.artingl.opencraft.Control.Game.TextureEngine;
 import com.artingl.opencraft.Resources.Lang.Lang;
 import org.lwjgl.opengl.GL11;
@@ -41,10 +41,10 @@ public class MainMenuScreen extends Screen
     public void init() {
         super.init();
 
-        singleplayerButton = this.addElement(new Button(this, 0, 0, Lang.getTranslatedString("opencraft:gui.text.singleplayer"), () -> Opencraft.setCurrentScreen(GUI.worldList)));
+        singleplayerButton = this.addElement(new Button(this, 0, 0, Lang.getTranslatedString("opencraft:gui.text.singleplayer"), () -> Opencraft.setCurrentScreen(ScreenRegistry.worldList)));
         multiplayerButton = this.addElement(new Button(this, 0, 0, Lang.getTranslatedString("opencraft:gui.text.multiplayer"), () -> Opencraft.connectTo("95.165.132.6", 65000)));
-        modsListButton = this.addElement(new Button(this, 0, 0, Lang.getTranslatedString("opencraft:gui.text.mods_list"), () -> Opencraft.setCurrentScreen(GUI.modsList)));
-        settingsButton = this.addElement(new Button(this, 0, 0, Lang.getTranslatedString("opencraft:gui.text.settings"), () -> Opencraft.setCurrentScreen(GUI.settingsScreen)));
+        modsListButton = this.addElement(new Button(this, 0, 0, Lang.getTranslatedString("opencraft:gui.text.mods_list"), () -> Opencraft.setCurrentScreen(ScreenRegistry.modsList)));
+        settingsButton = this.addElement(new Button(this, 0, 0, Lang.getTranslatedString("opencraft:gui.text.settings"), () -> Opencraft.setCurrentScreen(ScreenRegistry.settingsScreen)));
         quitButton = this.addElement(new Button(this, 0, 0, Lang.getTranslatedString("opencraft:gui.text.quit_game"), Opencraft::close));
 
         getElements().get(settingsButton).setWidth(90);
@@ -123,32 +123,32 @@ public class MainMenuScreen extends Screen
         GL11.glTranslatef(0, 0, 0);
         GL11.glScalef(3, 3, 3);
 
-        GL11.glBindTexture(GL11.GL_TEXTURE_2D, this.panorama[4]);
+        Opencraft.getShaderProgram().bindTexture(this.panorama[4]);
         GL11.glBegin(GL11.GL_QUADS);
         BlockRenderer.renderLegacyTop(0, 0, 0, 1, 1, 1);
         GL11.glEnd();
 
-        GL11.glBindTexture(GL11.GL_TEXTURE_2D, this.panorama[5]);
+        Opencraft.getShaderProgram().bindTexture(this.panorama[5]);
         GL11.glBegin(GL11.GL_QUADS);
         BlockRenderer.renderLegacyBottom(0, 0, 0, 1, 1, 1);
         GL11.glEnd();
 
-        GL11.glBindTexture(GL11.GL_TEXTURE_2D, this.panorama[0]);
+        Opencraft.getShaderProgram().bindTexture(this.panorama[0]);
         GL11.glBegin(GL11.GL_QUADS);
         BlockRenderer.renderLegacyFront(0, 0, 0, 1, 1, 1);
         GL11.glEnd();
 
-        GL11.glBindTexture(GL11.GL_TEXTURE_2D, this.panorama[2]);
+        Opencraft.getShaderProgram().bindTexture(this.panorama[2]);
         GL11.glBegin(GL11.GL_QUADS);
         BlockRenderer.renderLegacyBack(0, 0, 0, 1, 1, 1);
         GL11.glEnd();
 
-        GL11.glBindTexture(GL11.GL_TEXTURE_2D, this.panorama[1]);
+        Opencraft.getShaderProgram().bindTexture(this.panorama[1]);
         GL11.glBegin(GL11.GL_QUADS);
         BlockRenderer.renderLegacyLeft(0, 0, 0, 1, 1, 1);
         GL11.glEnd();
 
-        GL11.glBindTexture(GL11.GL_TEXTURE_2D, this.panorama[3]);
+        Opencraft.getShaderProgram().bindTexture(this.panorama[3]);
         GL11.glBegin(GL11.GL_QUADS);
         BlockRenderer.renderLegacyRight(0, 0, 0, 1, 1, 1);
         GL11.glEnd();

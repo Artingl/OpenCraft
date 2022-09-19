@@ -1,5 +1,6 @@
 package com.artingl.opencraft.Control.Game;
 
+import com.artingl.opencraft.Opencraft;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.GL11;

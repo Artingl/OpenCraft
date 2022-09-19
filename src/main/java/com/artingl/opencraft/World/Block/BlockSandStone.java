@@ -8,8 +8,11 @@ public class BlockSandStone extends Block
 
     public BlockSandStone()
     {
-        super("opencraft:sandstone", false);
+        super("opencraft:sandstone");
+    }
 
+    @Override
+    public void createTexture() {
         float tx, ty, bx, by, sx, sy;
         tx = 0; ty = 0; bx = 0; by = 0; sx = 0; sy = 0;
 
@@ -22,7 +25,5 @@ public class BlockSandStone extends Block
         int id = TextureEngine.getBlockTextureId("opencraft:sandstone_side");
 
         this.texture = new Texture(id, tx, ty, bx, by, sx, sy);
-
     }
-
 }

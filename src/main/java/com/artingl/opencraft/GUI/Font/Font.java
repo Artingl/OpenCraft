@@ -2,7 +2,7 @@ package com.artingl.opencraft.GUI.Font;
 
 import com.artingl.opencraft.Opencraft;
 import com.artingl.opencraft.Control.Game.TextureEngine;
-import com.artingl.opencraft.Control.Game.VerticesBuffer;
+import com.artingl.opencraft.Control.Render.BufferRenderer;
 import com.artingl.opencraft.Resources.Resources;
 import org.lwjgl.opengl.GL11;
 import javax.imageio.ImageIO;
@@ -66,7 +66,7 @@ public class Font {
 
       GL11.glEnable(3553);
       GL11.glBindTexture(3553, this.fontTexture);
-      VerticesBuffer t = VerticesBuffer.getGlobalInstance();
+      BufferRenderer t = BufferRenderer.getGlobalInstance();
       t.begin();
       t.color(color);
       int xo = 0;

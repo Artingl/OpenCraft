@@ -1,6 +1,5 @@
 package com.artingl.opencraft.World.Level.Biomes;
 
-import com.artingl.opencraft.World.Block.Block;
 import com.artingl.opencraft.World.Block.BlockRegistry;
 import com.artingl.opencraft.World.Chunk.Region;
 import com.artingl.opencraft.World.Level.LevelTypes;
@@ -8,6 +7,7 @@ import com.artingl.opencraft.World.Level.LevelTypes;
 public class BiomeDesert extends Biome {
 
     public static int id = 2;
+    private int heightValue;
 
     public BiomeDesert() {
         super(LevelTypes.WORLD);
@@ -26,31 +26,25 @@ public class BiomeDesert extends Biome {
         return "Desert";
     }
 
+    public void prepareXZ(Region region, int height, int x, int z) {
+        heightValue = region.randomInteger(-10, -4);
+    }
+
     @Override
-    public void createRegionXZ(Region region, int height, int x, int z) {
-        int value = region.randomInteger(-10, -4);
-        for (int y = 1; y < height; y++) {
-            if (y == height-1) {
-                region.setBlock(BlockRegistry.Blocks.sand, x, y, z);
-            }
-            else {
-                if (y > height + value) {
-                    region.setBlock(BlockRegistry.Blocks.sandStone, x, y, z);
-                }
-                else {
-                    region.setBlock(BlockRegistry.Blocks.stone, x, y, z);
-                }
+    public void createBlock(Region region, int height, int x, int y, int z) {
+        if (y == height - 1) {
+            region.setBlock(BlockRegistry.Blocks.sand, x, y, z);
+        } else {
+            if (y > height + heightValue) {
+                region.setBlock(BlockRegistry.Blocks.sandStone, x, y, z);
+            } else {
+                region.setBlock(BlockRegistry.Blocks.stone, x, y, z);
             }
         }
     }
 
     @Override
-    public int getWaterLevelModifier() {
-        return -4;
-    }
-
-    @Override
     public boolean checkHeight(int value) {
-        return value < 10;
+        return value < 15;
     }
 }

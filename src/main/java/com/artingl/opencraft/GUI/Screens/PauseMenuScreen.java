@@ -2,7 +2,7 @@ package com.artingl.opencraft.GUI.Screens;
 
 import com.artingl.opencraft.Control.Game.Input;
 import com.artingl.opencraft.GUI.Elements.Element;
-import com.artingl.opencraft.GUI.GUI;
+import com.artingl.opencraft.GUI.ScreenRegistry;
 import com.artingl.opencraft.Resources.Lang.Lang;
 import com.artingl.opencraft.GUI.Elements.Button;
 import com.artingl.opencraft.Opencraft;
@@ -23,7 +23,7 @@ public class PauseMenuScreen extends Screen
     public void init() {
         super.init();
 
-        settingsButton = this.addElement(new Button(this, 0, 0, Lang.getTranslatedString("opencraft:gui.text.settings"), () -> Opencraft.setCurrentScreen(GUI.settingsScreen)));
+        settingsButton = this.addElement(new Button(this, 0, 0, Lang.getTranslatedString("opencraft:gui.text.settings"), () -> Opencraft.setCurrentScreen(ScreenRegistry.settingsScreen)));
         backToGameButton = this.addElement(new Button(this, 0, 0, Lang.getTranslatedString("opencraft:gui.text.back_to_game"), Opencraft::closeCurrentScreen));
         quitButton = this.addElement(new Button(this, 0, 0, Lang.getTranslatedString("opencraft:gui.text.quit_world"), Opencraft::quitToMainMenu));
         hostGameButton = this.addElement(new Button(this, 0, 0, "Host game", () -> {

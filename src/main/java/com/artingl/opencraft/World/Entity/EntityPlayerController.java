@@ -1,7 +1,7 @@
 package com.artingl.opencraft.World.Entity;
 
 import com.artingl.opencraft.Control.Game.Input;
-import com.artingl.opencraft.GUI.GUI;
+import com.artingl.opencraft.GUI.ScreenRegistry;
 import com.artingl.opencraft.GUI.Screens.ChatScreen;
 import com.artingl.opencraft.GUI.Windows.PlayerHotBar;
 import com.artingl.opencraft.Logger.Logger;
@@ -9,6 +9,7 @@ import com.artingl.opencraft.Math.Vector2f;
 import com.artingl.opencraft.Math.Vector2i;
 import com.artingl.opencraft.Math.Vector3f;
 import com.artingl.opencraft.Multiplayer.Packet.PacketWorldUpdate;
+import com.artingl.opencraft.Multiplayer.World.Gamemode.Spectator;
 import com.artingl.opencraft.Opencraft;
 import com.artingl.opencraft.World.Block.Block;
 import com.artingl.opencraft.World.Block.BlockRegistry;
@@ -65,6 +66,10 @@ public class EntityPlayerController
             entityPlayer.setFlyingState(false);
         }
 
+        if (entityPlayer.getGamemode().getId() == Spectator.id) {
+            entityPlayer.setFlyingState(true);
+        }
+
         int xa = 0;
         int ya = 0;
 
@@ -87,7 +92,7 @@ public class EntityPlayerController
                 }
             }
 
-            if (entityPlayer.getGamemode().getId() == Creative.id) {
+            if (entityPlayer.getGamemode().getId() == Creative.id || entityPlayer.getGamemode().getId() == Spectator.id) {
                 if (entityPlayer.isFlying()) {
                     if (Input.isKeyDown(Input.Keys.KEY_SPACE)) {
                         vel.y = 0.42F;
@@ -187,7 +192,7 @@ public class EntityPlayerController
             }
         }
         else {
-            if (entityPlayer.getGamemode().getId() == Creative.id) {
+            if (entityPlayer.getGamemode().getId() == Creative.id || entityPlayer.getGamemode().getId() == Spectator.id) {
                 if (entityPlayer.isFlying()) {
                     vel.y = 0;
                 }
@@ -207,6 +212,10 @@ public class EntityPlayerController
                 if (entityPlayer.isFlying())
                     entityPlayer.getVelocity().y = 0.42f;
             }
+            else if (entityPlayer.getGamemode().equals(Spectator.instance)) {
+                entityPlayer.setFlyingState(true);
+                entityPlayer.getVelocity().y = 0.42f;
+            }
         }
         else if (keyInput.keyCode == Input.Keys.KEY_T) {
             if (entityPlayer.getScreen() == null)
@@ -218,7 +227,7 @@ public class EntityPlayerController
         }
         else if (keyInput.keyCode == Input.Keys.KEY_ESCAPE) {
             if (Opencraft.isWorldLoaded() && !Opencraft.getPlayerEntity().isDead()) {
-                Opencraft.setCurrentScreen(GUI.pauseMenu);
+                Opencraft.setCurrentScreen(ScreenRegistry.pauseMenu);
                 Opencraft.inMenu(true);
             }
         }
@@ -287,42 +296,42 @@ public class EntityPlayerController
         return cameraOrient;
     }
 
-    public static void updateEntityPositionByVelocity(Entity entityPlayer, Vector2i pos) {
+    public static void updateEntityPositionByVelocity(Entity entity, Vector2i pos) {
         float yo;
-        float acceleration = entityPlayer.getAcceleration();
+        float acceleration = entity.getAcceleration();
 
-        if (entityPlayer.isInWater() && !entityPlayer.isFlying()) {
-            yo = entityPlayer.getPosition().y;
-            entityPlayer.moveRelative(pos.x, pos.y, 0.02F);
-            entityPlayer.move(entityPlayer.getVelocity().x, entityPlayer.getVelocity().y, entityPlayer.getVelocity().z);
-            entityPlayer.getVelocity().x *= 0.8F * acceleration;
-            entityPlayer.getVelocity().y *= 0.8F;
-            entityPlayer.getVelocity().z *= 0.8F * acceleration;
-            entityPlayer.getVelocity().y = (float) ((double) entityPlayer.getVelocity().y - 0.02D);
-            if (entityPlayer.hasHorizontalCollision() && entityPlayer.isFree(entityPlayer.getVelocity().x, entityPlayer.getVelocity().y + 0.6F - yo + yo, entityPlayer.getVelocity().z)) {
-                entityPlayer.getVelocity().y = 0.3F;
+        if (entity.isInWater() && !entity.isFlying()) {
+            yo = entity.getPosition().y;
+            entity.moveRelative(pos.x, pos.y, 0.02F);
+            entity.move(entity.getVelocity().x, entity.getVelocity().y, entity.getVelocity().z);
+            entity.getVelocity().x *= 0.8F * acceleration;
+            entity.getVelocity().y *= 0.8F;
+            entity.getVelocity().z *= 0.8F * acceleration;
+            entity.getVelocity().y = (float) ((double) entity.getVelocity().y - 0.02D);
+            if (entity.hasHorizontalCollision() && entity.isFree(entity.getVelocity().x, entity.getVelocity().y + 0.6F - yo + yo, entity.getVelocity().z)) {
+                entity.getVelocity().y = 0.3F;
             }
-        } else if (entityPlayer.isFlying()) {
-            entityPlayer.moveRelative(pos.x, pos.y, 0.1F);
-            entityPlayer.move(entityPlayer.getVelocity().x, entityPlayer.getVelocity().y, entityPlayer.getVelocity().z);
-            entityPlayer.getVelocity().x *= 0.91F * acceleration;
-            entityPlayer.getVelocity().y *= 0.98F;
-            entityPlayer.getVelocity().z *= 0.91F * acceleration;
-            entityPlayer.getVelocity().y = (float)((double)entityPlayer.getVelocity().y - 0.08D);
+        } else if (entity.isFlying()) {
+            entity.moveRelative(pos.x, pos.y, 0.1F);
+            entity.move(entity.getVelocity().x, entity.getVelocity().y, entity.getVelocity().z);
+            entity.getVelocity().x *= 0.91F * acceleration;
+            entity.getVelocity().y *= 0.98F;
+            entity.getVelocity().z *= 0.91F * acceleration;
+            entity.getVelocity().y = (float)((double)entity.getVelocity().y - 0.08D);
 
-            if (entityPlayer.isOnGround()) {
-                entityPlayer.setFlyingState(false);
+            if (entity.isOnGround()) {
+                entity.setFlyingState(false);
             }
         } else {
-            entityPlayer.moveRelative(pos.x, pos.y, entityPlayer.isOnGround() ? 0.1F : 0.02F);
-            entityPlayer.move(entityPlayer.getVelocity().x, entityPlayer.getVelocity().y, entityPlayer.getVelocity().z);
-            entityPlayer.getVelocity().x *= 0.91F * acceleration;
-            entityPlayer.getVelocity().y *= 0.98F;
-            entityPlayer.getVelocity().z *= 0.91F * acceleration;
-            entityPlayer.getVelocity().y = (float)((double)entityPlayer.getVelocity().y - 0.08D);
-            if (entityPlayer.isOnGround()) {
-                entityPlayer.getVelocity().x *= 0.6F;
-                entityPlayer.getVelocity().z *= 0.6F;
+            entity.moveRelative(pos.x, pos.y, entity.isOnGround() ? 0.1F : 0.02F);
+            entity.move(entity.getVelocity().x, entity.getVelocity().y, entity.getVelocity().z);
+            entity.getVelocity().x *= 0.91F * acceleration;
+            entity.getVelocity().y *= 0.98F;
+            entity.getVelocity().z *= 0.91F * acceleration;
+            entity.getVelocity().y = (float)((double)entity.getVelocity().y - 0.08D);
+            if (entity.isOnGround()) {
+                entity.getVelocity().x *= 0.6F;
+                entity.getVelocity().z *= 0.6F;
             }
         }
     }

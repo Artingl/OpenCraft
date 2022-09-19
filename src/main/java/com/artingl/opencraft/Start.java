@@ -1,7 +1,6 @@
 package com.artingl.opencraft;
 
 import com.artingl.opencraft.Logger.Logger;
-import com.artingl.opencraft.Opencraft;
 
 public class Start
 {

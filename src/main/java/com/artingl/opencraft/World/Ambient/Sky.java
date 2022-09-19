@@ -1,7 +1,8 @@
 package com.artingl.opencraft.World.Ambient;
 
 import com.artingl.opencraft.Control.Game.TextureEngine;
-import com.artingl.opencraft.Control.Game.VerticesBuffer;
+import com.artingl.opencraft.Control.Render.BufferRenderer;
+import com.artingl.opencraft.Opencraft;
 import org.lwjgl.opengl.GL11;
 
 public class Sky {
@@ -10,12 +11,12 @@ public class Sky {
     private int cloudsSize = 1024;
     private float[] cloudPos = {-clouds, 0};
 
-    private VerticesBuffer t = VerticesBuffer.getGlobalInstance();
+    private BufferRenderer t = BufferRenderer.getGlobalInstance();
 
     public void update() {
         // draw clouds
         GL11.glEnable(GL11.GL_TEXTURE_2D);
-        GL11.glBindTexture(GL11.GL_TEXTURE_2D, clouds);
+        Opencraft.getShaderProgram().bindTexture(clouds);
 
         float y = 150;
         float x = 0;
@@ -32,7 +33,7 @@ public class Sky {
         t.setVertexCoord(cloudsSize + cloudPos[0] + x, y, -cloudsSize);
         t.end();
 
-        GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
+        Opencraft.getShaderProgram().bindTexture(0);
     }
 
     public void tick() {

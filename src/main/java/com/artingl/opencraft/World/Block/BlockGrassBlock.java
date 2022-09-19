@@ -8,8 +8,11 @@ public class BlockGrassBlock extends Block
 
     public BlockGrassBlock()
     {
-        super("opencraft:grass_block", false);
+        super("opencraft:grass_block");
+    }
 
+    @Override
+    public void createTexture() {
         float tx, ty, bx, by, sx, sy;
         tx = 0; ty = 0; bx = 0; by = 0; sx = 0; sy = 0;
 
@@ -22,7 +25,5 @@ public class BlockGrassBlock extends Block
         int id = TextureEngine.getBlockTextureId("opencraft:grass_side");
 
         this.texture = new Texture(id, tx, ty, bx, by, sx, sy);
-
     }
-
 }

@@ -7,6 +7,8 @@ import com.artingl.opencraft.World.Level.LevelTypes;
 public class BiomeMountains extends Biome {
 
     public static int id = 1;
+    private int heightValue;
+    private float gravelNoiseValue;
 
 
     public BiomeMountains() {
@@ -19,7 +21,7 @@ public class BiomeMountains extends Biome {
 
     @Override
     public int getBiomeHeight() {
-        return 80;
+        return 110;
     }
 
     public String getName() {
@@ -27,34 +29,34 @@ public class BiomeMountains extends Biome {
     }
 
     @Override
-    public void createRegionXZ(Region region, int height, int x, int z) {
-        int value = region.randomInteger(-5, 5);
-        float dirt_noise_value = region.getNoiseValue(x + value, z - value, -150, 150, 1, .002f);
-        for (int y = 1; y < height; y++) {
-            if (y > 100 + value) {
-                region.setBlock(BlockRegistry.Blocks.dirt, x, y, z);
+    public void prepareXZ(Region region, int height, int x, int z) {
+        heightValue = region.randomInteger(-5, 5);
+        gravelNoiseValue = region.getNoiseValue(x + heightValue, z - heightValue, -150, 150, 1, .002f);
+    }
 
-                if (y == height - 1) {
-                    region.setBlock(BlockRegistry.Blocks.snow, x, y, z);
-                }
+    @Override
+    public void createBlock(Region region, int height, int x, int y, int z) {
+        if (y > 100 + heightValue) {
+            region.setBlock(BlockRegistry.Blocks.dirt, x, y, z);
+
+            if (y == height - 1) {
+                region.setBlock(BlockRegistry.Blocks.snow, x, y, z);
             }
-            else {
-                if (dirt_noise_value > -1 && dirt_noise_value < 1 && y > height - value - 5) {
-                    region.setBlock(BlockRegistry.Blocks.gravel, x, y, z);
-                }
-                else region.setBlock(BlockRegistry.Blocks.stone, x, y, z);
-            }
+        } else {
+            if (gravelNoiseValue > -1 && gravelNoiseValue < 1 && y > height - heightValue - 5) {
+                region.setBlock(BlockRegistry.Blocks.gravel, x, y, z);
+            } else region.setBlock(BlockRegistry.Blocks.stone, x, y, z);
         }
     }
 
     @Override
-    public boolean canTreesSpawn() {
+    public boolean doTreesSpawn() {
         return false;
     }
 
     @Override
     public boolean checkHeight(int value) {
-        return value >= 31 && value <= 38;
+        return value >= 31 && value <= 45;
     }
 
 }

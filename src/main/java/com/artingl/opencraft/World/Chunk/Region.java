@@ -6,7 +6,7 @@ import com.artingl.opencraft.Opencraft;
 import com.artingl.opencraft.World.Block.Block;
 import com.artingl.opencraft.World.Block.BlockRegistry;
 import com.artingl.opencraft.World.Direction;
-import com.artingl.opencraft.World.Generation.PerlinNoise;
+import com.artingl.opencraft.World.Level.Generation.Noise.PerlinNoise;
 import com.artingl.opencraft.World.Level.ClientLevel;
 
 public class Region {
@@ -17,6 +17,7 @@ public class Region {
     private Chunk chunk;
     private boolean isDestroyed;
     private boolean ready;
+    private Vector2i position;
 
     public Region(Chunk chunk) {
         this.chunk = chunk;
@@ -24,12 +25,15 @@ public class Region {
         this.randomSeed = (Opencraft.getLevel().getSeed() + ((long) chunk.getPosition().x * chunk.getPosition().y));
         this.noise = new PerlinNoise(3, (int) this.randomSeed);
         this.buffer = new short[16 * 16 * ClientLevel.MAX_HEIGHT];
+        this.position = chunk.getPosition();
     }
 
     public Region(Vector2i pos) {
         this.ready = false;
         this.randomSeed = (Opencraft.getLevel().getSeed() + ((long) pos.x * pos.y));
+        this.noise = new PerlinNoise(3, (int) this.randomSeed);
         this.buffer = new short[16 * 16 * ClientLevel.MAX_HEIGHT];
+        this.position = pos;
     }
 
     public void generate() {
@@ -42,7 +46,7 @@ public class Region {
     }
 
     public Vector2i getPosition() {
-        return chunk.getPosition();
+        return position;
     }
 
     public Block getBlock(int x, int y, int z) {
@@ -54,13 +58,7 @@ public class Region {
     }
 
     public void setBlock(Block block, int x, int y, int z) {
-        if (x > 15 || x < 0 || z > 15 || z < 0 || y > ClientLevel.MAX_HEIGHT-1 || y < 0 || this.buffer == null) {
-            return;
-        }
-
-        this.buffer[(y * 16 + z) * 16 + x] = block.packToShort();
-
-        if (y + 1 < ClientLevel.MAX_HEIGHT && chunk != null) {
+        if (y + 1 < ClientLevel.MAX_HEIGHT && chunk != null && setBlockQuietly(block, x, y, z)) {
             getBlock(x, y + 1, z).neighborChanged(
                     Opencraft.getLevel(),
                     chunk.translateToRealCoords(x, y + 1, z),
@@ -70,6 +68,18 @@ public class Region {
         }
     }
 
+    public boolean setBlockQuietly(Block block, int x, int y, int z) {
+        if (x > 15 || x < 0 || z > 15 || z < 0 || y > ClientLevel.MAX_HEIGHT-1 || y < 0 || this.buffer == null) {
+            return false;
+        }
+
+        this.buffer[(y * 16 + z) * 16 + x] = block.packToShort();
+        return true;
+    }
+
+    public boolean setBlockQuietly(Block block, Vector3i pos) {
+        return setBlockQuietly(block, pos.x, pos.y, pos.z);
+    }
     public void setBlock(Block block, Vector3i pos) {
         setBlock(block, pos.x, pos.y, pos.z);
     }

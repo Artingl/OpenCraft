@@ -8,8 +8,11 @@ public class BlockLogOak extends Block
 
     public BlockLogOak()
     {
-        super("opencraft:log_oak", false);
+        super("opencraft:log_oak");
+    }
 
+    @Override
+    public void createTexture() {
         float tx, ty, bx, by, sx, sy;
         tx = 0; ty = 0; bx = 0; by = 0; sx = 0; sy = 0;
 
@@ -22,7 +25,5 @@ public class BlockLogOak extends Block
         int id = TextureEngine.getBlockTextureId("opencraft:log_oak_side");
 
         this.texture = new Texture(id, tx, ty, bx, by, sx, sy);
-
     }
-
 }

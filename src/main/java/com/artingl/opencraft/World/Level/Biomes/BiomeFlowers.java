@@ -6,6 +6,8 @@ import com.artingl.opencraft.World.Chunk.Region;
 public class BiomeFlowers extends BiomeGrassLand {
 
     public static int id = 4;
+    private int heightValue;
+    private float flowerNoiseValue;
 
     public BiomeFlowers() {
         super();
@@ -25,16 +27,21 @@ public class BiomeFlowers extends BiomeGrassLand {
     }
 
     @Override
-    public boolean canTreesSpawn() {
+    public boolean doTreesSpawn() {
         return true;
     }
 
     @Override
-    public void createRegionXZ(Region region, int height, int x, int z) {
-        super.createRegionXZ(region, height, x, z);
-        int value = region.randomInteger(-10, -4);
-        float flower_noise_value = region.getNoiseValue(x + value, z - value, -50, 50, 1, .02f);
-        if (region.getBlock(x, height, z).equals(BlockRegistry.Blocks.air) && flower_noise_value > -3 && flower_noise_value < 3) {
+    public void prepareXZ(Region region, int height, int x, int z) {
+        super.prepareXZ(region, height, x, z);
+        heightValue = region.randomInteger(-10, -4);
+        flowerNoiseValue = region.getNoiseValue(x + heightValue, z - heightValue, -50, 50, 1, .02f);
+    }
+
+    @Override
+    public void createBlock(Region region, int height, int x, int y, int z) {
+        super.createBlock(region, height, x, y, z);
+        if (region.getBlock(x, height, z).equals(BlockRegistry.Blocks.air) && flowerNoiseValue > -3 && flowerNoiseValue < 3) {
             region.setBlock(BlockRegistry.Blocks.rose, x, height, z);
         }
     }

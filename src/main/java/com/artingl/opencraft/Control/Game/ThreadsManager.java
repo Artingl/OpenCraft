@@ -1,9 +1,14 @@
 package com.artingl.opencraft.Control.Game;
 
 import com.artingl.opencraft.Logger.Logger;
+import com.artingl.opencraft.Utils.Utils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class ThreadsManager {
 
@@ -20,30 +25,35 @@ public class ThreadsManager {
     private int MAX_AVAILABLE_THREADS;
 
     private final Thread[] threads;
-    private final HashMap<Integer, ArrayList<Task>> tasks;
+    private final ConcurrentHashMap<Integer, ConcurrentLinkedDeque<Task>> tasks;
 
     public ThreadsManager() {
-        MAX_AVAILABLE_THREADS = Runtime.getRuntime().availableProcessors() / 2;
+        MAX_AVAILABLE_THREADS = Runtime.getRuntime().availableProcessors() / 3;
         if (MAX_AVAILABLE_THREADS < 1) {
             MAX_AVAILABLE_THREADS = 1;
         }
 
         threads = new Thread[MAX_AVAILABLE_THREADS];
-        tasks = new HashMap<>();
+        tasks = new ConcurrentHashMap<>();
 
         for (int i = 0; i < MAX_AVAILABLE_THREADS; i++) {
-            tasks.put(i, new ArrayList<>());
+            tasks.put(i, new ConcurrentLinkedDeque<>());
             int threadId = i;
             threads[i] = new Thread(() -> {
                 while (true) {
                     try {
-                        ArrayList<Task> list = new ArrayList<>(tasks.get(threadId));
-                        for (Task task: list) {
-                            task.runnable.run();
-                            task.done = true;
-                        }
+                        for (int j = 0; j < tasks.get(threadId).size(); j++) {
+                            Task task = tasks.get(threadId).pollFirst();
 
-                        Thread.sleep(10);
+                            if (task != null) {
+                                if (!task.done) {
+                                    task.runnable.run();
+                                    task.done = true;
+                                }
+                            }
+
+                            Utils.sleep(2);
+                        }
                     } catch (Exception e) {
                         Logger.exception("Error in thread " + Thread.currentThread().getName() + "!", e);
                     }
@@ -58,22 +68,14 @@ public class ThreadsManager {
     }
 
     public void execute(Runnable runnable) {
-        int smallest = Integer.MAX_VALUE;
+        int smallest = 0;
         int id = -1;
 
         for (int i = 0; i < MAX_AVAILABLE_THREADS; i++) {
-            ArrayList<Task> values = tasks.get(i);
-            values.removeIf(task -> task.done);
-            tasks.put(i, values);
-
-            if (smallest > values.size()) {
+            if (smallest > tasks.get(i).size() || id == -1) {
+                smallest = tasks.get(i).size();
                 id = i;
-                smallest = values.size();
             }
-        }
-
-        if (id == -1) {
-            id = 0;
         }
 
         tasks.get(id).add(new Task(runnable));

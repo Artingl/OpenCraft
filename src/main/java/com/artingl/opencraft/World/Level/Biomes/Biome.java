@@ -1,7 +1,5 @@
 package com.artingl.opencraft.World.Level.Biomes;
 
-import com.artingl.opencraft.World.Block.Block;
-import com.artingl.opencraft.World.Block.BlockRegistry;
 import com.artingl.opencraft.World.Chunk.Region;
 import com.artingl.opencraft.World.Level.LevelTypes;
 
@@ -35,10 +33,13 @@ public class Biome {
         return "Biome";
     }
 
-    public void createRegionXZ(Region region, int height, int x, int z) {
+    public void prepareXZ(Region region, int height, int x, int z) {
     }
 
-    public boolean canTreesSpawn() {
+    public void createBlock(Region region, int height, int x, int y, int z) {
+    }
+
+    public boolean doTreesSpawn() {
         return false;
     }
 
@@ -57,5 +58,13 @@ public class Biome {
 
     public int getWaterLevelModifier() {
         return 0;
+    }
+
+    public float getCaveLevelModifier() {
+        return 0;
+    }
+
+    public float getCaveModifier() {
+        return 2.5f;
     }
 }

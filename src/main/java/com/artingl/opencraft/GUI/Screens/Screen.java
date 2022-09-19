@@ -6,7 +6,7 @@ import com.artingl.opencraft.GUI.Elements.Slider;
 import com.artingl.opencraft.GUI.Font.Font;
 import com.artingl.opencraft.Opencraft;
 import com.artingl.opencraft.Control.Game.TextureEngine;
-import com.artingl.opencraft.Control.Game.VerticesBuffer;
+import com.artingl.opencraft.Control.Render.BufferRenderer;
 import com.artingl.opencraft.Resources.Lang.Lang;
 import com.artingl.opencraft.Resources.Options.OptionsListener;
 import com.artingl.opencraft.Resources.Options.OptionsRegistry;
@@ -72,7 +72,7 @@ public class Screen implements OptionsListener
         float r = (float)(col >> 16 & 255) / 255.0F;
         float g = (float)(col >> 8 & 255) / 255.0F;
         float b = (float)(col & 255) / 255.0F;
-        VerticesBuffer t = VerticesBuffer.getGlobalInstance();
+        BufferRenderer t = BufferRenderer.getGlobalInstance();
         GL11.glEnable(3042);
         GL11.glBlendFunc(770, 771);
         GL11.glColor4f(r, g, b, a);
@@ -87,12 +87,12 @@ public class Screen implements OptionsListener
 
     public void setLoadingScreen(String s) {
         GL11.glTranslatef(0, 0, 50);
-        drawBackground(VerticesBuffer.getGlobalInstance(), Opencraft.getScreenScaledWidth(), Opencraft.getScreenScaledHeight(), 0x808080);
+        drawBackground(BufferRenderer.getGlobalInstance(), Opencraft.getScreenScaledWidth(), Opencraft.getScreenScaledHeight(), 0x808080);
         Opencraft.getFont().drawShadow(s, (Opencraft.getScreenScaledWidth() - Opencraft.getFont().getTextWidth(s)) / 2, (int) (Opencraft.getScreenScaledHeight() / 2f) - 5, 0xFFFFFF);
         Opencraft.getDisplay().swapBuffers();
     }
 
-    protected void drawBackground(VerticesBuffer t, int screenWidth, int screenHeight, int clr)
+    protected void drawBackground(BufferRenderer t, int screenWidth, int screenHeight, int clr)
     {
         GL11.glEnable(3553);
         GL11.glBindTexture(3553, background_id);

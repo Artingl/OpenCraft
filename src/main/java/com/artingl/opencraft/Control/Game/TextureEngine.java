@@ -10,8 +10,11 @@ import org.lwjgl.opengl.GL11;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.HashMap;
 
 public class TextureEngine
@@ -35,30 +38,45 @@ public class TextureEngine
         atlasImage =  new BufferedImage(16 * maxCountOfBlocks, 16 * maxCountOfBlocks, BufferedImage.TYPE_INT_ARGB);
     }
 
-    public static void loadTextures(Class<?> callingClass, String id) throws URISyntaxException {
+    public static void loadTextures(Class<?> callingClass, String id, String resourceId) throws URISyntaxException {
         Logger.debug("Loading " + id + " textures");
-        String resourcesPath = Resources.convertToPath(id + ":textures/blocks/");
+        String resourcesPath = Resources.convertToPath(resourceId + ":textures/blocks/");
 
         Utils.foreachFiles(callingClass, resourcesPath, (path, name) -> {
             if (path.contains(resourcesPath) && path.endsWith(".png")) {
                 try {
+                    String texId = id + ":" + name.split("." + "png")[0];
+
                     Logger.debug("Loading " + id + ":textures/blocks/" + name + " texture");
 
-                    Opencraft.drawLoadingScreen(Utils.capitalizeString(id) + " Textures: Loading " + Utils.removeFileExtension(name));
+                    Opencraft.drawLoadingScreen(Utils.capitalizeString(id) + " Textures: Loading " + Utils.removeFileExtension(name) + " texture");
 
-                    BufferedImage img = ImageIO.read(Resources.load(callingClass, id + ":textures/blocks/" + name));
+                    BufferedImage img = ImageIO.read(Resources.load(callingClass, resourceId + ":textures/blocks/" + name));
                     img = cropImage(img, new Vector2i(0, 0), new Vector2i(16, 16));
-                    atlasImage.getGraphics().drawImage(img, texValues.x, texValues.y, null);
 
-                    float tx = (texValues.x / 16f) * getTextureAtlasSize();
-                    float ty = (texValues.y / 16f) * getTextureAtlasSize();
-                    TextureEngine.blocksTextures.put(id + ":" + name.split("." + "png")[0], new Float[]{tx, ty});
-                    TextureEngine.blocksTexturesID.put(id + ":" + name.split("." + "png")[0], texValues.i++);
+                    if (TextureEngine.blocksTexturesID.containsKey(texId)) {
+                        Float[] values = TextureEngine.blocksTextures.get(texId);
+                        values[0] = values[0] / getTextureAtlasSize() * 16;
+                        values[1] = values[1] / getTextureAtlasSize() * 16;
+                        atlasImage.getGraphics().drawImage(img, (int) (values[0]*1), (int) (values[1]*1), null);
+                    }
+                    else {
+                        atlasImage.getGraphics().drawImage(img, texValues.x, texValues.y, null);
 
-                    texValues.x += 16;
-                    if (texValues.x > 16 * maxCountOfBlocks) {
-                        texValues.x = 0;
-                        texValues.y += 16;
+                        float tx = (texValues.x / 16f) * getTextureAtlasSize();
+                        float ty = (texValues.y / 16f) * getTextureAtlasSize();
+
+                        TextureEngine.blocksTextures.remove(texId);
+                        TextureEngine.blocksTexturesID.remove(texId);
+
+                        TextureEngine.blocksTextures.put(texId, new Float[]{tx, ty});
+                        TextureEngine.blocksTexturesID.put(texId, texValues.i++);
+
+                        texValues.x += 16;
+                        if (texValues.x > 16 * maxCountOfBlocks) {
+                            texValues.x = 0;
+                            texValues.y += 16;
+                        }
                     }
                 } catch (Exception e) {
                     Logger.exception("Error occurred while loading " + id + ":textures/blocks/" + name + " file", e);
@@ -122,7 +140,7 @@ public class TextureEngine
         }
         buffer.flip();
         int textureID = GL11.glGenTextures();
-        GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureID);
+        Opencraft.getShaderProgram().bindTexture(textureID);
         GL11.glEnable(GL11.GL_BLEND);
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
         GL11.glTexParameteri(3553, 10241, mode);
@@ -133,13 +151,15 @@ public class TextureEngine
 
     public static float getBlockTextureX(String name)
     {
-        if (!TextureEngine.blocksTextures.containsKey(name)) return 0;
+        if (!TextureEngine.blocksTextures.containsKey(name))
+            return TextureEngine.blocksTextures.get("opencraft:none")[0];
         return blocksTextures.get(name)[0];
     }
 
     public static float getBlockTextureY(String name)
     {
-        if (!TextureEngine.blocksTextures.containsKey(name)) return 0;
+        if (!TextureEngine.blocksTextures.containsKey(name))
+            return TextureEngine.blocksTextures.get("opencraft:none")[1];
         return blocksTextures.get(name)[1];
     }
 
@@ -148,7 +168,8 @@ public class TextureEngine
     }
 
     public static int getBlockTextureId(String name) {
-        if (!TextureEngine.blocksTexturesID.containsKey(name)) return 0;
+        if (!TextureEngine.blocksTexturesID.containsKey(name))
+            return TextureEngine.blocksTexturesID.get("opencraft:none");
         return blocksTexturesID.get(name);
     }
 }

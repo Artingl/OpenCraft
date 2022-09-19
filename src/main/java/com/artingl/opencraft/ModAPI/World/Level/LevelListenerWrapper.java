@@ -4,8 +4,9 @@ import com.artingl.opencraft.ModAPI.ModEntry;
 import com.artingl.opencraft.Opencraft;
 import com.artingl.opencraft.World.Chunk.Chunk;
 import com.artingl.opencraft.World.Entity.Entity;
+import com.artingl.opencraft.World.EntityData.EntityEvent;
 import com.artingl.opencraft.World.Level.ClientLevel;
-import com.artingl.opencraft.World.Level.LevelListener;
+import com.artingl.opencraft.World.Level.Listener.LevelListener;
 
 public class LevelListenerWrapper implements LevelListener {
 
@@ -33,13 +34,13 @@ public class LevelListenerWrapper implements LevelListener {
     @Override
     public void levelSwitch(ClientLevel level) {
         if (levelSwitchListener != null)
-            levelSwitchListener.callback(level, Opencraft.getPlayerEntity());
+            levelSwitchListener.callback(level);
     }
 
     @Override
-    public void entityUpdate(ClientLevel level, Entity entity) {
+    public void entityUpdate(ClientLevel level, Entity entity, EntityEvent event) {
         if (entityUpdateListener != null)
-            entityUpdateListener.callback(level, entity);
+            entityUpdateListener.callback(level, entity, event);
     }
 
     public void setChunksUpdateListener(LevelChunksUpdateListener chunksUpdateListener) {

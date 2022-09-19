@@ -2,6 +2,8 @@ package com.artingl.opencraft.World.Level;
 
 import com.artingl.opencraft.World.Block.BlockRegistry;
 import com.artingl.opencraft.World.Level.Generation.LevelGeneration;
+import com.artingl.opencraft.World.Level.Listener.LevelListener;
+import com.artingl.opencraft.World.Level.Listener.LevelListenerEventChunkUpdate;
 import com.artingl.opencraft.World.Tick;
 import com.artingl.opencraft.Control.RenderInterface;
 import com.artingl.opencraft.Opencraft;
@@ -97,12 +99,12 @@ public class ClientLevel implements RenderInterface, Tick
     }
 
     public Chunk getChunkByBlockPos(int x, int z) {
-        return Opencraft.getLevelRenderer().getChunkByBlockPos(x, z);
+        return Opencraft.getLevelController().getChunkByBlockPos(x, z);
     }
 
     public Block getBlock(int x, int y, int z)
     {
-        Chunk chunk = Opencraft.getLevelRenderer().getChunkByBlockPos(x, z);
+        Chunk chunk = Opencraft.getLevelController().getChunkByBlockPos(x, z);
         Vector3i blockPos = new Vector3i(x, y, z);
 
         if (chunk == null) {
@@ -131,8 +133,8 @@ public class ClientLevel implements RenderInterface, Tick
         );
     }
 
-    public void setBlockQuietly(int x, int y, int z, Block block) {
-        Chunk chunk = Opencraft.getLevelRenderer().getChunkByBlockPos(x, z);
+    public void setBlockQuietly(Block block, int x, int y, int z) {
+        Chunk chunk = Opencraft.getLevelController().getChunkByBlockPos(x, z);
         Vector3i blockPos = new Vector3i(x, y, z);
 
         if (chunk == null) {
@@ -160,16 +162,18 @@ public class ClientLevel implements RenderInterface, Tick
 
     public void setBlock(Block block, int x, int y, int z)
     {
-        this.setBlockQuietly(x, y, z, block);
+        this.setBlockQuietly(block, x, y, z);
 
         for (int i = -1; i < 2; i++) {
             for (int j = -1; j < 2; j++) {
                 for (int k = -1; k < 2; k++) {
-                    Opencraft.getLevelRenderer().sendEvent(
+                    Opencraft.getLevelController().sendEvent(
                             LevelListener.Events.CHUNK_UPDATE,
                             this,
-                            Opencraft.getLevelRenderer().getChunkByPos((x >> 4) + i, (z >> 4) + j),
-                            new Vector3i(x, y + k, z)
+                            new LevelListenerEventChunkUpdate(
+                                Opencraft.getLevelController().getChunkByPos((x >> 4) + i, (z >> 4) + j),
+                                new Vector3f(x, y + k, z)
+                            )
                     );
                 }
             }
@@ -186,7 +190,7 @@ public class ClientLevel implements RenderInterface, Tick
         setBlock(BlockRegistry.Blocks.air, x, y, z);
     }
 
-    public void setBlockQuietly(Block block, Vector3i pos) { setBlockQuietly(pos.x, pos.y, pos.z, block); }
+    public void setBlockQuietly(Block block, Vector3i pos) { setBlockQuietly(block, pos.x, pos.y, pos.z); }
 
     public void setBlock(Block block, Vector3i pos)
     {
